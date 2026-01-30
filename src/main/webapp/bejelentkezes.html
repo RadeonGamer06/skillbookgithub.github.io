@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bejelentkezés - SkillBook</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="icon" type="image/x-icon" href="fav.png">
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.15);
+      --text: #e8eefc;
+      --muted: rgba(232,238,252,0.7);
+      --accent: #7aa7ff;
+      --danger: #ff6b6b;
+      --success: #4dd4ac;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      place-items: center;
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(122,167,255,0.25), transparent 60%),
+                  radial-gradient(800px 500px at 80% 90%, rgba(77,212,172,0.18), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 0 0 22px 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 6px 2px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: rgba(122,167,255,0.65);
+      box-shadow: 0 0 0 3px rgba(122,167,255,0.18);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 10px 0 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      user-select: none;
+    }
+
+    .checkbox input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .link {
+      color: rgba(232,238,252,0.85);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .link:hover { text-decoration: underline; }
+
+    button {
+      width: 100%;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(122,167,255,0.95), rgba(77,212,172,0.9));
+      color: #08101f;
+      font-weight: 700;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      display: none;
+      margin-top: 14px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .msg.error {
+      border-color: rgba(255,107,107,0.45);
+      color: #ffd0d0;
+    }
+    .msg.success {
+      border-color: rgba(77,212,172,0.45);
+      color: #c9ffef;
+    }
+
+    .small {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .login-link {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .login-link a {
+      color: rgba(232,238,252,0.85);
+      text-decoration: none;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .Back {
+      width: min(1100px, calc(100% - 40px));
+      margin: 18px auto 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      align-self: stretch;
+    }
+
+    .Back a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      transition: all 0.18s ease;
+    }
+
+    .Back a:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(122,167,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="Back">
+    <i class='bx bx-arrow-back'></i> 
+    <a href="pro.html">Vissza</a>
+  </div>
+
+  <div class="card">
+    <h1>Bejelentkezés</h1>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="pl. teszt@pelda.hu" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Jelszó</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" required />
+      </div>
+
+      <div class="row">
+        <label class="checkbox" title="Token tárolása a böngészőben">
+          <input id="remember" type="checkbox" checked />
+          Maradjak bejelentkezve
+        </label>
+      </div>
+
+      <button id="loginBtn" type="submit">Bejelentkezés</button>
+
+      <div class="login-link">
+        <p>Nincs még fiókod? <a href="regisztracio.html">Regisztráció</a></p>
+      </div>
+    </form>
+
+    <div id="messageBox" class="msg"></div>
+
+  </div>
+
+  <script>
+    // API URL - adj át ide a saját backend URL-ed
+    const API_BASE_URL = 'http://localhost:8080/SkillBook/api/Users';
+
+    // Ide irányít sikeres login után:
+    const REDIRECT_URL = 'pro.html';
+
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('messageBox');
+
+    function showMessage(text, type) {
+      msg.textContent = text;
+      msg.className = 'msg ' + (type || '');
+      msg.style.display = 'block';
+    }
+
+    function hideMessage() {
+      msg.style.display = 'none';
+      msg.textContent = '';
+      msg.className = 'msg';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessage();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('remember').checked;
+
+      if (!email || !password) {
+        showMessage('Kérlek töltsd ki az email és jelszó mezőket.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Bejelentkezés...';
+
+      try {
+        const res = await fetch(API_BASE_URL + '/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.token) {
+          // Token tárolás: "maradjak bejelentkezve" esetén localStorage, különben sessionStorage
+          const storage = remember ? localStorage : sessionStorage;
+
+          storage.setItem('token', data.token);
+          if (data.user) storage.setItem('user', JSON.stringify(data.user));
+
+          showMessage('Sikeres bejelentkezés! Átirányítás...', 'success');
+
+          setTimeout(() => {
+            window.location.href = REDIRECT_URL;
+          }, 700);
+
+        } else {
+          // Backend által visszaadott message (ha van), különben általános
+          const m = data.message || 'Hibás email vagy jelszó.';
+          showMessage(m + ` (HTTP ${res.status})`, 'error');
+        }
+
+      } catch (err) {
+        console.error(err);
+        showMessage('Nem sikerült kapcsolódni a szerverhez. Fut a backend és elérhető az API?', 'error');
+
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Bejelentkezés';
+      }
+    });
+  </script>
+</body>
+</html>
