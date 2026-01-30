@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillBook</title>
+    <link rel="icon" type="image/x-icon" href="fav.png">
+
+    <style>
+        :root {
+            --bg-1: #070a14;
+            --bg-2: #0f1731;
+            --card: rgba(255,255,255,.08);
+            --border: rgba(255,255,255,.14);
+            --text: #f3f6ff;
+            --muted: rgba(243,246,255,.72);
+            --accent: #60a5fa;
+            --accent-2: #a78bfa;
+            --shadow: 0 18px 50px rgba(0,0,0,.38);
+            --radius: 22px;
+        }
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(900px 540px at 18% 12%, rgba(167,139,250,.35), transparent 60%),
+                radial-gradient(900px 540px at 86% 22%, rgba(96,165,250,.28), transparent 55%),
+                linear-gradient(180deg, var(--bg-1), var(--bg-2));
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -120px -140px auto auto;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle at 35% 35%, rgba(96,165,250,.45), transparent 62%);
+            filter: blur(55px);
+            opacity: .55;
+            z-index: -1;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+        @keyframes floatGlow {
+            0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+            50%     { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 26px;
+            background: rgba(7,10,20,.58);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+            font-size: 1.4rem;
+            letter-spacing: .4px;
+        }
+        .logo span { color: var(--muted); font-weight: 600; }
+        .logo strong {
+            color: var(--text);
+            font-weight: 800;
+            background: linear-gradient(135deg, rgba(96,165,250,1), rgba(167,139,250,1));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+        nav a, nav button {
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.05);
+            transition: transform .18s ease, background .18s ease, border-color .18s ease;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        nav a:hover, nav button:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,255,255,.22);
+        }
+        nav a.active {
+            background: linear-gradient(135deg, rgba(96,165,250,.42), rgba(167,139,250,.26));
+            border-color: rgba(255,255,255,.28);
+            box-shadow: 0 12px 36px rgba(96,165,250,.16);
+        }
+
+        .auth-links {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-links.hidden {
+            display: none;
+        }
+
+        /* ── USER MENU ──────────────────────────────────────── */
+
+        .user-menu-container {
+            position: relative;
+            display: none;
+        }
+        .user-menu-container.visible {
+            display: block;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .user-menu-trigger:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(96,165,250,.8), rgba(167,139,250,.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            min-width: 180px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: all 0.18s ease;
+            z-index: 100;
+        }
+        .user-dropdown.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            color: var(--text);
+            text-decoration: none;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        .logout {
+            color: #ff6b6b !important;
+        }
+        .logout:hover {
+            background: rgba(255,107,107,0.15) !important;
+        }
+
+        .section-title {
+            width: min(1100px, calc(100% - 40px));
+            margin: 28px auto 14px;
+            font-size: 1.05rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .courses {
+            width: min(1100px, calc(100% - 40px));
+            margin: 0 auto 36px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .course-card {
+            padding: 18px 18px 16px;
+            border-radius: var(--radius);
+            background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            animation: fadeUp .55s ease both;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .course-card:nth-child(2) { animation-delay: .06s; }
+        .course-card:nth-child(3) { animation-delay: .12s; }
+        .course-card:nth-child(4) { animation-delay: .18s; }
+        .course-card:nth-child(5) { animation-delay: .24s; }
+        .course-card:nth-child(6) { animation-delay: .30s; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .course-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255,255,255,.28);
+            box-shadow: 0 28px 80px rgba(0,0,0,.45);
+        }
+
+        .course-card h3 { margin: 0 0 10px; font-size: 1.1rem; }
+        .course-card p  { margin: 7px 0; color: var(--muted); line-height: 1.35; }
+        .course-card b  { color: var(--text); }
+
+        .course-card button {
+            margin-top: 14px;
+            padding: 11px 15px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.85));
+            color: var(--text);
+            font-weight: 750;
+            cursor: pointer;
+            box-shadow: 0 14px 35px rgba(0,0,0,.35);
+            transition: transform .18s ease, filter .18s ease;
+        }
+        .course-card button:hover { transform: translateY(-2px); filter: brightness(1.06); }
+        .course-card button:active { transform: translateY(0px) scale(.99); }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 22px 14px;
+            color: rgba(243,246,255,.65);
+            border-top: 1px solid rgba(255,255,255,.10);
+            background: rgba(7,10,20,.35);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 14px 14px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+            nav {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            nav a, nav button { padding: 9px 12px; font-size: 14px; }
+
+            .courses, .section-title { width: calc(100% - 28px); }
+
+            .user-menu-trigger { padding: 6px 8px; }
+            .user-name { display: none; }
+            .user-dropdown {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%) translateY(-8px);
+                min-width: 160px;
+            }
+            .user-dropdown.visible {
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <span>Skill</span><strong>Book</strong>
+            </div>
+        </div>
+
+        <nav>
+            <a href="pro.html" class="active">Kezdőlap</a>
+            <a href="courses.html">Tanfolyamok</a>
+            <a href="#">Naptár</a>
+            <a href="#">Kapcsolat</a>
+
+            <div id="authLinks" class="auth-links">
+                <a href="bejelentkezes.html">Bejelentkezés</a>
+                <a href="regisztracio.html">Regisztráció</a>
+            </div>
+
+            <!-- User menü konténer -->
+            <div class="user-menu-container" id="userMenuContainer">
+                <button class="user-menu-trigger" id="userMenuTrigger">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">?</div>
+                        <span class="user-name" id="userName">Vendég</span>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="fiok.html" class="dropdown-item">Fiókom</a>
+                    <a href="#" class="dropdown-item">Beállítások</a>   <!-- ha később kell, itt bővíthető -->
+                    <div class="dropdown-divider"></div>
+                    <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="section-title">TANFOLYAMAINK:</div>
+
+    <div class="courses">
+
+        <div class="course-card">
+            <h3>🇬🇧 Angol kezdőknek</h3>
+            <p><b>Kategória:</b> Nyelvtanulás</p>
+            <p><b>Ár:</b> 20 000 Ft</p>
+            <p><b>Időpont:</b> 2025.09.15 - 2025.11.15</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="english.html"><button>Jelentkezek</button></a>
+        </div>
+
+        <div class="course-card">
+            <h3>👨‍🍳 Szakács tanfolyam</h3>
+            <p><b>Kategória:</b> Vendéglátás</p>
+            <p><b>Ár:</b> 140 000 Ft</p>
+            <p><b>Időpont:</b> 2025.09.15 - 2025.11.15</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="chef.html"><button>Jelentkezek</button></a>
+        </div>
+
+        <div class="course-card">
+            <h3>📷 Fotózás, grafika</h3>
+            <p><b>Kategória:</b> Egyéb</p>
+            <p><b>Ár:</b> 240 000 Ft</p>
+            <p><b>Időpont:</b> 2025.01.20 - 2025.03.10</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="photo.html"><button>Jelentkezek</button></a>
+        </div>
+
+        <!-- ismétlődő elemek – ha kell, töröld vagy szaporítsd -->
+        <div class="course-card">
+            <h3>🇬🇧 Angol kezdőknek</h3>
+            <p><b>Kategória:</b> Nyelvtanulás</p>
+            <p><b>Ár:</b> 20 000 Ft</p>
+            <p><b>Időpont:</b> 2025.09.15 - 2025.11.15</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="english.html"><button>Jelentkezek</button></a>
+        </div>
+
+        <div class="course-card">
+            <h3>👨‍🍳 Szakács tanfolyam</h3>
+            <p><b>Kategória:</b> Vendéglátás</p>
+            <p><b>Ár:</b> 140 000 Ft</p>
+            <p><b>Időpont:</b> 2025.09.15 - 2025.11.15</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="chef.html"><button>Jelentkezek</button></a>
+        </div>
+
+        <div class="course-card">
+            <h3>📷 Fotózás, grafika</h3>
+            <p><b>Kategória:</b> Egyéb</p>
+            <p><b>Ár:</b> 240 000 Ft</p>
+            <p><b>Időpont:</b> 2025.01.20 - 2025.03.10</p>
+            <p><b>Tanár:</b> Nagy Péter</p>
+            <a href="photo.html"><button>Jelentkezek</button></a>
+        </div>
+
+    </div>
+
+    <footer>
+        2025 | SkillBook
+    </footer>
+
+    <script>
+        // Auth + dropdown logika
+        function checkAuth() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+            const userMenuContainer = document.getElementById('userMenuContainer');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+            const authLinks = document.getElementById('authLinks');
+            const userDropdown = document.getElementById('userDropdown');
+
+            if (token && userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    userName.textContent = user.name || user.email;
+                    const initial = (user.name || user.email || '?')[0].toUpperCase();
+                    userAvatar.textContent = initial;
+
+                    userMenuContainer.classList.add('visible');
+                    authLinks.classList.add('hidden');
+                } catch (e) {
+                    console.error('Hiba a user adatok betöltésekor:', e);
+                    showNotLoggedIn();
+                }
+            } else {
+                showNotLoggedIn();
+            }
+        }
+
+        function showNotLoggedIn() {
+            document.getElementById('userMenuContainer')?.classList.remove('visible');
+            document.getElementById('authLinks')?.classList.remove('hidden');
+            document.getElementById('userDropdown')?.classList.remove('visible');
+        }
+
+        // Dropdown nyitás/zárás kattintásra
+        document.addEventListener('click', function(e) {
+            const trigger = document.getElementById('userMenuTrigger');
+            const dropdown = document.getElementById('userDropdown');
+
+            if (!trigger || !dropdown) return;
+
+            if (trigger.contains(e.target)) {
+                dropdown.classList.toggle('visible');
+            } else if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('visible');
+            }
+        });
+
+        // Kijelentkezés
+        document.getElementById('logoutBtn')?.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+
+            alert('Sikeresen kijelentkeztél!');
+            window.location.reload();
+        });
+
+        // Oldal betöltésekor ellenőrizzük
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+
+</body>
+</html>

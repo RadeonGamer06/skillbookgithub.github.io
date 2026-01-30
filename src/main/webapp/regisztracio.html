@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regisztráció</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="icon" type="image/x-icon" href="fav.png">
+  
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.15);
+      --text: #e8eefc;
+      --muted: rgba(232,238,252,0.7);
+      --accent: #7aa7ff;
+      --danger: #ff6b6b;
+      --success: #4dd4ac;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+    
+    html, body { height: 100%; }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(122,167,255,0.25), transparent 60%),
+                  radial-gradient(800px 500px at 80% 90%, rgba(77,212,172,0.18), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      padding: 24px;
+    }
+
+    .Back {
+      width: min(1100px, calc(100% - 40px));
+      margin: 18px auto 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      align-self: stretch;
+    }
+
+    .Back a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      transition: all 0.18s ease;
+    }
+
+    .Back a:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(122,167,255,0.3);
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      margin: 28px auto;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    form h1 {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+      letter-spacing: 0.2px;
+    }
+
+    .input-box {
+      position: relative;
+      margin: 14px 0;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 12px 42px 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+      transition: all 0.18s ease;
+    }
+
+    .input-box input::placeholder {
+      color: rgba(232,238,252,0.5);
+    }
+
+    .input-box input:focus {
+      border-color: rgba(122,167,255,0.65);
+      box-shadow: 0 0 0 3px rgba(122,167,255,0.18);
+    }
+
+    .input-box select {
+      width: 100%;
+      padding: 12px 42px 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .input-box select option {
+      background: var(--bg);
+      color: var(--text);
+      padding: 10px;
+    }
+
+    .input-box select option[disabled] {
+      color: rgba(232,238,252,0.5);
+    }
+
+    .input-box select:focus {
+      border-color: rgba(122,167,255,0.65);
+      box-shadow: 0 0 0 3px rgba(122,167,255,0.18);
+    }
+
+    .input-box i {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.15rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .remember-forgot {
+      margin: 14px 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .remember-forgot label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .remember-forgot input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .remember-forgot a {
+      color: rgba(232,238,252,0.85);
+      text-decoration: none;
+      transition: text-decoration 0.2s ease;
+    }
+
+    .remember-forgot a:hover {
+      text-decoration: underline;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(122,167,255,0.95), rgba(77,212,172,0.9));
+      color: #08101f;
+      font-weight: 700;
+      transition: all 0.18s ease;
+      position: relative;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn.loading::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid #08101f;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spinner 0.6s linear infinite;
+    }
+
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }
+
+    .register-link {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .register-link a {
+      color: rgba(232,238,252,0.85);
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .message-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      z-index: 1000;
+      display: none;
+      animation: slideIn 0.3s ease;
+      backdrop-filter: blur(12px);
+      font-size: 14px;
+      line-height: 1.35;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .message-box.success {
+      border-color: rgba(77,212,172,0.45);
+      color: #c9ffef;
+      background: rgba(77,212,172,0.08);
+    }
+
+    .message-box.error {
+      border-color: rgba(255,107,107,0.45);
+      color: #ffd0d0;
+      background: rgba(255,107,107,0.08);
+    }
+
+    .message-box.warning {
+      border-color: rgba(250,204,21,0.45);
+      color: #fff4d0;
+      background: rgba(250,204,21,0.08);
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 22px 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: rgba(11,18,32,0.35);
+      backdrop-filter: blur(10px);
+      margin-top: auto;
+    }
+
+    @media (max-width: 520px) {
+      .Back, .wrapper {
+        width: calc(100% - 28px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Üzenet doboz -->
+  <div id="messageBox" class="message-box"></div>
+
+  <div class="Back">
+    <i class='bx bx-arrow-back'></i> 
+    <a href="pro.html">Vissza</a>
+  </div>
+
+  <div class="wrapper">
+    <form id="registrationForm">
+      <h1>Regisztráció</h1>
+
+      <div class="input-box">
+        <input type="text" id="fullName" placeholder="Teljes név" required>
+        <i class='bx bx-id-card'></i> 
+      </div>
+
+      <div class="input-box">
+        <input type="email" id="email" placeholder="Email" required>
+        <i class='bx bx-envelope'></i> 
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="password" placeholder="Jelszó" required minlength="6">
+        <i class='bx bx-lock'></i> 
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="confirmPassword" placeholder="Jelszó megerősítése" required>
+        <i class='bx bx-lock-alt'></i> 
+      </div>
+
+      <div class="input-box">
+        <select id="accountType" required style="padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.18); color: var(--text); outline: none; font-size: 15px; width: 100%; cursor: pointer;">
+          <option value="" disabled selected>Válassz fiók típust</option>
+          <option value="student">Diák</option>
+          <option value="instructor">Tanár</option>
+        </select>
+        <i class='bx bx-user-circle'></i> 
+      </div>
+
+      <div class="remember-forgot">
+        <label>
+          <input type="checkbox" id="termsCheckbox" required> Elfogadom a <a href="#">felhasználási feltételeket</a>
+        </label>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">Regisztráció</button>
+
+      <div class="register-link">
+        <p>Már van fiókod? <a href="bejelentkezes.html">Bejelentkezés</a></p>
+      </div>
+    </form>
+  </div>
+
+  <footer>
+    2025 | SkillBook
+  </footer>
+
+  <script>
+    // ============================================
+    // FONTOS: Állítsd be a projekted nevét!
+    // ============================================
+    const API_BASE_URL = '/SkillBook/api/Users';
+    // Ha más a projekted neve, pl: '/myproject/api/Users'
+    
+
+    // Form element
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Form submit event
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault(); // Megállítjuk az alapértelmezett form küldést
+
+      // Input mezők értékei
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const accountType = document.getElementById('accountType').value;
+      const termsAccepted = document.getElementById('termsCheckbox').checked;
+
+      // Validálás
+      if (!validateForm(fullName, email, password, confirmPassword, accountType, termsAccepted)) {
+        return; // Ha nem valid, ne folytassuk
+      }
+
+      // Regisztráció küldése
+      await registerUser(fullName, email, password, accountType);
+    });
+
+    // Validálás
+    function validateForm(name, email, password, confirmPassword, accountType, termsAccepted) {
+      // Név ellenőrzés
+      if (name.length < 3) {
+        showMessage('A név legalább 3 karakter hosszú legyen!', 'error');
+        return false;
+      }
+
+      // Email ellenőrzés (egyszerű regex)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage('Kérlek adj meg egy érvényes email címet!', 'error');
+        return false;
+      }
+
+      // Jelszó hossz ellenőrzés
+      if (password.length < 6) {
+        showMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie!', 'error');
+        return false;
+      }
+
+      // Jelszó egyezés ellenőrzés
+      if (password !== confirmPassword) {
+        showMessage('A megadott jelszavak nem egyeznek!', 'error');
+        return false;
+      }
+
+      // Fiók típus ellenőrzés
+      if (!accountType || accountType === '') {
+        showMessage('Kérlek válassz fiók típust!', 'warning');
+        return false;
+      }
+
+      // Feltételek elfogadása
+      if (!termsAccepted) {
+        showMessage('A regisztrációhoz el kell fogadnod a felhasználási feltételeket!', 'warning');
+        return false;
+      }
+
+      return true;
+    }
+
+    // Regisztráció API hívás
+    async function registerUser(name, email, password, accountType) {
+      // Loading állapot
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        // API kérés
+        const response = await fetch(API_BASE_URL + '/createUser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            password: password,
+            role: accountType // Fiók típus (student vagy instructor)
+          })
+        });
+
+        // Válasz feldolgozása
+        const data = await response.json();
+
+        if (data.statusCode === 201 || data.status === 'UserCreated') {
+          // Sikeres regisztráció
+          showMessage('✅ Sikeres regisztráció! Átirányítás...', 'success');
+          
+          // Form törlése
+          form.reset();
+
+          // Átirányítás 2 másodperc után a bejelentkezéshez
+          setTimeout(() => {
+            window.location.href = 'bejelentkezes.html';
+          }, 2000);
+
+        } else if (response.status === 409 || data.message?.includes('duplicate')) {
+          // Email már létezik
+          showMessage('❌ Ez az email cím már használatban van!', 'error');
+        } else {
+          // Más hiba
+          showMessage('❌ Hiba történt a regisztráció során. Próbáld újra!', 'error');
+        }
+
+      } catch (error) {
+        console.error('Regisztrációs hiba:', error);
+        showMessage('❌ Nem sikerült kapcsolódni a szerverhez. Ellenőrizd a kapcsolatot!', 'error');
+      } finally {
+        // Loading állapot kikapcsolása
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Üzenet megjelenítése
+    function showMessage(message, type = 'info') {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = message;
+      messageBox.className = 'message-box ' + type;
+      messageBox.style.display = 'block';
+
+      // 5 másodperc után eltűnik
+      setTimeout(() => {
+        messageBox.style.display = 'none';
+      }, 5000);
+    }
+
+    // Valós idejű jelszó egyezés ellenőrzés (opcionális)
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+
+      if (confirmPassword && password !== confirmPassword) {
+        this.setCustomValidity('A jelszavak nem egyeznek');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+  </script>
+
+</body>
+</html>
