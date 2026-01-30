@@ -1,1 +1,1 @@
-# EZ még nagyon nincs kész!
+# Regina - Adatbázis
