@@ -2,338 +2,536 @@ package com.mycompany.vizsgaremek.service;
 
 import com.mycompany.vizsgaremek.model.Users;
 import com.mycompany.vizsgaremek.security.JwtUtil;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.ParameterMode;
-import javax.persistence.PersistenceContext;
-import javax.persistence.StoredProcedureQuery;
-import javax.persistence.TypedQuery;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.*;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
-@Stateless
-public class UsersService{
-@PersistenceContext(unitName = "SkillBook")
+@ApplicationScoped
+public class UsersService {
+
+    @PersistenceContext(unitName = "SkillBook")
     private EntityManager em;
 
-    public JSONObject createUser(String username, String email, String password, String role) {
+    @Inject
+    private EmailService emailService;
+
+    // ════════════════════════════════════════════════════════════════════════
+    // PROFILKÉP UPLOAD KONFIGURÁCIÓ - JAVÍTOTT VERZIÓ
+    // ════════════════════════════════════════════════════════════════════════
+
+    // ✅ JAVÍTÁS: WAR-on kívülre mentjük, hogy ne törlődjön minden deploy-nál!
+    private static final String UPLOAD_DIR = 
+        "C:\\Users\\Bagoly Donát\\Desktop\\SkillBook\\server\\wildfly-preview-26.1.1.Final\\standalone\\data\\uploads\\profile_pictures";
+    
+    // ✅ URL prefix ami a böngészőben használható (új REST endpoint-on keresztül)
+    private static final String URL_PREFIX = "/SkillBook/api/Uploads/profile_pictures/";
+
+   
+    public JSONObject createUser(String name, String email, String password, String role) {
         JSONObject resp = new JSONObject();
 
         try {
-            String Pw = BCrypt.hashpw(password, BCrypt.gensalt(12));
+            System.out.println("📝 USER LÉTREHOZÁS:");
+            System.out.println("   Név: " + name);
+            System.out.println("   Email: " + email);
+            System.out.println("   Role: " + role);
 
+            // Jelszó hashelése
+            String hashedPw = BCrypt.hashpw(password, BCrypt.gensalt(12));
+            
             if (role == null || role.trim().isEmpty()) {
-                role = "customer";
+                role = "student";
             }
 
+            // User létrehozása DB-ben
             StoredProcedureQuery query = em.createStoredProcedureQuery("createUser");
-
             query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("passwordIN", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("roleIN", String.class, ParameterMode.IN);
 
-            query.setParameter("nameIN", username);
+            query.setParameter("nameIN", name);
             query.setParameter("emailIN", email);
-            query.setParameter("passwordIN", Pw);
+            query.setParameter("passwordIN", hashedPw);
             query.setParameter("roleIN", role);
 
             query.execute();
 
+            System.out.println("✅ User sikeresen létrehozva");
+
+            // Üdvözlő email küldése (opcionális)
+            try {
+                emailService.sendWelcomeEmail(name, email);
+                System.out.println("✅ Üdvözlő email elküldve");
+            } catch (Exception ex) {
+                System.err.println("⚠️ Email hiba (nem blokkoló): " + ex.getMessage());
+            }
+
             resp.put("status", "UserCreated");
             resp.put("statusCode", 201);
-            
+            resp.put("message", "Sikeres regisztráció!");
 
         } catch (Exception e) {
             e.printStackTrace();
-            resp.put("status", "DatabaseError");
-            resp.put("statusCode", 500);
+            
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && 
+                (errorMsg.contains("Duplicate") || errorMsg.contains("unique"))) {
+                
+                if (errorMsg.toLowerCase().contains("email")) {
+                    resp.put("message", "Ez az email cím már foglalt!");
+                } else {
+                    resp.put("message", "Ez a név vagy email már használatban van!");
+                }
+                resp.put("statusCode", 409);
+            } else {
+                resp.put("message", "Hiba történt: " + errorMsg);
+                resp.put("statusCode", 500);
+            }
         }
 
         return resp;
     }
 
-    
-    
-    public JSONObject updateUser(int userId, String name, String email, String role) {
-    JSONObject resp = new JSONObject();
+    // ════════════════════════════════════════════════════════════════════════
+    // PROFILKÉP FELTÖLTÉS/FRISSÍTÉS - JAVÍTOTT verzió
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject updateProfilePicture(Integer userId, InputStream fileInputStream, String fileName) {
+        JSONObject resp = new JSONObject();
 
-    try {
-        StoredProcedureQuery query = em.createStoredProcedureQuery("updateUser");
+        try {
+            System.out.println("📷 PROFILKÉP FELTÖLTÉS:");
+            System.out.println("   User ID: " + userId);
+            System.out.println("   Fájlnév: " + fileName);
 
-        query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("roleIN", String.class, ParameterMode.IN);
+            // User ellenőrzése
+            Users user = em.find(Users.class, userId);
+            if (user == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Felhasználó nem található");
+                return resp;
+            }
 
-        query.setParameter("userIdIN", userId);
-        query.setParameter("nameIN", name);
-        query.setParameter("emailIN", email);
-        query.setParameter("roleIN", role);
+            // Input validáció
+            if (fileInputStream == null || fileName == null) {
+                resp.put("statusCode", 400);
+                resp.put("message", "Hiányzó fájl");
+                return resp;
+            }
 
-        query.execute();
+            // Fájl mentése
+            String profilePicUrl = saveProfilePicture(fileInputStream, fileName, userId);
 
-        resp.put("status", "UserUpdated");
-        resp.put("statusCode", 200);
+            if (profilePicUrl == null) {
+                resp.put("statusCode", 500);
+                resp.put("message", "Fájl mentési hiba");
+                return resp;
+            }
 
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("status", "DatabaseError");
-        resp.put("message", e.getMessage());
-        resp.put("statusCode", 500);
-    }
+            // DB frissítése
+            try {
+                StoredProcedureQuery picQuery = em.createStoredProcedureQuery("updateProfilePicture");
+                picQuery.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+                picQuery.registerStoredProcedureParameter("pictureIN", String.class, ParameterMode.IN);
+                picQuery.setParameter("userIdIN", userId);
+                picQuery.setParameter("pictureIN", profilePicUrl);
+                picQuery.execute();
+                
+                System.out.println("✅ Profilkép sikeresen frissítve: " + profilePicUrl);
 
-    return resp;
-}
+                resp.put("statusCode", 200);
+                resp.put("message", "Profilkép sikeresen feltöltve");
+                resp.put("profilePicture", profilePicUrl);
 
-    
-    
-public JSONObject deleteUser(int userId) {
-    JSONObject resp = new JSONObject();
+            } catch (Exception dbEx) {
+                System.err.println("⚠️ ADATBÁZIS HIBA:");
+                System.err.println("   Az 'updateProfilePicture' stored procedure nem létezik!");
+                System.err.println("   Futtasd a következő SQL-t:");
+                System.err.println("");
+                System.err.println("   ALTER TABLE users ADD COLUMN profile_picture VARCHAR(500);");
+                System.err.println("");
+                System.err.println("   DELIMITER $$");
+                System.err.println("   CREATE PROCEDURE updateProfilePicture(");
+                System.err.println("       IN userIdIN INT,");
+                System.err.println("       IN pictureIN VARCHAR(500)");
+                System.err.println("   )");
+                System.err.println("   BEGIN");
+                System.err.println("       UPDATE users SET profile_picture = pictureIN WHERE id = userIdIN;");
+                System.err.println("   END$$");
+                System.err.println("   DELIMITER ;");
+                System.err.println("");
+                
+                dbEx.printStackTrace();
+                
+                resp.put("statusCode", 500);
+                resp.put("message", "Adatbázis hiba - a profilkép funkció még nincs támogatva. Futtasd az SQL migrációt!");
+            }
 
-    try {
-        StoredProcedureQuery q = em.createStoredProcedureQuery("deleteUser");
-        q.registerStoredProcedureParameter(1, Integer.class, ParameterMode.IN);
-        q.setParameter(1, userId);
-
-        q.execute(); // vagy executeUpdate, de execute biztosabb SP-nél
-
-        resp.put("status", "DeleteExecuted");
-        resp.put("statusCode", 200);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("status", "DatabaseError");
-        resp.put("message", e.getMessage());
-        resp.put("statusCode", 500);
-    }
-    return resp;
-}
-
-
-public JSONObject getAllUsers() {
-    JSONObject resp = new JSONObject();
-    JSONArray arr = new JSONArray();
-
-    try {
-        StoredProcedureQuery sp = em.createStoredProcedureQuery("getAllUsers", Users.class);
-
-        @SuppressWarnings("unchecked")
-        List<Users> users = sp.getResultList();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        for (Users u : users) {
-            JSONObject o = new JSONObject();
-            o.put("id", u.getId());
-            o.put("name", u.getName());
-            o.put("email", u.getEmail());
-            o.put("role", u.getRole());
-
-            // created_at (Date) → string, hogy Postmanben is szépen látszódjon
-            o.put("created_at", u.getCreatedAt() != null ? sdf.format(u.getCreatedAt()) : JSONObject.NULL);
-
-            // ⚠️ jelszót NE add vissza API-ban
-            arr.put(o);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Váratlan hiba: " + e.getMessage());
         }
 
-        resp.put("status", "UsersFetched");
-        resp.put("statusCode", 200);
-        resp.put("data", arr);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("status", "DatabaseError");
-        resp.put("message", e.getMessage());
-        resp.put("statusCode", 500);
+        return resp;
     }
 
-    return resp;
-}
+    // ════════════════════════════════════════════════════════════════════════
+    // HELPER: PROFILKÉP FÁJL MENTÉSE - JAVÍTOTT verzió
+    // ════════════════════════════════════════════════════════════════════════
+    private String saveProfilePicture(InputStream fileInputStream, String fileName, Integer userId) {
+        try {
+            // Könyvtár létrehozása ha nem létezik
+            File uploadDir = new File(UPLOAD_DIR);
+            if (!uploadDir.exists()) {
+                boolean created = uploadDir.mkdirs();
+                if (!created) {
+                    System.err.println("❌ Nem sikerült létrehozni: " + UPLOAD_DIR);
+                    return null;
+                }
+                System.out.println("✅ Könyvtár létrehozva: " + UPLOAD_DIR);
+            }
 
+            // Fájlkiterjesztés kiolvasása
+            String extension = "";
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+                extension = fileName.substring(dotIndex); // pl. ".jpg"
+            }
 
-public JSONObject getUserById(int userId) {
-    JSONObject resp = new JSONObject();
-    try {
-        StoredProcedureQuery sp = em.createStoredProcedureQuery("getUserById", Users.class);
-        sp.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
-        sp.setParameter("userIdIN", userId);
+            // Egyedi fájlnév generálása
+            String uniqueFileName = "profile_" + userId + "_" + UUID.randomUUID().toString() + extension;
+            File targetFile = new File(uploadDir, uniqueFileName);
 
-        Users user = (Users) sp.getSingleResult();
+            // Fájl mentése
+            Files.copy(fileInputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            System.out.println("✅ Fájl mentve: " + targetFile.getAbsolutePath());
 
-        JSONObject u = new JSONObject();
-        u.put("id", user.getId());
-        u.put("name", user.getName());
-        u.put("email", user.getEmail());
-        u.put("role", user.getRole());
-        u.put("created_at", user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
+            // Visszaadjuk a böngésző számára elérhető URL-t
+            return URL_PREFIX + uniqueFileName;
 
-        resp.put("status", "UserFound");
-        resp.put("statusCode", 200);
-        resp.put("data", u);
-    } catch (NoResultException e) {
-        resp.put("status", "UserNotFound");
-        resp.put("statusCode", 404);
-        resp.put("message", "No user with id: " + userId);
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("status", "DatabaseError");
-        resp.put("statusCode", 500);
-        resp.put("message", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-    return resp;
-}
 
+    // ════════════════════════════════════════════════════════════════════════
+    // UPDATE USER
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject updateUser(int id, String name, String email, String role) {
+        JSONObject resp = new JSONObject();
 
-public JSONObject login(String email, String password) {
-    JSONObject resp = new JSONObject();
+        try {
+            Users existingUser = em.find(Users.class, id);
+            if (existingUser == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Felhasználó nem található");
+                return resp;
+            }
 
-    try {
-        TypedQuery<Users> q = em.createQuery(
-            "SELECT u FROM Users u WHERE u.email = :email", Users.class
-        );
-        q.setParameter("email", email);
+            String finalName = (name != null && !name.trim().isEmpty()) ? name : existingUser.getName();
+            String finalEmail = (email != null && !email.trim().isEmpty()) ? email : existingUser.getEmail();
+            String finalRole = (role != null && !role.trim().isEmpty()) ? role : existingUser.getRole();
 
-        Users user = q.getSingleResult();
+            StoredProcedureQuery query = em.createStoredProcedureQuery("updateUser");
+            query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("roleIN", String.class, ParameterMode.IN);
 
-        // BCrypt ellenőrzés (regisztrációnál)
-        if (!BCrypt.checkpw(password, user.getPassword())) {
+            query.setParameter("userIdIN", id);
+            query.setParameter("nameIN", finalName);
+            query.setParameter("emailIN", finalEmail);
+            query.setParameter("roleIN", finalRole);
+
+            query.execute();
+
+            resp.put("status", "UserUpdated");
+            resp.put("statusCode", 200);
+            resp.put("message", "Adatok sikeresen frissítve");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Hiba történt: " + e.getMessage());
+        }
+
+        return resp;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // DELETE USER
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject deleteUser(int userId) {
+        JSONObject resp = new JSONObject();
+
+        try {
+            Users user = em.find(Users.class, userId);
+            if (user == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Felhasználó nem található");
+                return resp;
+            }
+
+            StoredProcedureQuery query = em.createStoredProcedureQuery("deleteUser");
+            query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+            query.setParameter("userIdIN", userId);
+            query.execute();
+
+            resp.put("status", "UserDeleted");
+            resp.put("statusCode", 200);
+            resp.put("message", "Felhasználó sikeresen törölve");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Hiba történt: " + e.getMessage());
+        }
+
+        return resp;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // GET USER BY ID
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject getUserById(int id) {
+        JSONObject resp = new JSONObject();
+
+        try {
+            Users user = em.find(Users.class, id);
+
+            if (user != null) {
+                JSONObject userJson = new JSONObject();
+                userJson.put("id", user.getId());
+                userJson.put("name", user.getName());
+                userJson.put("email", user.getEmail());
+                userJson.put("role", user.getRole());
+                userJson.put("createdAt", user.getCreatedAt());
+                
+                // ✅ JAVÍTÁS: Profilkép URL hozzáadása ha létezik
+                if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
+                    userJson.put("profilePicture", user.getProfilePicture());
+                }
+
+                resp.put("statusCode", 200);
+                resp.put("data", userJson);
+            } else {
+                resp.put("statusCode", 404);
+                resp.put("message", "User not found");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", e.getMessage());
+        }
+
+        return resp;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // LOGIN
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject login(String email, String password) {
+        JSONObject resp = new JSONObject();
+
+        try {
+            TypedQuery<Users> q = em.createQuery(
+                "SELECT u FROM Users u WHERE u.email = :email", Users.class
+            );
+            q.setParameter("email", email);
+
+            Users user = q.getSingleResult();
+
+            if (!BCrypt.checkpw(password, user.getPassword())) {
+                resp.put("statusCode", 401);
+                resp.put("message", "Hibás email vagy jelszó");
+                return resp;
+            }
+
+            String token = JwtUtil.generateToken(user.getId(), user.getEmail());
+
+            JSONObject userJson = new JSONObject();
+            userJson.put("id", user.getId());
+            userJson.put("email", user.getEmail());
+            userJson.put("name", user.getName());
+            userJson.put("role", user.getRole());
+            
+            // ✅ JAVÍTÁS: Profilkép URL hozzáadása ha létezik
+            if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
+                userJson.put("profilePicture", user.getProfilePicture());
+            }
+
+            resp.put("statusCode", 200);
+            resp.put("token", token);
+            resp.put("user", userJson);
+
+        } catch (NoResultException e) {
             resp.put("statusCode", 401);
             resp.put("message", "Hibás email vagy jelszó");
-            return resp;
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Szerver hiba: " + e.getMessage());
         }
 
-        //JWT token
-        String token = JwtUtil.generateToken(user.getId(), user.getEmail());
-
-        JSONObject userJson = new JSONObject();
-        userJson.put("id", user.getId());
-        userJson.put("email", user.getEmail());
-        userJson.put("name", user.getName());
-
-        resp.put("statusCode", 200);
-        resp.put("token", token);
-        resp.put("user", userJson);
-
-        return resp;
-
-    } catch (NoResultException e) {
-        resp.put("statusCode", 401);
-        resp.put("message", "Hibás email vagy jelszó");
-        return resp;
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("statusCode", 500);
-        resp.put("message", "Szerver hiba");
-        return resp;
-    }
-}
-
-
-
-
-
-// Saját felhasználó lekérése (token alapján)
-public JSONObject getCurrentUser(int userId) {
-    JSONObject resp = new JSONObject();
-    try {
-        JSONObject userData = getUserById(userId);
-        if (userData.optInt("statusCode", 500) != 200) {
-            return userData; // továbbadjuk a hibát
-        }
-        resp.put("status", "UserFound");
-        resp.put("statusCode", 200);
-        resp.put("data", userData.optJSONObject("data"));
-    } catch (Exception e) {
-        e.printStackTrace(); // ← logolja a szerver logba
-        resp.put("statusCode", 500);
-        resp.put("message", "Internal error: " + e.getMessage());
-    }
-    return resp;
-}
-
-// Profil frissítés – név, email, jelszó opcionálisan
-public JSONObject updateProfile(int userId, String name, String email, String currentPassword, String newPassword) {
-    JSONObject resp = new JSONObject();
-
-    if (currentPassword == null || currentPassword.trim().isEmpty()) {
-        resp.put("statusCode", 400);
-        resp.put("message", "Jelenlegi jelszó kötelező a módosításhoz");
         return resp;
     }
 
-    try {
-        TypedQuery<Users> q = em.createQuery("SELECT u FROM Users u WHERE u.id = :id", Users.class);
-        q.setParameter("id", userId);
-        Users user;
+    // ════════════════════════════════════════════════════════════════════════
+    // GET CURRENT USER (me endpoint)
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject getCurrentUser(Integer userId) {
+        return getUserById(userId.intValue());
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // UPDATE PROFILE
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject updateProfile(
+            Integer userId, String name, String email,
+            String currentPassword, String newPassword) {
+
+        JSONObject resp = new JSONObject();
+
         try {
-            user = q.getSingleResult();
-        } catch (NoResultException e) {
-            resp.put("statusCode", 404);
-            resp.put("message", "Felhasználó nem található");
-            return resp;
-        }
+            Users user = em.find(Users.class, userId);
+            if (user == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Felhasználó nem található");
+                return resp;
+            }
 
-        if (!BCrypt.checkpw(currentPassword, user.getPassword())) {
-            resp.put("statusCode", 401);
-            resp.put("message", "Helytelen jelenlegi jelszó");
-            return resp;
-        }
+            if (!BCrypt.checkpw(currentPassword, user.getPassword())) {
+                resp.put("statusCode", 401);
+                resp.put("message", "Hibás jelenlegi jelszó");
+                return resp;
+            }
 
-        // Név és email frissítése
-        StoredProcedureQuery query = em.createStoredProcedureQuery("updateUser");
-        query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("nameIN",   String.class,  ParameterMode.IN);
-        query.registerStoredProcedureParameter("emailIN",  String.class,  ParameterMode.IN);
-        query.registerStoredProcedureParameter("roleIN",   String.class,  ParameterMode.IN);
+            String newNameValue = name != null && !name.trim().isEmpty() ? name.trim() : user.getName();
+            String newEmailValue = email != null && !email.trim().isEmpty() ? email.trim() : user.getEmail();
 
-        query.setParameter("userIdIN", userId);
-        query.setParameter("nameIN",   name != null && !name.trim().isEmpty() ? name.trim() : user.getName());
-        query.setParameter("emailIN",  email != null && !email.trim().isEmpty() ? email.trim() : user.getEmail());
-        query.setParameter("roleIN",   user.getRole());
+            StoredProcedureQuery query = em.createStoredProcedureQuery("updateUser");
+            query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("roleIN", String.class, ParameterMode.IN);
 
-        query.execute();
+            query.setParameter("userIdIN", userId);
+            query.setParameter("nameIN", newNameValue);
+            query.setParameter("emailIN", newEmailValue);
+            query.setParameter("roleIN", user.getRole());
 
-        // Jelszócsere csak akkor, ha megadták ÉS létezik a SP
-        if (newPassword != null && !newPassword.trim().isEmpty()) {
-            String hashed = BCrypt.hashpw(newPassword.trim(), BCrypt.gensalt(12));
-            try {
+            query.execute();
+
+            if (newPassword != null && !newPassword.trim().isEmpty()) {
+                String hashed = BCrypt.hashpw(newPassword.trim(), BCrypt.gensalt(12));
                 StoredProcedureQuery pwQuery = em.createStoredProcedureQuery("updateUserPassword");
                 pwQuery.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
                 pwQuery.registerStoredProcedureParameter("passwordIN", String.class, ParameterMode.IN);
                 pwQuery.setParameter("userIdIN", userId);
                 pwQuery.setParameter("passwordIN", hashed);
                 pwQuery.execute();
-            } catch (Exception pwEx) {
-                System.err.println("Jelszócsere SP hiba: " + pwEx.getMessage());
             }
+
+            resp.put("status", "ProfileUpdated");
+            resp.put("statusCode", 200);
+            resp.put("message", "Sikeresen módosítva");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Hiba: " + e.getMessage());
         }
 
-        resp.put("status", "ProfileUpdated");
-        resp.put("statusCode", 200);
-        resp.put("message", "Sikeresen módosítva");
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        resp.put("statusCode", 500);
-        resp.put("message", "Szerveroldali hiba: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        return resp;
     }
 
-    return resp;
-}
-// Saját fiók törlése
-public JSONObject deleteCurrentUser(int userId) {
-    return deleteUser(userId);
-}
+    // ════════════════════════════════════════════════════════════════════════
+    // DELETE CURRENT USER
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject deleteCurrentUser(int userId) {
+        return deleteUser(userId);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // FORGOT PASSWORD
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject forgotPassword(String email) {
+        JSONObject resp = new JSONObject();
+
+        try {
+            TypedQuery<Users> q = em.createQuery(
+                "SELECT u FROM Users u WHERE u.email = :email", Users.class);
+            q.setParameter("email", email.trim().toLowerCase());
+
+            Users user;
+            try {
+                user = q.getSingleResult();
+            } catch (NoResultException e) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Nem található felhasználó ezzel az email címmel.");
+                return resp;
+            }
+
+            SecureRandom random = new SecureRandom();
+            byte[] bytes = new byte[9];
+            random.nextBytes(bytes);
+            String tempPassword = Base64.getUrlEncoder()
+                    .withoutPadding()
+                    .encodeToString(bytes)
+                    .replaceAll("[^a-zA-Z0-9]", "")
+                    .substring(0, 12);
+
+            String hashedTemp = BCrypt.hashpw(tempPassword, BCrypt.gensalt(12));
+
+            StoredProcedureQuery pwQuery = em.createStoredProcedureQuery("updateUserPassword");
+            pwQuery.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+            pwQuery.registerStoredProcedureParameter("passwordIN", String.class, ParameterMode.IN);
+            pwQuery.setParameter("userIdIN", user.getId());
+            pwQuery.setParameter("passwordIN", hashedTemp);
+            pwQuery.execute();
+
+            boolean emailSent = emailService.sendForgotPasswordEmail(
+                    user.getName(),
+                    user.getEmail(),
+                    tempPassword
+            );
+
+            if (emailSent) {
+                resp.put("statusCode", 200);
+                resp.put("message", "Az egyszer használatos jelszót elküldtük.");
+            } else {
+                resp.put("statusCode", 500);
+                resp.put("message", "Email küldési hiba.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Szerver hiba: " + e.getMessage());
+        }
+
+        return resp;
+    }
     
+    // ════════════════════════════════════════════════════════════════════════
+    // HELPER: Fájl lekérése (később használjuk a UploadController-ben)
+    // ════════════════════════════════════════════════════════════════════════
+    public static File getProfilePictureFile(String filename) {
+        return new File(UPLOAD_DIR, filename);
+    }
 }
-
-
-
-
-

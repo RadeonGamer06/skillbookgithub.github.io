@@ -38,6 +38,14 @@ public class Courses implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
     
+    @Column(name = "start_date")
+    @Temporal(TemporalType.DATE)
+    private Date startDate;
+    
+    @Column(name = "end_date")
+    @Temporal(TemporalType.DATE)
+    private Date endDate;
+    
     // Constructors
     public Courses() {
     }
@@ -109,6 +117,22 @@ public class Courses implements Serializable {
     
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public Date getStartDate() {
+        return startDate;
+    }
+    
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+    
+    public Date getEndDate() {
+        return endDate;
+    }
+    
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
     
     @Override

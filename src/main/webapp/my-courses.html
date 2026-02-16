@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tanfolyamaim | SkillBook</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+
+      :root{
+      --bg-1: #f5f3ff;
+      --bg-2: #e9d5ff;
+      --card: rgba(255,255,255,0.85);
+      --card-2: rgba(255,255,255,0.7);
+      --border: rgba(139,92,246,0.2);
+      --text: #1e1b4b;
+      --muted: rgba(30,27,75,0.65);
+      --accent: #7c3aed;
+      --accent-2: #059669;
+      --shadow: 0 10px 40px rgba(124,58,237,0.15);
+      --radius: 4px;
+    }
+
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: linear-gradient(135deg, #e9d5ff 0%, #d1fae5 50%, #ddd6fe 100%);
+      background-attachment: fixed;
+      overflow-x:hidden;
+      min-height: 100vh;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:-120px -140px auto auto;
+      width:560px;
+      height:560px;
+      background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.25), transparent 62%);
+      filter: blur(55px);
+      opacity:.55;
+      z-index:-1;
+      animation: floatGlow 12s ease-in-out infinite;
+    }
+    @keyframes floatGlow{
+      0%,100%{ transform: translate3d(0,0,0) rotate(0deg); }
+      50%{ transform: translate3d(-20px, 16px, 0) rotate(10deg); }
+    }
+
+    header{
+      position: sticky;
+      top:0;
+      z-index:10;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:18px 26px;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Hamburger menü gomb */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all .18s ease;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255,255,255,0.9);
+      border-color: var(--accent);
+    }
+
+    .menu-toggle span {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 4px;
+      transition: all .3s ease;
+    }
+
+    .logo{
+      display:flex;
+      align-items:baseline;
+      gap:2px;
+      font-size: 1.4rem;
+      letter-spacing:.4px;
+      text-decoration: none;
+    }
+    .logo span{ color: var(--muted); font-weight:600; }
+    .logo strong{
+      color: var(--text);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    nav a, nav button {
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.6);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+    }
+    nav a:hover, nav button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.9);
+      border-color: var(--accent);
+    }
+    nav a.active{
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.2);
+    }
+
+    .auth-links {
+      display: flex;
+      gap: 10px;
+    }
+    .auth-links.hidden {
+      display: none;
+    }
+
+    /* ── USER MENU ──────────────────────────────────────── */
+
+    .user-menu-container {
+      position: relative;
+      display: none;
+    }
+    .user-menu-container.visible {
+      display: block;
+    }
+
+    .user-menu-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .user-menu-trigger:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+
+    .user-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dropdown-arrow {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      min-width: 180px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: all 0.18s ease;
+      z-index: 100;
+    }
+    .user-dropdown.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      color: var(--text);
+      text-decoration: none;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .dropdown-item:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .logout {
+      color: #ff6b6b !important;
+    }
+    .logout:hover {
+      background: rgba(255,107,107,0.15) !important;
+    }
+
+    main{
+      width:min(1100px, calc(100% - 40px));
+      margin: 28px auto 40px;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    h2{
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #addCourseBtn {
+      display: none;
+      padding: 12px 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.85));
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 14px 35px rgba(0,0,0,.35);
+      transition: transform .18s ease, filter .18s ease;
+      font-size: 0.95rem;
+    }
+    #addCourseBtn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+    #addCourseBtn:active {
+      transform: translateY(0px) scale(.99);
+    }
+    #addCourseBtn i {
+      margin-right: 6px;
+    }
+
+    .courses{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .course-card{
+      display:block;
+      padding: 18px 18px 16px;
+      border-radius: 4px;
+      text-decoration:none;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transform: translateY(0);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      animation: fadeUp .5s ease both;
+      cursor: pointer;
+    }
+    @keyframes fadeUp{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .course-card:hover{
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,.28);
+      box-shadow: 0 28px 70px rgba(0,0,0,.45);
+    }
+    .course-card h3{
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+    .course-card p{
+      margin: 7px 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 0.9rem;
+    }
+    .course-card strong, .course-card b{
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state i {
+      font-size: 4rem;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      margin: 5% auto;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: min(500px, calc(100% - 40px));
+      box-shadow: 0 30px 90px rgba(0,0,0,.6);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .close {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .close:hover {
+      color: var(--text);
+    }
+
+    .modal h3 {
+      margin: 0 0 20px;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+      transition: all 0.18s ease;
+      font-family: inherit;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: rgba(96,165,250,0.65);
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.18);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.18);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+      font-size: 0.95rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.85));
+      color: var(--text);
+      box-shadow: 0 14px 35px rgba(0,0,0,.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.6);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.9);
+    }
+
+    .message-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      z-index: 1001;
+      display: none;
+      animation: slideIn 0.3s ease;
+      backdrop-filter: blur(12px);
+      font-size: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      max-width: 400px;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .message-box.success {
+      border-color: rgba(77,212,172,0.45);
+      color: #c9ffef;
+      background: rgba(77,212,172,0.08);
+    }
+    .message-box.error {
+      border-color: rgba(255,107,107,0.45);
+      color: #ffd0d0;
+      background: rgba(255,107,107,0.08);
+    }
+
+    footer{
+      width:100%;
+      text-align:center;
+      padding: 22px 14px;
+      color: rgba(243,246,255,.65);
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      margin-top: auto;
+    }
+
+    @media (max-width: 991px){
+      .menu-toggle {
+        display: flex;
+      }
+
+      nav {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px 26px;
+        gap: 8px;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all .3s ease;
+      }
+
+      nav.active {
+        max-height: 500px;
+        opacity: 1;
+      }
+      
+      nav a, nav button {
+        color: white;
+        border-color: rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.15);
+      }
+      
+      nav a:hover, nav button:hover {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+      }
+      
+      nav a.active {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.6);
+      }
+
+      .user-menu-trigger {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+      }
+      
+      .user-name {
+        color: white;
+      }
+      
+      .dropdown-arrow {
+        color: white;
+      }
+
+      main{ width: calc(100% - 28px); }
+      .courses { grid-template-columns: 1fr; }
+      .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+      
+    .hidden { display: none !important; }
+
+    /* Spinner (kategória betöltéshez) */
+    .inline-spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.25);
+      border-top-color: rgba(255,255,255,.85);
+      display: inline-block;
+      animation: spin .8s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .select-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(10,14,28,.55);
+      color: #f3f6ff;
+      outline: none;
+    }
+    select:disabled { opacity: .7; cursor: not-allowed; }
+
+        /* Dark Mode - Backgrounds AND Text Colors */
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.15), transparent 62%);
+            opacity: .3;
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(30,41,59,0.9);
+        }
+
+        [data-theme="dark"] nav a,
+        [data-theme="dark"] nav button {
+            background: rgba(51,65,85,0.6);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] nav a:hover,
+        [data-theme="dark"] nav button:hover {
+            background: rgba(51,65,85,0.9);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .user-menu-trigger {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .user-menu-trigger:hover {
+            background: rgba(51,65,85,0.6);
+        }
+
+        [data-theme="dark"] .user-name {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .dropdown-arrow {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .user-dropdown {
+            background: rgba(30,41,59,0.98);
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background: rgba(124,58,237,0.25);
+        }
+
+        [data-theme="dark"] footer {
+            background: rgba(30,41,59,0.9);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] main {
+            background: rgba(30,41,59,0.9);
+        }
+
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .course-card {
+            background: rgba(30,41,59,0.9);
+        }
+
+        [data-theme="dark"] .card:hover,
+        [data-theme="dark"] .course-card:hover {
+            background: rgba(51,65,85,0.95);
+        }
+
+        [data-theme="dark"] .info-card {
+            background: rgba(30,41,59,0.9);
+        }
+
+        [data-theme="dark"] .info-card:hover {
+            background: rgba(51,65,85,0.9);
+        }
+
+        [data-theme="dark"] .contact-form {
+            background: rgba(30,41,59,0.9);
+        }
+
+        [data-theme="dark"] .modal-content {
+            background: rgba(30,41,59,0.95);
+        }
+
+        [data-theme="dark"] .modal {
+            background: rgba(0,0,0,0.85);
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] textarea,
+        [data-theme="dark"] select,
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background: rgba(15,23,42,0.8);
+            color: #f1f5f9;
+            border-color: rgba(139,92,246,0.4);
+        }
+
+        [data-theme="dark"] input::placeholder,
+        [data-theme="dark"] textarea::placeholder {
+            color: rgba(241,245,249,0.5);
+        }
+
+        [data-theme="dark"] input:focus,
+        [data-theme="dark"] textarea:focus,
+        [data-theme="dark"] select:focus {
+            background: rgba(15,23,42,0.95);
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .feature-card:hover {
+            background: rgba(51,65,85,0.9);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .chat-main {
+            background: rgba(15,23,42,0.6);
+        }
+
+        [data-theme="dark"] .chat-header {
+            background: rgba(30,41,59,0.8);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .message.received {
+            background: rgba(30,41,59,0.9);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .message-box {
+            background: rgba(30,41,59,0.95);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .menu-toggle span {
+            background: #f1f5f9;
+        }
+
+        [data-theme="dark"] .menu-toggle {
+            background: rgba(51,65,85,0.6);
+        }
+
+        [data-theme="dark"] .menu-toggle:hover {
+            background: rgba(51,65,85,0.9);
+        }
+
+        [data-theme="dark"] .about {
+            background: rgba(30,41,59,0.6);
+        }
+
+        [data-theme="dark"] .stat-item {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .cta-section {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .map-section {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .search-container input {
+            background: rgba(15,23,42,0.8);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .user-item {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .user-item:hover {
+            background: rgba(51,65,85,0.6);
+        }
+
+        [data-theme="dark"] .message-input-area {
+            background: rgba(30,41,59,0.8);
+        }
+
+        [data-theme="dark"] .message-input-area input {
+            background: rgba(15,23,42,0.8);
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .about-image img {
+            opacity: 0.85;
+        }
+
+        [data-theme="dark"] .info-icon {
+            background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(5,150,105,0.3));
+        }
+
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6 {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] p {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .hero-title {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .hero-subtitle {
+            color: rgba(241,245,249,0.8);
+        }
+
+        [data-theme="dark"] .section-title {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .feature-card h3,
+        [data-theme="dark"] .feature-card p {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .about-content h2,
+        [data-theme="dark"] .about-content p {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .stat-number,
+        [data-theme="dark"] .stat-label {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .cta-section h2,
+        [data-theme="dark"] .cta-section p {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .info-card h3,
+        [data-theme="dark"] .info-card p {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .info-card a {
+            color: #a78bfa;
+        }
+
+        [data-theme="dark"] .contact-hero h1 {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .contact-hero p {
+            color: rgba(241,245,249,0.8);
+        }
+
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] label {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .list-section-title {
+            color: rgba(241,245,249,0.7);
+        }
+
+        [data-theme="dark"] .header-section h2 {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .logo span {
+            color: rgba(241,245,249,0.7);
+        }
+
+    </style>
+</head>
+
+<body>
+
+  <!-- Message Box -->
+  <div id="messageBox" class="message-box"></div>
+
+  <!-- ===== MODAL (Bootstrap-stílus csak itt) ===== -->
+<div id="courseModal" class="modal">
+  <div class="modal-content">
+
+    <span class="close" onclick="closeModal()">&times;</span>
+
+    <h4 class="mb-3">Új tanfolyam létrehozása</h4>
+
+    <form id="courseForm">
+
+      <div class="mb-3">
+        <label for="courseTitle" class="form-label">Tanfolyam címe *</label>
+        <input type="text" id="courseTitle" class="form-control" required>
+      </div>
+
+      <!-- ✅ KATEGÓRIA – csak instructor -->
+      <div class="mb-3 hidden" id="categoryGroup">
+        <label for="courseCategorySelect" class="form-label">Kategória *</label>
+
+        <div class="input-group">
+          <select id="courseCategorySelect"
+                  class="form-select"
+                  required
+                  disabled>
+            <option>Kategóriák betöltése…</option>
+          </select>
+
+          <!-- Spinner -->
+          <span class="input-group-text" id="categorySpinnerWrap" style="display:none;">
+            <span class="spinner-border spinner-border-sm"></span>
+          </span>
+        </div>
+
+        <small class="text-secondary d-block mt-1">
+          Csak tanár hozhat létre / szerkeszthet saját tanfolyamot.
+        </small>
+      </div>
+
+      <div class="mb-3">
+        <label for="coursePrice" class="form-label">Ár (Ft) *</label>
+        <input type="number" id="coursePrice" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="courseStartDate" class="form-label">Kezdés dátuma *</label>
+        <input type="date" id="courseStartDate" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="courseEndDate" class="form-label">Befejezés dátuma *</label>
+        <input type="date" id="courseEndDate" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="courseDescription" class="form-label">Leírás</label>
+        <textarea id="courseDescription"
+                  class="form-control"
+                  rows="3"></textarea>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">
+          Mégse
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Létrehozás
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+  
+  <!-- ===== EDIT MODAL ===== -->
+  <div id="editCourseModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeEditModal()">&times;</span>
+      <h4 class="mb-3">Tanfolyam szerkesztése</h4>
+
+      <form id="editCourseForm">
+        <input type="hidden" id="editCourseId">
+
+        <div class="mb-3">
+          <label for="editCourseTitle" class="form-label">Tanfolyam címe *</label>
+          <input type="text" id="editCourseTitle" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="editCourseDescription" class="form-label">Leírás</label>
+          <textarea id="editCourseDescription" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="editCoursePrice" class="form-label">Ár (Ft) *</label>
+          <input type="number" id="editCoursePrice" class="form-control" required>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn btn-outline-light" onclick="closeEditModal()">Mégse</button>
+          <button type="submit" class="btn btn-primary">Mentés</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<header>
+    <div class="header-left">
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a href="pro.html" class="logo">
+        <span>Skill</span><strong>Book</strong>
+      </a>
+    </div>
+
+    <nav id="mainNav">
+      <a href="pro.html">Kezdőlap</a>
+      <a href="courses.html">Tanfolyamok</a>
+      <a href="my-courses.html" id="myCoursesNav" class="active" style="display:none;">Tanfolyamaim</a>
+      <a href="kapcsolat.html">Kapcsolat</a>
+      <a href="chat.html" id="chatLink" style="display:none;">Csevegés</a>
+
+      <div id="authLinks" class="auth-links">
+        <a href="bejelentkezes.html">Bejelentkezés</a>
+        <a href="regisztracio.html">Regisztráció</a>
+      </div>
+
+      <div class="user-menu-container" id="userMenuContainer">
+        <button class="user-menu-trigger" id="userMenuTrigger">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-name" id="userName">Vendég</span>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+
+        <div class="user-dropdown" id="userDropdown">
+          <a href="fiok.html" class="dropdown-item">Fiókom</a>
+          <a href="beallitasok.html" class="dropdown-item">Beállítások</a>
+          <div class="dropdown-divider"></div>
+          <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  
+  <main>
+    <div class="header-section">
+      <h2>TANFOLYAMAIM:</h2>
+      <button id="addCourseBtn" style="display:none;" onclick="openModal()">
+        <i class='bx bx-plus'></i>
+        Tanfolyam hozzáadása
+      </button>
+    </div>
+
+    <div class="courses" id="myCoursesContainer"></div>
+  </main>
+
+
+  <footer>
+    <p>2025 | SkillBook</p>
+  </footer>
+
+  <script>
+    const API_BASE_URL = `${window.location.origin}/SkillBook/api`;
+
+    // Apply saved theme immediately
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    })();
+
+    // Segédfüggvény az auth header-hez
+    function authHeaders() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // Hamburger menü toggle
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('nav');
+
+    if (menuToggle && nav) {
+        menuToggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+        });
+    }
+
+    // Ellenőrzi, hogy van-e legalább egy saját kurzusa az oktatónak
+    async function checkMyCoursesNav() {
+        const link = document.getElementById('myCoursesNav');
+        if (!link) return;
+
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!token || !userStr) { link.style.display = 'none'; return; }
+
+        let user;
+        try { user = JSON.parse(userStr); } catch(e) { link.style.display = 'none'; return; }
+
+        if (!user || user.role !== 'instructor') { link.style.display = 'none'; return; }
+
+        try {
+            const meRes = await fetch(API_BASE_URL + '/Users/me', { headers: authHeaders() });
+            if (!meRes.ok) { link.style.display = 'none'; return; }
+            const meJson = await meRes.json();
+            const myId = meJson?.data?.id;
+            if (!myId) { link.style.display = 'none'; return; }
+
+            const cRes = await fetch(API_BASE_URL + '/Courses/getAllCourses');
+            if (!cRes.ok) { link.style.display = 'none'; return; }
+            const cJson = await cRes.json();
+            const courses = Array.isArray(cJson?.data) ? cJson.data : [];
+            const myCourses = courses.filter(c => String(c.instructor_id) === String(myId));
+
+            link.style.display = myCourses.length > 0 ? 'inline-flex' : 'none';
+        } catch (e) {
+            link.style.display = 'none';
+        }
+    }
+
+    async function checkAuth() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+        const userMenuContainer = document.getElementById('userMenuContainer');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const authLinks = document.getElementById('authLinks');
+        const chatLink = document.getElementById('chatLink');
+
+        if (token && userStr) {
+            try {
+                // Friss adatokat kérünk a backendtől (profilkép miatt is)
+                const res = await fetch(API_BASE_URL + '/Users/me', {
+                    headers: authHeaders()
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Hiba: ${res.status} - ${res.statusText}`);
+                }
+
+                const result = await res.json();
+
+                if (result.statusCode !== 200 || !result.data) {
+                    throw new Error(result.message || 'Hibás válasz a szervertől');
+                }
+
+                const user = result.data;
+
+                // Név frissítése
+                userName.textContent = user.name || user.email || 'Felhasználó';
+
+                // Avatar / profilkép logika
+                if (user.profilePicture && user.profilePicture.trim() !== '') {
+                    // Van feltöltött kép
+                    const imageUrl = user.profilePicture.startsWith('http') 
+                        ? user.profilePicture 
+                        : `${window.location.origin}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`;
+                    
+                    userAvatar.style.backgroundImage = `url(${imageUrl})`;
+                    userAvatar.style.backgroundSize = 'cover';
+                    userAvatar.style.backgroundPosition = 'center';
+                    userAvatar.style.backgroundRepeat = 'no-repeat';
+                    userAvatar.textContent = '';
+                } else {
+                    // Nincs kép → inicial
+                    const initial = (user.name || user.email || '?')[0].toUpperCase();
+                    userAvatar.textContent = initial;
+                    userAvatar.style.backgroundImage = '';
+                }
+
+                // Láthatóságok
+                userMenuContainer.classList.add('visible');
+                authLinks.classList.add('hidden');
+
+                if (chatLink && (user.role === 'student' || user.role === 'instructor' || user.role === 'admin')) {
+                    chatLink.style.display = 'inline-flex';
+                }
+
+                // Frissítjük a localStorage-t is
+                localStorage.setItem('user', JSON.stringify(user));
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+            } catch (err) {
+                console.error('checkAuth hiba:', err);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                showNotLoggedIn();
+            }
+        } else {
+            showNotLoggedIn();
+        }
+    }
+
+    function showNotLoggedIn() {
+        const userMenuContainer = document.getElementById('userMenuContainer');
+        const authLinks = document.getElementById('authLinks');
+        const chatLink = document.getElementById('chatLink');
+
+        if (userMenuContainer) userMenuContainer.classList.remove('visible');
+        if (authLinks) authLinks.classList.remove('hidden');
+        if (chatLink) chatLink.style.display = 'none';
+    }
+
+    // User dropdown toggle
+    const userTrigger = document.getElementById('userMenuTrigger');
+    const userDropdown = document.getElementById('userDropdown');
+
+    if (userTrigger && userDropdown) {
+        userTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('visible');
+            userTrigger.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth >= 992) {
+                if (!userTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('visible');
+                    userTrigger.classList.remove('active');
+                }
+            }
+        });
+    }
+
+    // Kijelentkezés
+    document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        
+        alert('Sikeresen kijelentkeztél!');
+        window.location.href = 'pro.html';
+    });
+
+    // Inicializálás
+    document.addEventListener('DOMContentLoaded', async function(){
+        await checkAuth();
+        await checkMyCoursesNav();
+    });
+</script>
+</body>
+</html>

@@ -12,7 +12,8 @@ public class JwtUtil {
     
     // Minimum 32 karakter !!!
     private static final String SECRET = "THIS_IS_A_REALLY_LONG_SECRET_KEY_1234567890";
-    private static final long EXPIRATION_MS = 1000L * 60 * 60; // 1 óra
+    // 22 nap = 22 nap * 24 óra * 60 perc * 60 mp * 1000 ms
+    private static final long EXPIRATION_MS = 22L * 24 * 60 * 60 * 1000;
 
     private static SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());

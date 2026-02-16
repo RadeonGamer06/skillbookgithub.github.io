@@ -1,0 +1,73 @@
+<header>
+        <div class="header-left">
+            <a class="logo" href="pro.html">
+                <span>Skill</span><strong>Book</strong>
+            </a>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Menü">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav id="mainNav">
+            <a href="pro.html" class="active">Főoldal</a>
+            <a href="courses.html">Tanfolyamok</a>
+            <a href="my-courses.html" id="myCoursesNav" style="display: none;">Tanfolyamaim</a>
+            <a href="chat.html" id="chatLink" style="display: none;">Csevegés</a>
+
+            <div id="authLinks" class="auth-links">
+                <a href="bejelentkezes.html">Bejelentkezés</a>
+                <a href="regisztracio.html">Regisztráció</a>
+            </div>
+
+            <div class="user-menu-container" id="userMenuContainer">
+                <button class="user-menu-trigger" id="userMenuTrigger">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">?</div>
+                        <span class="user-name" id="userName">Vendég</span>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="fiok.html" class="dropdown-item">Fiókom</a>
+                    <a href="#" class="dropdown-item">Beállítások</a>
+                    <div class="dropdown-divider"></div>
+                    <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const menuToggle = document.querySelector(".menu-toggle");
+  const nav = document.querySelector("header nav");
+
+  if (menuToggle) {
+    menuToggle.addEventListener("click", () => {
+      nav.classList.toggle("active");
+    });
+  }
+
+  const userTrigger = document.querySelector(".user-menu-trigger");
+  const userDropdown = document.querySelector(".user-dropdown");
+
+  if (userTrigger) {
+    userTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userTrigger.classList.toggle("active");
+      userDropdown.classList.toggle("visible");
+    });
+
+    document.addEventListener("click", () => {
+      userTrigger.classList.remove("active");
+      userDropdown.classList.remove("visible");
+    });
+  }
+
+});
+</script>

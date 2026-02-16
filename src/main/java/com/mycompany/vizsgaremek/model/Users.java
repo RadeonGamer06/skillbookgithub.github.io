@@ -38,37 +38,54 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Users.findByEmail", query = "SELECT u FROM Users u WHERE u.email = :email"),
     @NamedQuery(name = "Users.findByPassword", query = "SELECT u FROM Users u WHERE u.password = :password"),
     @NamedQuery(name = "Users.findByRole", query = "SELECT u FROM Users u WHERE u.role = :role"),
-    @NamedQuery(name = "Users.findByCreatedAt", query = "SELECT u FROM Users u WHERE u.createdAt = :createdAt")})
+    @NamedQuery(name = "Users.findByCreatedAt", query = "SELECT u FROM Users u WHERE u.createdAt = :createdAt"),
+    @NamedQuery(name = "Users.findByProfilePicture", query = "SELECT u FROM Users u WHERE u.profilePicture = :profilePicture")})
 public class Users implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    
     @Size(max = 255)
     @Column(name = "name")
     private String name;
+    
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Size(max = 255)
     @Column(name = "email")
     private String email;
+    
     @Size(max = 255)
     @Column(name = "password")
     private String password;
+    
     @Size(max = 10)
     @Column(name = "role")
     private String role;
+    
     @Basic(optional = false)
     @NotNull
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+    
+    // ════════════════════════════════════════════════════════════════════════
+    // ÚJ MEZŐ: PROFILKÉP
+    // ════════════════════════════════════════════════════════════════════════
+    @Size(max = 500)
+    @Column(name = "profile_picture")
+    private String profilePicture;
+    
     @OneToMany(mappedBy = "instructorId")
     private Collection<Courses> coursesCollection;
-    @OneToMany(mappedBy = "senderId")
+    
+    @OneToMany(mappedBy = "sender")
     private Collection<Messages> messagesCollection;
+    
     @OneToMany(mappedBy = "userId")
     private Collection<Enrollments> enrollmentsCollection;
 
@@ -130,6 +147,17 @@ public class Users implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // PROFILKÉP GETTER/SETTER
+    // ════════════════════════════════════════════════════════════════════════
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     @XmlTransient
