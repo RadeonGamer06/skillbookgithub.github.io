@@ -15,17 +15,27 @@ public class ApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new HashSet<>();
 
-        // Controllers
+        // ── Meglévő controllerek ──────────────────────────────────────────
         resources.add(UsersController.class);
         resources.add(AuthController.class);
         resources.add(CoursesController.class);
         resources.add(ContactController.class);
-        resources.add(CategoriesController.class);
-        resources.add(MessagesController.class);
-        resources.add(ReviewsController.class);
-        resources.add(UploadsController.class);  // ✅ ÚJ - képek kiszolgálása
-        
-        // Security filters
+        resources.add(CategoriesController.class);   // getAllCategories (public)
+        resources.add(MessagesController.class);      // chat (user-to-user)
+        resources.add(ReviewsController.class);       // user review CRUD
+        resources.add(UploadsController.class);       // képek kiszolgálása
+
+        // ── Új controllerek ──────────────────────────────────────────────
+        resources.add(AdminUsersController.class);       // GET getAllUsers, PUT setRole/updateUser, DELETE deleteUser
+        resources.add(EnrollmentsController.class);      // beiratkozások CRUD
+        resources.add(CourseSessionsController.class);   // tanfolyam időpontok CRUD
+        resources.add(CourseMaterialsController.class);  // tananyagok (list + delete)
+        resources.add(QuizzesController.class);          // kvízek + kérdések + eredmények CRUD
+        resources.add(AdminReviewsController.class);     // getAllReviews + adminUpdateReview
+        resources.add(AdminMessagesController.class);    // getAllMessages + deleteMessage
+        resources.add(AdminCategoriesController.class);  // createCategory + updateCategory + deleteCategory
+
+        // ── Security filters ─────────────────────────────────────────────
         resources.add(JwtAuthFilter.class);
         resources.add(CorsFilter.class);
 

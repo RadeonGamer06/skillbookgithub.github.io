@@ -968,6 +968,7 @@
                 <div class="user-dropdown" id="userDropdown">
                     <a href="fiok.html" class="dropdown-item">Fiókom</a>
                     <a href="beallitasok.html" class="dropdown-item">Beállítások</a>
+                    <a href="admin.html" class="dropdown-item admin-link" id="adminLink" style="display:none;">⚙️ Admin panel</a>
                     <div class="dropdown-divider"></div>
                     <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
                 </div>
@@ -1183,6 +1184,12 @@
 
                 if (chatLink && (user.role === 'student' || user.role === 'instructor' || user.role === 'admin')) {
                     chatLink.style.display = 'inline-flex';
+                }
+
+                // Admin link megjelenítése
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink && user.role === 'admin') {
+                    adminLink.style.display = 'block';
                 }
 
                 // Frissítjük a localStorage-t is, hogy más oldalakon is friss legyen

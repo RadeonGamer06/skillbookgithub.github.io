@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel – SkillBook</title>
+    <link rel="icon" type="image/x-icon" href="fav.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0a0a0f;
+            --surface:  #111118;
+            --surface2: #18181f;
+            --border:   rgba(139,92,246,0.18);
+            --accent:   #7c3aed;
+            --accent2:  #059669;
+            --danger:   #dc2626;
+            --warn:     #d97706;
+            --text:     #e2e0f0;
+            --muted:    rgba(226,224,240,0.45);
+            --mono:     'JetBrains Mono', monospace;
+            --sans:     'Syne', sans-serif;
+            --glow:     0 0 24px rgba(124,58,237,0.35);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 240px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-logo {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-logo .brand {
+            font-family: var(--sans);
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sidebar-logo .sub {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+        .sidebar-nav::-webkit-scrollbar { width: 3px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); border-radius: 2px; }
+
+        .nav-section-label {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 10px 24px 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 24px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            color: var(--muted);
+            font-family: var(--sans);
+            font-size: 0.88rem;
+            font-weight: 600;
+            position: relative;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 2px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .nav-item:hover { color: var(--text); background: rgba(124,58,237,0.08); }
+        .nav-item.active { color: var(--text); background: rgba(124,58,237,0.12); }
+        .nav-item.active::before { opacity: 1; }
+        .nav-icon { font-size: 0.95rem; width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: color 0.15s;
+        }
+        .back-link:hover { color: var(--text); }
+
+        /* ── Main Content ── */
+        .main {
+            margin-left: 240px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 40;
+        }
+
+        .topbar-title {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .topbar-title span { color: var(--accent); }
+
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(124,58,237,0.12);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: #a78bfa;
+            letter-spacing: 0.05em;
+        }
+        .admin-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(5,150,105,0); }
+        }
+
+        /* ── Panels ── */
+        .panel {
+            display: none;
+            padding: 28px 32px;
+            animation: fadeIn 0.25s ease;
+        }
+        .panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Stats Row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+        .stat-card .val {
+            font-family: var(--mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+        .stat-card .lbl {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── Section header ── */
+        .section-hd {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .section-hd h2 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .section-hd-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 12px;
+        }
+        .search-box input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            width: 160px;
+        }
+        .search-box input::placeholder { color: var(--muted); }
+
+        /* ── Buttons ── */
+        .btn-add {
+            padding: 7px 14px;
+            background: rgba(5,150,105,0.2);
+            border: 1px solid rgba(5,150,105,0.45);
+            border-radius: 4px;
+            color: #6ee7b7;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { background: rgba(5,150,105,0.35); }
+
+        /* ── Table ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr {
+            background: rgba(124,58,237,0.08);
+            border-bottom: 1px solid var(--border);
+        }
+        thead th {
+            padding: 11px 14px;
+            text-align: left;
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid rgba(139,92,246,0.07);
+            transition: background 0.12s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(124,58,237,0.05); }
+        td {
+            padding: 11px 14px;
+            font-size: 0.83rem;
+            vertical-align: middle;
+        }
+        .td-mono   { font-family: var(--mono); font-size: 0.76rem; color: var(--muted); }
+        .td-name   { font-weight: 700; }
+        .td-email  { font-family: var(--mono); font-size: 0.76rem; color: #a78bfa; }
+        .td-truncate { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ── Role badge ── */
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: var(--mono);
+            font-size: 0.66rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .role-admin      { background: rgba(124,58,237,0.25); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.4); }
+        .role-instructor { background: rgba(5,150,105,0.2);  color: #6ee7b7; border: 1px solid rgba(5,150,105,0.4); }
+        .role-student    { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+        .badge-green  { background: rgba(5,150,105,0.2); color: #6ee7b7; border: 1px solid rgba(5,150,105,0.4); }
+        .badge-red    { background: rgba(220,38,38,0.15); color: #fca5a5; border: 1px solid rgba(220,38,38,0.35); }
+        .badge-blue   { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+        .badge-yellow { background: rgba(217,119,6,0.18); color: #fcd34d; border: 1px solid rgba(217,119,6,0.4); }
+
+        /* ── Action buttons ── */
+        .actions { display: flex; gap: 5px; }
+        .btn-edit, .btn-del, .btn-view {
+            padding: 4px 9px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            transition: all 0.15s;
+        }
+        .btn-edit  { background: rgba(124,58,237,0.2); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.4); }
+        .btn-edit:hover  { background: rgba(124,58,237,0.35); box-shadow: var(--glow); }
+        .btn-del   { background: rgba(220,38,38,0.15); color: #fca5a5; border: 1px solid rgba(220,38,38,0.35); }
+        .btn-del:hover   { background: rgba(220,38,38,0.3); }
+        .btn-view  { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+        .btn-view:hover  { background: rgba(59,130,246,0.3); }
+
+        /* ── Loading / Empty ── */
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(124,58,237,0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state { padding: 40px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+        /* ── Price badge ── */
+        .price-badge {
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            color: var(--accent2);
+            background: rgba(5,150,105,0.1);
+            border: 1px solid rgba(5,150,105,0.25);
+            padding: 2px 7px;
+            border-radius: 3px;
+        }
+
+        /* ── Stars ── */
+        .stars { color: #fcd34d; font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* ── Role quick-set ── */
+        .role-quick {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .role-select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            padding: 4px 6px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .role-select:focus { border-color: var(--accent); }
+        .role-select option { background: var(--surface); }
+        .btn-role {
+            background: rgba(5,150,105,0.15);
+            border: 1px solid rgba(5,150,105,0.35);
+            color: #34d399;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-role:hover {
+            background: rgba(5,150,105,0.3);
+            border-color: #34d399;
+        }
+
+        /* ── Mini stats (users panel) ── */
+        .mini-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: var(--text);
+        }
+        .mini-stat strong { font-family: var(--mono); font-size: 1rem; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 28px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+            animation: modalIn 0.2s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal::-webkit-scrollbar { width: 3px; }
+        .modal::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-8px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal h3 span { color: var(--muted); font-weight: 400; font-family: var(--mono); font-size: 0.75rem; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-family: var(--mono);
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 9px 12px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+        }
+        .form-group select option { background: var(--surface); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-cancel {
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--muted);
+            cursor: pointer;
+            font-family: var(--sans);
+            font-size: 0.83rem;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+        .btn-cancel:hover { border-color: rgba(139,92,246,0.4); color: var(--text); }
+        .btn-save {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--accent), #5b21b6);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-size: 0.83rem;
+            font-weight: 800;
+            transition: all 0.15s;
+            box-shadow: var(--glow);
+        }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* ── Confirm modal ── */
+        .confirm-modal { max-width: 380px; }
+        .confirm-modal p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; margin-bottom: 8px; }
+        .confirm-target { font-family: var(--mono); color: #fca5a5; font-size: 0.82rem; }
+        .btn-danger {
+            padding: 8px 20px;
+            background: rgba(220,38,38,0.25);
+            border: 1px solid rgba(220,38,38,0.5);
+            border-radius: 4px;
+            color: #fca5a5;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-size: 0.83rem;
+            font-weight: 800;
+            transition: all 0.15s;
+        }
+        .btn-danger:hover { background: rgba(220,38,38,0.4); }
+
+        /* ── Toast ── */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 11px 16px;
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            color: var(--text);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            animation: toastIn 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 300px;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(24px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .toast.success { border-color: rgba(5,150,105,0.5); }
+        .toast.error   { border-color: rgba(220,38,38,0.5); }
+        .toast-icon { font-size: 1rem; }
+
+        /* ── Access Denied ── */
+        #accessDenied {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #accessDenied.show { display: flex; }
+        #accessDenied .lock { font-size: 4rem; }
+        #accessDenied h1 { font-size: 1.5rem; color: var(--danger); }
+        #accessDenied p { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+        #accessDenied a {
+            margin-top: 12px;
+            padding: 10px 24px;
+            background: rgba(124,58,237,0.2);
+            border: 1px solid rgba(124,58,237,0.4);
+            border-radius: 4px;
+            color: #c4b5fd;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.15s;
+        }
+        #accessDenied a:hover { background: rgba(124,58,237,0.35); }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .panel { padding: 20px 16px; }
+            .topbar { padding: 12px 16px; }
+            .mobile-toggle { display: flex !important; }
+        }
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        table { min-width: 600px; }
+        .table-scroll { overflow-x: auto; }
+
+        /* ── File link ── */
+        .file-link {
+            color: #93c5fd;
+            font-family: var(--mono);
+            font-size: 0.74rem;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(147,197,253,0.4);
+        }
+        .file-link:hover { color: #bfdbfe; }
+
+        /* ── Score badge ── */
+        .score-badge {
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: rgba(217,119,6,0.15);
+            color: #fcd34d;
+            border: 1px solid rgba(217,119,6,0.35);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Access denied overlay -->
+<div id="accessDenied">
+    <div class="lock">🔒</div>
+    <h1>Hozzáférés megtagadva</h1>
+    <p>Ez az oldal csak admin jogosultsággal rendelkező felhasználók számára elérhető.</p>
+    <a href="pro.html">← Vissza a főoldalra</a>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="brand">SkillBook</div>
+        <div class="sub">// admin panel</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Áttekintés</div>
+        <button class="nav-item active" data-panel="dashboard">
+            <span class="nav-icon">📊</span> Dashboard
+        </button>
+
+        <div class="nav-section-label">Alap adatok</div>
+        <button class="nav-item" data-panel="users">
+            <span class="nav-icon">👥</span> Felhasználók
+        </button>
+        <button class="nav-item" data-panel="categories">
+            <span class="nav-icon">🏷️</span> Kategóriák
+        </button>
+
+        <div class="nav-section-label">Tanfolyamok</div>
+        <button class="nav-item" data-panel="courses">
+            <span class="nav-icon">📚</span> Tanfolyamok
+        </button>
+        <button class="nav-item" data-panel="course_materials">
+            <span class="nav-icon">📎</span> Tananyagok
+        </button>
+        <button class="nav-item" data-panel="course_sessions">
+            <span class="nav-icon">📅</span> Időpontok
+        </button>
+
+        <div class="nav-section-label">Interakciók</div>
+        <button class="nav-item" data-panel="enrollments">
+            <span class="nav-icon">📝</span> Beiratkozások
+        </button>
+        <button class="nav-item" data-panel="reviews">
+            <span class="nav-icon">⭐</span> Értékelések
+        </button>
+        <button class="nav-item" data-panel="messages">
+            <span class="nav-icon">💬</span> Üzenetek
+        </button>
+
+        <div class="nav-section-label">Kvízek</div>
+        <button class="nav-item" data-panel="quizzes">
+            <span class="nav-icon">🧩</span> Kvízek
+        </button>
+        <button class="nav-item" data-panel="quiz_questions">
+            <span class="nav-icon">❓</span> Kérdések
+        </button>
+        <button class="nav-item" data-panel="quiz_results">
+            <span class="nav-icon">🏆</span> Eredmények
+        </button>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="pro.html" class="back-link">← Vissza a főoldalra</a>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="main" id="mainContent">
+    <div class="topbar">
+        <button class="mobile-toggle" id="mobileToggle">☰</button>
+        <div class="topbar-title">SkillBook / <span>Admin Panel</span></div>
+        <div class="admin-badge">
+            <div class="admin-dot"></div>
+            <span id="adminName">admin</span>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card"><div class="val" id="st-users">—</div><div class="lbl">Felhasználók</div></div>
+            <div class="stat-card"><div class="val" id="st-courses">—</div><div class="lbl">Tanfolyamok</div></div>
+            <div class="stat-card"><div class="val" id="st-categories">—</div><div class="lbl">Kategóriák</div></div>
+            <div class="stat-card"><div class="val" id="st-enrollments">—</div><div class="lbl">Beiratkozások</div></div>
+            <div class="stat-card"><div class="val" id="st-reviews">—</div><div class="lbl">Értékelések</div></div>
+            <div class="stat-card"><div class="val" id="st-messages">—</div><div class="lbl">Üzenetek</div></div>
+            <div class="stat-card"><div class="val" id="st-quizzes">—</div><div class="lbl">Kvízek</div></div>
+            <div class="stat-card"><div class="val" id="st-materials">—</div><div class="lbl">Tananyagok</div></div>
+        </div>
+        <div class="table-wrap">
+            <div id="recentActivity" class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+        <div class="section-hd">
+            <h2>👥 Felhasználók</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchUsers" placeholder="Keresés..."></div>
+                <select id="filterRole" class="role-select" style="height:32px;padding:0 8px;" onchange="filterUsersByRole()">
+                    <option value="">Minden rang</option>
+                    <option value="student">student</option>
+                    <option value="instructor">instructor</option>
+                    <option value="admin">admin</option>
+                </select>
+            </div>
+        </div>
+        <div id="userStats" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;"></div>
+        <div class="table-scroll table-wrap" id="usersTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="panel" id="panel-categories">
+        <div class="section-hd">
+            <h2>🏷️ Kategóriák</h2>
+            <div class="section-hd-right">
+                <button class="btn-add" onclick="openAddCategory()">+ Új kategória</button>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="categoriesTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- COURSES -->
+    <div class="panel" id="panel-courses">
+        <div class="section-hd">
+            <h2>📚 Tanfolyamok</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchCourses" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="coursesTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- COURSE MATERIALS -->
+    <div class="panel" id="panel-course_materials">
+        <div class="section-hd">
+            <h2>📎 Tananyagok</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchMaterials" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="materialsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- COURSE SESSIONS -->
+    <div class="panel" id="panel-course_sessions">
+        <div class="section-hd">
+            <h2>📅 Tanfolyam időpontok</h2>
+        </div>
+        <div class="table-scroll table-wrap" id="sessionsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- ENROLLMENTS -->
+    <div class="panel" id="panel-enrollments">
+        <div class="section-hd">
+            <h2>📝 Beiratkozások</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchEnrollments" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="enrollmentsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="panel" id="panel-reviews">
+        <div class="section-hd">
+            <h2>⭐ Értékelések</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchReviews" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="reviewsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="panel" id="panel-messages">
+        <div class="section-hd">
+            <h2>💬 Üzenetek</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchMessages" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="messagesTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- QUIZZES -->
+    <div class="panel" id="panel-quizzes">
+        <div class="section-hd">
+            <h2>🧩 Kvízek</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchQuizzes" placeholder="Keresés..."></div>
+                <button class="btn-add" onclick="openAddQuiz()">+ Új kvíz</button>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="quizzesTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- QUIZ QUESTIONS -->
+    <div class="panel" id="panel-quiz_questions">
+        <div class="section-hd">
+            <h2>❓ Kvíz kérdések</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchQuestions" placeholder="Keresés..."></div>
+                <button class="btn-add" onclick="openAddQuestion()">+ Új kérdés</button>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="questionsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+
+    <!-- QUIZ RESULTS -->
+    <div class="panel" id="panel-quiz_results">
+        <div class="section-hd">
+            <h2>🏆 Kvíz eredmények</h2>
+            <div class="section-hd-right">
+                <div class="search-box"><span>🔍</span><input type="text" id="searchResults" placeholder="Keresés..."></div>
+            </div>
+        </div>
+        <div class="table-scroll table-wrap" id="quizResultsTable">
+            <div class="loading"><span class="spinner"></span> Betöltés...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════ -->
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal">
+        <h3>Felhasználó szerkesztése <span id="userModalId"></span></h3>
+        <div class="form-group"><label>Név</label><input type="text" id="edit-name" placeholder="Teljes név"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="edit-email" placeholder="email@példa.hu"></div>
+        <div class="form-group">
+            <label>Szerepkör</label>
+            <select id="edit-role">
+                <option value="student">Student</option>
+                <option value="instructor">Instructor</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('userModal')">Mégse</button>
+            <button class="btn-save" onclick="saveUser()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Course Modal -->
+<div class="modal-overlay" id="courseModal">
+    <div class="modal">
+        <h3>Tanfolyam szerkesztése <span id="courseModalId"></span></h3>
+        <div class="form-group"><label>Cím</label><input type="text" id="edit-course-title" placeholder="Tanfolyam neve"></div>
+        <div class="form-group"><label>Leírás</label><textarea id="edit-course-desc" placeholder="Leírás..."></textarea></div>
+        <div class="form-row">
+            <div class="form-group"><label>Ár (HUF)</label><input type="number" id="edit-course-price" placeholder="0"></div>
+            <div class="form-group"><label>Max. résztvevők</label><input type="number" id="edit-course-max" placeholder="20"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Kezdő dátum</label><input type="date" id="edit-course-start"></div>
+            <div class="form-group"><label>Záró dátum</label><input type="date" id="edit-course-end"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('courseModal')">Mégse</button>
+            <button class="btn-save" onclick="saveCourse()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+        <h3 id="categoryModalTitle">Kategória <span id="categoryModalId"></span></h3>
+        <div class="form-group"><label>Név</label><input type="text" id="edit-cat-name" placeholder="Kategória neve"></div>
+        <div class="form-group"><label>Slug</label><input type="text" id="edit-cat-slug" placeholder="url-barát-nev"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('categoryModal')">Mégse</button>
+            <button class="btn-save" onclick="saveCategory()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Enrollment Modal -->
+<div class="modal-overlay" id="enrollmentModal">
+    <div class="modal">
+        <h3>Beiratkozás szerkesztése <span id="enrollmentModalId"></span></h3>
+        <div class="form-group">
+            <label>Státusz</label>
+            <select id="edit-enrollment-status">
+                <option value="registered">Regisztrált</option>
+                <option value="canceled">Visszavont</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('enrollmentModal')">Mégse</button>
+            <button class="btn-save" onclick="saveEnrollment()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Review Modal -->
+<div class="modal-overlay" id="reviewModal">
+    <div class="modal">
+        <h3>Értékelés szerkesztése <span id="reviewModalId"></span></h3>
+        <div class="form-group">
+            <label>Értékelés (1–5)</label>
+            <select id="edit-review-rating">
+                <option value="1">1 ⭐</option>
+                <option value="2">2 ⭐⭐</option>
+                <option value="3">3 ⭐⭐⭐</option>
+                <option value="4">4 ⭐⭐⭐⭐</option>
+                <option value="5">5 ⭐⭐⭐⭐⭐</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Megjegyzés</label><textarea id="edit-review-comment" placeholder="Megjegyzés..."></textarea></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('reviewModal')">Mégse</button>
+            <button class="btn-save" onclick="saveReview()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Session Modal -->
+<div class="modal-overlay" id="sessionModal">
+    <div class="modal">
+        <h3>Időpont szerkesztése <span id="sessionModalId"></span></h3>
+        <div class="form-group">
+            <label>Tanfolyam</label>
+            <select id="edit-session-course"></select>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Kezdés</label><input type="datetime-local" id="edit-session-start"></div>
+            <div class="form-group"><label>Befejezés</label><input type="datetime-local" id="edit-session-end"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('sessionModal')">Mégse</button>
+            <button class="btn-save" onclick="saveSession()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Modal -->
+<div class="modal-overlay" id="quizModal">
+    <div class="modal">
+        <h3 id="quizModalTitle">Kvíz <span id="quizModalId"></span></h3>
+        <div class="form-group">
+            <label>Tanfolyam</label>
+            <select id="edit-quiz-course"></select>
+        </div>
+        <div class="form-group"><label>Cím</label><input type="text" id="edit-quiz-title" placeholder="Kvíz neve"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('quizModal')">Mégse</button>
+            <button class="btn-save" onclick="saveQuiz()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Question Modal -->
+<div class="modal-overlay" id="questionModal">
+    <div class="modal">
+        <h3 id="questionModalTitle">Kérdés <span id="questionModalId"></span></h3>
+        <div class="form-group">
+            <label>Kvíz</label>
+            <select id="edit-question-quiz"></select>
+        </div>
+        <div class="form-group"><label>Kérdés</label><textarea id="edit-question-text" placeholder="A kérdés szövege..."></textarea></div>
+        <div class="form-group"><label>Helyes válasz</label><input type="text" id="edit-question-answer" placeholder="Helyes válasz"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('questionModal')">Mégse</button>
+            <button class="btn-save" onclick="saveQuestion()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Result Modal -->
+<div class="modal-overlay" id="quizResultModal">
+    <div class="modal">
+        <h3>Eredmény szerkesztése <span id="quizResultModalId"></span></h3>
+        <div class="form-group"><label>Pontszám (%)</label><input type="number" id="edit-result-score" min="0" max="100" step="0.01" placeholder="0.00"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('quizResultModal')">Mégse</button>
+            <button class="btn-save" onclick="saveQuizResult()">💾 Mentés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal confirm-modal">
+        <h3>🗑️ Törlés megerősítése</h3>
+        <p>Biztosan törölni szeretnéd?</p>
+        <p class="confirm-target" id="confirmTarget">–</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('confirmModal')">Mégse</button>
+            <button class="btn-danger" id="confirmDeleteBtn">Törlés</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    const API = '/SkillBook/api';
+
+    // ── Auth helpers ──
+    function token() {
+        return localStorage.getItem('token') || sessionStorage.getItem('token');
+    }
+    function authHdr() {
+        return { 'Authorization': `Bearer ${token()}`, 'Content-Type': 'application/json' };
+    }
+
+    // ── Toast ──
+    function toast(msg, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>${msg}`;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+
+    // ── Modal helpers ──
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+        o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+
+    // ── Navigation ──
+    document.querySelectorAll('.nav-item[data-panel]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const p = document.getElementById('panel-' + btn.dataset.panel);
+            if (p) p.classList.add('active');
+            loadPanel(btn.dataset.panel);
+            document.getElementById('sidebar').classList.remove('open');
+        });
+    });
+
+    document.getElementById('mobileToggle')?.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // ── State ──
+    let allUsers = [], allCourses = [], allCategories = [],
+        allEnrollments = [], allReviews = [], allMessages = [],
+        allMaterials = [], allSessions = [], allQuizzes = [],
+        allQuestions = [], allQuizResults = [];
+
+    let editingUserId = null, editingCourseId = null, editingCategoryId = null,
+        editingEnrollmentId = null, editingReviewId = null, editingSessionId = null,
+        editingQuizId = null, editingQuestionId = null, editingResultId = null;
+    let isAddingCategory = false, isAddingQuiz = false, isAddingQuestion = false;
+
+    // ── Auth check ──
+    async function checkAdmin() {
+        const tok = token();
+        if (!tok) { showDenied(); return; }
+        try {
+            const r = await fetch(`${API}/Users/me`, { headers: authHdr() });
+            const d = await r.json();
+            if (!r.ok || d.data?.role !== 'admin') { showDenied(); return; }
+            document.getElementById('adminName').textContent = d.data.name || d.data.email;
+            loadDashboard();
+        } catch { showDenied(); }
+    }
+    function showDenied() { document.getElementById('accessDenied').classList.add('show'); }
+
+    // ── Load panel dispatcher ──
+    function loadPanel(name) {
+        switch(name) {
+            case 'dashboard':       loadDashboard(); break;
+            case 'users':           loadUsers(); break;
+            case 'courses':         loadCourses(); break;
+            case 'categories':      loadCategories(); break;
+            case 'enrollments':     loadEnrollments(); break;
+            case 'reviews':         loadReviews(); break;
+            case 'messages':        loadMessages(); break;
+            case 'course_materials':loadMaterials(); break;
+            case 'course_sessions': loadSessions(); break;
+            case 'quizzes':         loadQuizzes(); break;
+            case 'quiz_questions':  loadQuestions(); break;
+            case 'quiz_results':    loadQuizResults(); break;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // DASHBOARD
+    // ──────────────────────────────────────────────────────────────────
+    async function loadDashboard() {
+        try {
+            const [uR, cR, catR, eR, revR, mR, qR, matR] = await Promise.all([
+                fetch(`${API}/Admin/Users/getAllUsers`,       { headers: authHdr() }),
+                fetch(`${API}/Courses/getAllCourses`),
+                fetch(`${API}/Categories/getAllCategories`),
+                fetch(`${API}/Enrollments/getAllEnrollments`, { headers: authHdr() }),
+                fetch(`${API}/Reviews/getAllReviews`,         { headers: authHdr() }),
+                fetch(`${API}/Messages/getAllMessages`,       { headers: authHdr() }),
+                fetch(`${API}/Quizzes/getAllQuizzes`,         { headers: authHdr() }),
+                fetch(`${API}/Materials/getAllMaterials`,     { headers: authHdr() })
+            ]);
+            const [u, c, cat, e, rev, m, q, mat] = await Promise.all([
+                uR.json(), cR.json(), catR.json(), eR.json(), revR.json(), mR.json(), qR.json(), matR.json()
+            ]);
+
+            const users = Array.isArray(u?.data) ? u.data : [];
+            const courses = Array.isArray(c?.data) ? c.data : [];
+            const categories = Array.isArray(cat?.data) ? cat.data : [];
+            const enrollments = Array.isArray(e?.data) ? e.data : [];
+            const reviews = Array.isArray(rev?.data) ? rev.data : (Array.isArray(rev?.reviews) ? rev.reviews : []);
+            const messages = Array.isArray(m?.data) ? m.data : [];
+            const quizzes = Array.isArray(q?.data) ? q.data : [];
+            const materials = Array.isArray(mat?.data) ? mat.data : [];
+
+            document.getElementById('st-users').textContent = users.length;
+            document.getElementById('st-courses').textContent = courses.length;
+            document.getElementById('st-categories').textContent = categories.length;
+            document.getElementById('st-enrollments').textContent = enrollments.length;
+            document.getElementById('st-reviews').textContent = reviews.length;
+            document.getElementById('st-messages').textContent = messages.length;
+            document.getElementById('st-quizzes').textContent = quizzes.length;
+            document.getElementById('st-materials').textContent = materials.length;
+
+            const recent = users.slice(0, 10);
+            const tbody = recent.map(u => `
+                <tr>
+                    <td class="td-mono">${u.id}</td>
+                    <td class="td-name">${esc(u.name || '–')}</td>
+                    <td class="td-email">${esc(u.email || '–')}</td>
+                    <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+                    <td class="td-mono">${fmtDate(u.created_at)}</td>
+                </tr>`).join('');
+            document.getElementById('recentActivity').innerHTML = `
+                <table>
+                    <thead><tr><th>#</th><th>Név</th><th>Email</th><th>Szerepkör</th><th>Regisztráció</th></tr></thead>
+                    <tbody>${tbody || '<tr><td colspan="5" class="empty-state">Nincs adat</td></tr>'}</tbody>
+                </table>`;
+        } catch(e) {
+            document.getElementById('recentActivity').innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // USERS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadUsers() {
+        const el = document.getElementById('usersTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Admin/Users/getAllUsers`, { headers: authHdr() });
+            const d = await r.json();
+            allUsers = Array.isArray(d?.data) ? d.data : [];
+            renderUsers(allUsers);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderUsers(list) {
+        const el = document.getElementById('usersTable');
+
+        // Mini stats
+        const statsEl = document.getElementById('userStats');
+        if (statsEl) {
+            const counts = { student: 0, instructor: 0, admin: 0 };
+            allUsers.forEach(u => { if (counts[u.role] !== undefined) counts[u.role]++; });
+            statsEl.innerHTML = `
+                <div class="mini-stat"><span class="role-badge role-student">student</span> <strong>${counts.student}</strong></div>
+                <div class="mini-stat"><span class="role-badge role-instructor">instructor</span> <strong>${counts.instructor}</strong></div>
+                <div class="mini-stat"><span class="role-badge role-admin">admin</span> <strong>${counts.admin}</strong></div>
+                <div class="mini-stat" style="color:var(--muted)">Összesen: <strong>${allUsers.length}</strong></div>
+            `;
+        }
+
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs találat</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr>
+                <th>#</th><th>Név</th><th>Email</th><th>Jelenlegi rang</th>
+                <th>Rang beállítása</th><th>Regisztráció</th><th>Műveletek</th>
+            </tr></thead>
+            <tbody>${list.map(u => `
+                <tr>
+                    <td class="td-mono">${u.id}</td>
+                    <td class="td-name">${esc(u.name || '–')}</td>
+                    <td class="td-email">${esc(u.email || '–')}</td>
+                    <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+                    <td>
+                        <div class="role-quick">
+                            <select class="role-select" id="rs-${u.id}">
+                                <option value="student"    ${u.role==='student'    ? 'selected':''}>student</option>
+                                <option value="instructor" ${u.role==='instructor' ? 'selected':''}>instructor</option>
+                                <option value="admin"      ${u.role==='admin'      ? 'selected':''}>admin ⭐</option>
+                            </select>
+                            <button class="btn-role" onclick="quickSetRole(${u.id})">✓ Mentés</button>
+                        </div>
+                    </td>
+                    <td class="td-mono">${fmtDate(u.created_at)}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editUser(${u.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('user', ${u.id}, '${esc(u.name || u.email)}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    function filterUsersByRole() {
+        const role = document.getElementById('filterRole')?.value || '';
+        const q    = (document.getElementById('searchUsers')?.value || '').toLowerCase();
+        let filtered = allUsers;
+        if (role)  filtered = filtered.filter(u => u.role === role);
+        if (q)     filtered = filtered.filter(u =>
+            (u.name||'').toLowerCase().includes(q) ||
+            (u.email||'').toLowerCase().includes(q));
+        renderUsers(filtered);
+    }
+
+    document.getElementById('searchUsers')?.addEventListener('input', filterUsersByRole);
+
+    function editUser(id) {
+        const u = allUsers.find(x => x.id === id);
+        if (!u) return;
+        editingUserId = id;
+        document.getElementById('userModalId').textContent = `#${id}`;
+        document.getElementById('edit-name').value = u.name || '';
+        document.getElementById('edit-email').value = u.email || '';
+        document.getElementById('edit-role').value = u.role || 'student';
+        openModal('userModal');
+    }
+
+    async function saveUser() {
+        const body = {
+            name: document.getElementById('edit-name').value,
+            email: document.getElementById('edit-email').value,
+            role: document.getElementById('edit-role').value
+        };
+        try {
+            const r = await fetch(`${API}/Admin/Users/updateUser/${editingUserId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Felhasználó mentve!'); closeModal('userModal'); loadUsers(); }
+            else toast(d.message || 'Hiba történt', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    async function quickSetRole(userId) {
+        const sel = document.getElementById(`rs-${userId}`);
+        if (!sel) return;
+        const newRole = sel.value;
+        try {
+            const r = await fetch(`${API}/Admin/Users/setRole/${userId}`, {
+                method: 'PUT',
+                headers: authHdr(),
+                body: JSON.stringify({ role: newRole })
+            });
+            const d = await r.json();
+            if (r.ok) {
+                toast(`Rang beállítva → ${newRole}`, 'success');
+                loadUsers();
+            } else {
+                toast(d.message || 'Hiba a rang beállításánál', 'error');
+            }
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // COURSES
+    // ──────────────────────────────────────────────────────────────────
+    async function loadCourses() {
+        const el = document.getElementById('coursesTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Courses/getAllCourses`);
+            const d = await r.json();
+            allCourses = Array.isArray(d?.data) ? d.data : [];
+            renderCourses(allCourses);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderCourses(list) {
+        const el = document.getElementById('coursesTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs tanfolyam</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Cím</th><th>Oktató</th><th>Kategória</th><th>Ár</th><th>Max.</th><th>Időszak</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(c => `
+                <tr>
+                    <td class="td-mono">${c.id}</td>
+                    <td class="td-name td-truncate">${esc(c.title || '–')}</td>
+                    <td>${esc(c.instructor_name || '–')}</td>
+                    <td>${esc(c.category_name || '–')}</td>
+                    <td><span class="price-badge">${c.price ? c.price.toLocaleString('hu') + ' Ft' : '–'}</span></td>
+                    <td class="td-mono">${c.max_participants ?? '–'}</td>
+                    <td class="td-mono" style="font-size:0.7rem">${c.start_date ? fmtDate(c.start_date) : '–'} → ${c.end_date ? fmtDate(c.end_date) : '–'}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editCourse(${c.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('course', ${c.id}, '${esc(c.title)}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchCourses')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderCourses(allCourses.filter(c =>
+            (c.title||'').toLowerCase().includes(q) ||
+            (c.instructor_name||'').toLowerCase().includes(q) ||
+            (c.category_name||'').toLowerCase().includes(q)
+        ));
+    });
+
+    function editCourse(id) {
+        const c = allCourses.find(x => x.id === id);
+        if (!c) return;
+        editingCourseId = id;
+        document.getElementById('courseModalId').textContent = `#${id}`;
+        document.getElementById('edit-course-title').value = c.title || '';
+        document.getElementById('edit-course-desc').value = c.description || '';
+        document.getElementById('edit-course-price').value = c.price ?? '';
+        document.getElementById('edit-course-max').value = c.max_participants ?? '';
+        document.getElementById('edit-course-start').value = c.start_date ? c.start_date.substring(0,10) : '';
+        document.getElementById('edit-course-end').value = c.end_date ? c.end_date.substring(0,10) : '';
+        openModal('courseModal');
+    }
+
+    async function saveCourse() {
+        const body = {
+            title: document.getElementById('edit-course-title').value,
+            description: document.getElementById('edit-course-desc').value,
+            price: parseInt(document.getElementById('edit-course-price').value) || 0,
+            max_participants: parseInt(document.getElementById('edit-course-max').value) || 20,
+            start_date: document.getElementById('edit-course-start').value || null,
+            end_date: document.getElementById('edit-course-end').value || null
+        };
+        try {
+            const r = await fetch(`${API}/Courses/updateCourse/${editingCourseId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Tanfolyam mentve!'); closeModal('courseModal'); loadCourses(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // CATEGORIES
+    // ──────────────────────────────────────────────────────────────────
+    async function loadCategories() {
+        const el = document.getElementById('categoriesTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Categories/getAllCategories`);
+            const d = await r.json();
+            allCategories = Array.isArray(d?.data) ? d.data : [];
+            renderCategories(allCategories);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderCategories(list) {
+        const el = document.getElementById('categoriesTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs kategória</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Név</th><th>Slug</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(c => `
+                <tr>
+                    <td class="td-mono">${c.id}</td>
+                    <td class="td-name">${esc(c.name || '–')}</td>
+                    <td class="td-mono">${esc(c.slug || '–')}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editCategory(${c.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('category', ${c.id}, '${esc(c.name)}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    function openAddCategory() {
+        isAddingCategory = true;
+        editingCategoryId = null;
+        document.getElementById('categoryModalTitle').textContent = 'Új kategória';
+        document.getElementById('categoryModalId').textContent = '';
+        document.getElementById('edit-cat-name').value = '';
+        document.getElementById('edit-cat-slug').value = '';
+        openModal('categoryModal');
+    }
+
+    function editCategory(id) {
+        const c = allCategories.find(x => x.id === id);
+        if (!c) return;
+        isAddingCategory = false;
+        editingCategoryId = id;
+        document.getElementById('categoryModalTitle').textContent = 'Kategória szerkesztése';
+        document.getElementById('categoryModalId').textContent = `#${id}`;
+        document.getElementById('edit-cat-name').value = c.name || '';
+        document.getElementById('edit-cat-slug').value = c.slug || '';
+        openModal('categoryModal');
+    }
+
+    async function saveCategory() {
+        const body = {
+            name: document.getElementById('edit-cat-name').value,
+            slug: document.getElementById('edit-cat-slug').value
+        };
+        try {
+            let r;
+            if (isAddingCategory) {
+                r = await fetch(`${API}/Categories/createCategory`, {
+                    method: 'POST', headers: authHdr(), body: JSON.stringify(body)
+                });
+            } else {
+                r = await fetch(`${API}/Categories/updateCategory/${editingCategoryId}`, {
+                    method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+                });
+            }
+            const d = await r.json();
+            if (r.ok) { toast(isAddingCategory ? 'Kategória létrehozva!' : 'Kategória mentve!'); closeModal('categoryModal'); loadCategories(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // ENROLLMENTS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadEnrollments() {
+        const el = document.getElementById('enrollmentsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Enrollments/getAllEnrollments`, { headers: authHdr() });
+            const d = await r.json();
+            allEnrollments = Array.isArray(d?.data) ? d.data : [];
+            renderEnrollments(allEnrollments);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderEnrollments(list) {
+        const el = document.getElementById('enrollmentsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs beiratkozás</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Tanuló</th><th>Tanfolyam</th><th>Státusz</th><th>Dátum</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(e => `
+                <tr>
+                    <td class="td-mono">${e.id}</td>
+                    <td>${esc(e.student_name || e.user_id || '–')}</td>
+                    <td class="td-truncate">${esc(e.course_title || e.course_id || '–')}</td>
+                    <td><span class="role-badge ${e.status === 'registered' ? 'badge-green' : 'badge-red'}">${e.status}</span></td>
+                    <td class="td-mono">${fmtDate(e.created_at)}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editEnrollment(${e.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('enrollment', ${e.id}, '#${e.id}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchEnrollments')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderEnrollments(allEnrollments.filter(e =>
+            (e.student_name||'').toLowerCase().includes(q) ||
+            (e.course_title||'').toLowerCase().includes(q) ||
+            (e.status||'').toLowerCase().includes(q)
+        ));
+    });
+
+    function editEnrollment(id) {
+        const e = allEnrollments.find(x => x.id === id);
+        if (!e) return;
+        editingEnrollmentId = id;
+        document.getElementById('enrollmentModalId').textContent = `#${id}`;
+        document.getElementById('edit-enrollment-status').value = e.status || 'registered';
+        openModal('enrollmentModal');
+    }
+
+    async function saveEnrollment() {
+        const body = { status: document.getElementById('edit-enrollment-status').value };
+        try {
+            const r = await fetch(`${API}/Enrollments/updateEnrollment/${editingEnrollmentId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Beiratkozás mentve!'); closeModal('enrollmentModal'); loadEnrollments(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // REVIEWS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadReviews() {
+        const el = document.getElementById('reviewsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Reviews/getAllReviews`, { headers: authHdr() });
+            const d = await r.json();
+            allReviews = Array.isArray(d?.data) ? d.data : (Array.isArray(d?.reviews) ? d.reviews : []);
+            renderReviews(allReviews);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderReviews(list) {
+        const el = document.getElementById('reviewsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs értékelés</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Felhasználó</th><th>Tanfolyam</th><th>Értékelés</th><th>Megjegyzés</th><th>Dátum</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(r => `
+                <tr>
+                    <td class="td-mono">${r.id}</td>
+                    <td>${esc(r.reviewer_name || r.user_name || r.user_id || '–')}</td>
+                    <td class="td-truncate">${esc(r.course_title || r.course_id || '–')}</td>
+                    <td><span class="stars">${'⭐'.repeat(Math.min(r.rating || 0, 5))}</span> <span class="td-mono">${r.rating}/5</span></td>
+                    <td class="td-truncate">${esc(r.comment || '–')}</td>
+                    <td class="td-mono">${fmtDate(r.created_at)}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editReview(${r.id})">✏️ Szerk.</button>
+                        <button class="btn-del" onclick="confirmDelete('review', ${r.id}, '${esc(r.reviewer_name || r.user_name || r.user_id)} – ${esc(r.course_title || '')}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchReviews')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderReviews(allReviews.filter(r =>
+            (r.reviewer_name||r.user_name||'').toLowerCase().includes(q) ||
+            (r.course_title||'').toLowerCase().includes(q) ||
+            (r.comment||'').toLowerCase().includes(q)
+        ));
+    });
+
+    function editReview(id) {
+        const r = allReviews.find(x => x.id === id);
+        if (!r) return;
+        editingReviewId = id;
+        document.getElementById('reviewModalId').textContent = `#${id}`;
+        document.getElementById('edit-review-rating').value = r.rating || 3;
+        document.getElementById('edit-review-comment').value = r.comment || '';
+        openModal('reviewModal');
+    }
+
+    async function saveReview() {
+        const body = {
+            rating: parseInt(document.getElementById('edit-review-rating').value),
+            comment: document.getElementById('edit-review-comment').value
+        };
+        try {
+            const r = await fetch(`${API}/Reviews/updateReview/${editingReviewId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Értékelés mentve!'); closeModal('reviewModal'); loadReviews(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // MESSAGES
+    // ──────────────────────────────────────────────────────────────────
+    async function loadMessages() {
+        const el = document.getElementById('messagesTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Messages/getAllMessages`, { headers: authHdr() });
+            const d = await r.json();
+            allMessages = Array.isArray(d?.data) ? d.data : [];
+            renderMessages(allMessages);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderMessages(list) {
+        const el = document.getElementById('messagesTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs üzenet</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Küldő</th><th>Fogadó</th><th>Tartalom</th><th>Dátum</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(m => `
+                <tr>
+                    <td class="td-mono">${m.id}</td>
+                    <td>${esc(m.sender_name || m.sender_id || '–')}</td>
+                    <td>${esc(m.receiver_name || m.receiver_id || '–')}</td>
+                    <td class="td-truncate">${esc(m.content || '–')}</td>
+                    <td class="td-mono">${fmtDate(m.sentAt || m.created_at)}</td>
+                    <td class="actions">
+                        <button class="btn-del" onclick="confirmDelete('message', ${m.id}, 'üzenet #${m.id}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchMessages')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderMessages(allMessages.filter(m =>
+            (m.sender_name||'').toLowerCase().includes(q) ||
+            (m.content||'').toLowerCase().includes(q)
+        ));
+    });
+
+    // ──────────────────────────────────────────────────────────────────
+    // COURSE MATERIALS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadMaterials() {
+        const el = document.getElementById('materialsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Materials/getAllMaterials`, { headers: authHdr() });
+            const d = await r.json();
+            allMaterials = Array.isArray(d?.data) ? d.data : [];
+            renderMaterials(allMaterials);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderMaterials(list) {
+        const el = document.getElementById('materialsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs tananyag</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Cím</th><th>Tanfolyam</th><th>Feltöltő</th><th>Fájl</th><th>Dátum</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(m => `
+                <tr>
+                    <td class="td-mono">${m.id}</td>
+                    <td class="td-name td-truncate">${esc(m.title || '–')}</td>
+                    <td class="td-truncate">${esc(m.course_title || m.course_id || '–')}</td>
+                    <td>${esc(m.uploader_name || m.uploaded_by || '–')}</td>
+                    <td>${m.file_url ? `<a href="${esc(m.file_url)}" target="_blank" class="file-link">📄 Megnyitás</a>` : '–'}</td>
+                    <td class="td-mono">${fmtDate(m.uploaded_at)}</td>
+                    <td class="actions">
+                        <button class="btn-del" onclick="confirmDelete('material', ${m.id}, '${esc(m.title)}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchMaterials')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderMaterials(allMaterials.filter(m =>
+            (m.title||'').toLowerCase().includes(q) ||
+            (m.course_title||'').toLowerCase().includes(q)
+        ));
+    });
+
+    // ──────────────────────────────────────────────────────────────────
+    // COURSE SESSIONS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadSessions() {
+        const el = document.getElementById('sessionsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Sessions/getAllSessions`, { headers: authHdr() });
+            const d = await r.json();
+            allSessions = Array.isArray(d?.data) ? d.data : [];
+            renderSessions(allSessions);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderSessions(list) {
+        const el = document.getElementById('sessionsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs időpont</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Tanfolyam</th><th>Kezdés</th><th>Befejezés</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(s => `
+                <tr>
+                    <td class="td-mono">${s.id}</td>
+                    <td class="td-truncate">${esc(s.course_title || s.course_id || '–')}</td>
+                    <td class="td-mono">${fmtDatetime(s.start_at)}</td>
+                    <td class="td-mono">${fmtDatetime(s.end_at)}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editSession(${s.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('session', ${s.id}, '#${s.id} – ${esc(s.course_title||'')}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    async function editSession(id) {
+        const s = allSessions.find(x => x.id === id);
+        if (!s) return;
+        await populateCourseSelect('edit-session-course');
+        editingSessionId = id;
+        document.getElementById('sessionModalId').textContent = `#${id}`;
+        document.getElementById('edit-session-course').value = s.course_id || '';
+        document.getElementById('edit-session-start').value = s.start_at ? s.start_at.substring(0,16) : '';
+        document.getElementById('edit-session-end').value = s.end_at ? s.end_at.substring(0,16) : '';
+        openModal('sessionModal');
+    }
+
+    async function saveSession() {
+        const body = {
+            course_id: parseInt(document.getElementById('edit-session-course').value),
+            start_at: document.getElementById('edit-session-start').value,
+            end_at: document.getElementById('edit-session-end').value
+        };
+        try {
+            const r = await fetch(`${API}/Sessions/updateSession/${editingSessionId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Időpont mentve!'); closeModal('sessionModal'); loadSessions(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // QUIZZES
+    // ──────────────────────────────────────────────────────────────────
+    async function loadQuizzes() {
+        const el = document.getElementById('quizzesTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Quizzes/getAllQuizzes`, { headers: authHdr() });
+            const d = await r.json();
+            allQuizzes = Array.isArray(d?.data) ? d.data : [];
+            renderQuizzes(allQuizzes);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderQuizzes(list) {
+        const el = document.getElementById('quizzesTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs kvíz</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Cím</th><th>Tanfolyam</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(q => `
+                <tr>
+                    <td class="td-mono">${q.id}</td>
+                    <td class="td-name">${esc(q.title || '–')}</td>
+                    <td class="td-truncate">${esc(q.course_title || q.course_id || '–')}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editQuiz(${q.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('quiz', ${q.id}, '${esc(q.title)}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchQuizzes')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderQuizzes(allQuizzes.filter(x =>
+            (x.title||'').toLowerCase().includes(q) ||
+            (x.course_title||'').toLowerCase().includes(q)
+        ));
+    });
+
+    async function openAddQuiz() {
+        isAddingQuiz = true;
+        editingQuizId = null;
+        await populateCourseSelect('edit-quiz-course');
+        document.getElementById('quizModalTitle').textContent = 'Új kvíz';
+        document.getElementById('quizModalId').textContent = '';
+        document.getElementById('edit-quiz-title').value = '';
+        openModal('quizModal');
+    }
+
+    async function editQuiz(id) {
+        const q = allQuizzes.find(x => x.id === id);
+        if (!q) return;
+        isAddingQuiz = false;
+        editingQuizId = id;
+        await populateCourseSelect('edit-quiz-course');
+        document.getElementById('quizModalTitle').textContent = 'Kvíz szerkesztése';
+        document.getElementById('quizModalId').textContent = `#${id}`;
+        document.getElementById('edit-quiz-course').value = q.course_id || '';
+        document.getElementById('edit-quiz-title').value = q.title || '';
+        openModal('quizModal');
+    }
+
+    async function saveQuiz() {
+        const body = {
+            course_id: parseInt(document.getElementById('edit-quiz-course').value),
+            title: document.getElementById('edit-quiz-title').value
+        };
+        try {
+            let r;
+            if (isAddingQuiz) {
+                r = await fetch(`${API}/Quizzes/createQuiz`, {
+                    method: 'POST', headers: authHdr(), body: JSON.stringify(body)
+                });
+            } else {
+                r = await fetch(`${API}/Quizzes/updateQuiz/${editingQuizId}`, {
+                    method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+                });
+            }
+            const d = await r.json();
+            if (r.ok) { toast(isAddingQuiz ? 'Kvíz létrehozva!' : 'Kvíz mentve!'); closeModal('quizModal'); loadQuizzes(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // QUIZ QUESTIONS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadQuestions() {
+        const el = document.getElementById('questionsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Quizzes/getAllQuestions`, { headers: authHdr() });
+            const d = await r.json();
+            allQuestions = Array.isArray(d?.data) ? d.data : [];
+            renderQuestions(allQuestions);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderQuestions(list) {
+        const el = document.getElementById('questionsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs kérdés</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Kvíz</th><th>Kérdés</th><th>Helyes válasz</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(q => `
+                <tr>
+                    <td class="td-mono">${q.id}</td>
+                    <td><span class="badge-blue role-badge">${esc(q.quiz_title || q.quiz_id || '–')}</span></td>
+                    <td class="td-truncate">${esc(q.question || '–')}</td>
+                    <td class="td-mono" style="color:#6ee7b7">${esc(q.correct_answer || '–')}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editQuestion(${q.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('question', ${q.id}, 'kérdés #${q.id}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchQuestions')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderQuestions(allQuestions.filter(x =>
+            (x.question||'').toLowerCase().includes(q) ||
+            (x.quiz_title||'').toLowerCase().includes(q) ||
+            (x.correct_answer||'').toLowerCase().includes(q)
+        ));
+    });
+
+    async function openAddQuestion() {
+        isAddingQuestion = true;
+        editingQuestionId = null;
+        await populateQuizSelect('edit-question-quiz');
+        document.getElementById('questionModalTitle').textContent = 'Új kérdés';
+        document.getElementById('questionModalId').textContent = '';
+        document.getElementById('edit-question-text').value = '';
+        document.getElementById('edit-question-answer').value = '';
+        openModal('questionModal');
+    }
+
+    async function editQuestion(id) {
+        const q = allQuestions.find(x => x.id === id);
+        if (!q) return;
+        isAddingQuestion = false;
+        editingQuestionId = id;
+        await populateQuizSelect('edit-question-quiz');
+        document.getElementById('questionModalTitle').textContent = 'Kérdés szerkesztése';
+        document.getElementById('questionModalId').textContent = `#${id}`;
+        document.getElementById('edit-question-quiz').value = q.quiz_id || '';
+        document.getElementById('edit-question-text').value = q.question || '';
+        document.getElementById('edit-question-answer').value = q.correct_answer || '';
+        openModal('questionModal');
+    }
+
+    async function saveQuestion() {
+        const body = {
+            quiz_id: parseInt(document.getElementById('edit-question-quiz').value),
+            question: document.getElementById('edit-question-text').value,
+            correct_answer: document.getElementById('edit-question-answer').value
+        };
+        try {
+            let r;
+            if (isAddingQuestion) {
+                r = await fetch(`${API}/Quizzes/createQuestion`, {
+                    method: 'POST', headers: authHdr(), body: JSON.stringify(body)
+                });
+            } else {
+                r = await fetch(`${API}/Quizzes/updateQuestion/${editingQuestionId}`, {
+                    method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+                });
+            }
+            const d = await r.json();
+            if (r.ok) { toast(isAddingQuestion ? 'Kérdés létrehozva!' : 'Kérdés mentve!'); closeModal('questionModal'); loadQuestions(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // QUIZ RESULTS
+    // ──────────────────────────────────────────────────────────────────
+    async function loadQuizResults() {
+        const el = document.getElementById('quizResultsTable');
+        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
+        try {
+            const r = await fetch(`${API}/Quizzes/getAllResults`, { headers: authHdr() });
+            const d = await r.json();
+            allQuizResults = Array.isArray(d?.data) ? d.data : [];
+            renderQuizResults(allQuizResults);
+        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
+    }
+
+    function renderQuizResults(list) {
+        const el = document.getElementById('quizResultsTable');
+        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs eredmény</div>'; return; }
+        el.innerHTML = `<table>
+            <thead><tr><th>#</th><th>Tanuló</th><th>Kvíz</th><th>Pontszám</th><th>Teljesítve</th><th>Műveletek</th></tr></thead>
+            <tbody>${list.map(r => `
+                <tr>
+                    <td class="td-mono">${r.id}</td>
+                    <td>${esc(r.student_name || r.user_id || '–')}</td>
+                    <td class="td-truncate">${esc(r.quiz_title || r.quiz_id || '–')}</td>
+                    <td><span class="score-badge">${r.score != null ? r.score + '%' : '–'}</span></td>
+                    <td class="td-mono">${fmtDate(r.completed_at)}</td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="editQuizResult(${r.id})">✏️ Szerk.</button>
+                        <button class="btn-del"  onclick="confirmDelete('quiz_result', ${r.id}, '#${r.id}')">🗑️</button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    }
+
+    document.getElementById('searchResults')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderQuizResults(allQuizResults.filter(r =>
+            (r.student_name||'').toLowerCase().includes(q) ||
+            (r.quiz_title||'').toLowerCase().includes(q)
+        ));
+    });
+
+    function editQuizResult(id) {
+        const r = allQuizResults.find(x => x.id === id);
+        if (!r) return;
+        editingResultId = id;
+        document.getElementById('quizResultModalId').textContent = `#${id}`;
+        document.getElementById('edit-result-score').value = r.score ?? '';
+        openModal('quizResultModal');
+    }
+
+    async function saveQuizResult() {
+        const body = { score: parseFloat(document.getElementById('edit-result-score').value) };
+        try {
+            const r = await fetch(`${API}/Quizzes/updateResult/${editingResultId}`, {
+                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (r.ok) { toast('Eredmény mentve!'); closeModal('quizResultModal'); loadQuizResults(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // DELETE (unified)
+    // ──────────────────────────────────────────────────────────────────
+    let pendingDelete = null;
+
+    function confirmDelete(type, id, label) {
+        pendingDelete = { type, id };
+        document.getElementById('confirmTarget').textContent = label;
+        openModal('confirmModal');
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (!pendingDelete) return;
+        const { type, id } = pendingDelete;
+        closeModal('confirmModal');
+
+        const endpoints = {
+            user:        `${API}/Admin/Users/deleteUser/${id}`,
+            course:      `${API}/Courses/deleteCourse/${id}`,
+            category:    `${API}/Categories/deleteCategory/${id}`,
+            enrollment:  `${API}/Enrollments/deleteEnrollment/${id}`,
+            review:      `${API}/Reviews/deleteReview/${id}`,
+            message:     `${API}/Messages/deleteMessage/${id}`,
+            material:    `${API}/Materials/deleteMaterial/${id}`,
+            session:     `${API}/Sessions/deleteSession/${id}`,
+            quiz:        `${API}/Quizzes/deleteQuiz/${id}`,
+            question:    `${API}/Quizzes/deleteQuestion/${id}`,
+            quiz_result: `${API}/Quizzes/deleteResult/${id}`
+        };
+
+        const reloaders = {
+            user: loadUsers, course: loadCourses, category: loadCategories,
+            enrollment: loadEnrollments, review: loadReviews, message: loadMessages,
+            material: loadMaterials, session: loadSessions,
+            quiz: loadQuizzes, question: loadQuestions, quiz_result: loadQuizResults
+        };
+
+        try {
+            const r = await fetch(endpoints[type], { method: 'DELETE', headers: authHdr() });
+            const d = await r.json();
+            if (r.ok) { toast('Törölve!'); reloaders[type]?.(); }
+            else toast(d.message || 'Hiba', 'error');
+        } catch { toast('Hálózati hiba', 'error'); }
+        pendingDelete = null;
+    });
+
+    // ──────────────────────────────────────────────────────────────────
+    // HELPERS – populate selects
+    // ──────────────────────────────────────────────────────────────────
+    async function populateCourseSelect(selectId) {
+        if (!allCourses.length) {
+            const r = await fetch(`${API}/Courses/getAllCourses`);
+            const d = await r.json();
+            allCourses = Array.isArray(d?.data) ? d.data : [];
+        }
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = allCourses.map(c => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
+    }
+
+    async function populateQuizSelect(selectId) {
+        if (!allQuizzes.length) {
+            const r = await fetch(`${API}/Quizzes/getAllQuizzes`, { headers: authHdr() });
+            const d = await r.json();
+            allQuizzes = Array.isArray(d?.data) ? d.data : [];
+        }
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = allQuizzes.map(q => `<option value="${q.id}">${esc(q.title)}</option>`).join('');
+    }
+
+    // ── Helpers ──
+    function esc(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    function fmtDate(d) {
+        if (!d) return '–';
+        try { return new Date(d).toLocaleDateString('hu-HU', { year:'numeric', month:'2-digit', day:'2-digit' }); }
+        catch { return d; }
+    }
+    function fmtDatetime(d) {
+        if (!d) return '–';
+        try { return new Date(d).toLocaleString('hu-HU', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+        catch { return d; }
+    }
+
+    // ── Init ──
+    checkAdmin();
+</script>
+</body>
+</html>
