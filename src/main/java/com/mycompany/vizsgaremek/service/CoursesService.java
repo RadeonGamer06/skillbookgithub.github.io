@@ -136,26 +136,30 @@ public class CoursesService {
             Integer categoryId, Integer maxParticipants, String startDate, String endDate) {
         JSONObject resp = new JSONObject();
         try {
-            StoredProcedureQuery query = em.createStoredProcedureQuery("createCourse");
-            query.registerStoredProcedureParameter("titleIN", String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("descriptionIN", String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("priceIN", Integer.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("instructorIdIN", Integer.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("categoryIdIN", Integer.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("maxParticipantsIN", Integer.class, ParameterMode.IN);
-            query.setParameter("titleIN", title);
-            query.setParameter("descriptionIN", description);
-            query.setParameter("priceIN", price);
-            query.setParameter("instructorIdIN", instructorId);
-            query.setParameter("categoryIdIN", categoryId);
-            query.setParameter("maxParticipantsIN", maxParticipants);
-            query.execute();
+            // Natív SQL INSERT használata stored procedure helyett
+            String sql = "INSERT INTO courses (title, description, price, instructor_id, category_id, max_participants, created_at) " +
+                         "VALUES (:title, :description, :price, :instructorId, :categoryId, :maxParticipants, NOW())";
+            
+            Query query = em.createNativeQuery(sql);
+            query.setParameter("title", title);
+            query.setParameter("description", description);
+            query.setParameter("price", price);
+            query.setParameter("instructorId", instructorId);
+            query.setParameter("categoryId", categoryId);
+            query.setParameter("maxParticipants", maxParticipants);
+            query.executeUpdate();
+            
+            // Az utoljára beszúrt ID lekérése
             BigInteger bigId = (BigInteger) em.createNativeQuery("SELECT LAST_INSERT_ID()").getSingleResult();
             Integer newCourseId = bigId.intValueExact();
+            
+            // Dátumok beállítása ha meg vannak adva
             if ((startDate != null && !startDate.trim().isEmpty()) || (endDate != null && !endDate.trim().isEmpty())) {
                 Courses newCourse = em.find(Courses.class, newCourseId);
-                setStartEndDates(newCourse, startDate, endDate);
-                em.merge(newCourse);
+                if (newCourse != null) {
+                    setStartEndDates(newCourse, startDate, endDate);
+                    em.merge(newCourse);
+                }
             }
             resp.put("status", "CourseCreated");
             resp.put("statusCode", 201);
@@ -176,26 +180,34 @@ public class CoursesService {
         JSONObject resp = new JSONObject();
         JSONArray arr = new JSONArray();
         try {
-            Query query = em.createNativeQuery("SELECT c.id, c.title, c.description, c.price, c.instructor_id, c.category_id, c.max_participants, c.start_date, c.end_date, u.name AS instructor_name " +
-                    "FROM courses c LEFT JOIN users u ON c.instructor_id = u.id " +
-                    "ORDER BY c.title");
+            Query query = em.createNativeQuery(
+                "SELECT c.id, c.title, c.description, c.price, c.instructor_id, c.category_id, " +
+                "c.max_participants, c.start_date, c.end_date, " +
+                "u.name AS instructor_name, " +
+                "u.profile_picture AS instructor_profile_picture, " +
+                "c.header_image " +
+                "FROM courses c LEFT JOIN users u ON c.instructor_id = u.id " +
+                "ORDER BY c.title");
             List<Object[]> courses = query.getResultList();
             for (Object[] row : courses) {
                 JSONObject o = new JSONObject();
-                o.put("id", row[0]);
-                o.put("title", row[1]);
-                o.put("description", row[2]);
-                o.put("price", row[3]);
+                o.put("id",            row[0]);
+                o.put("title",         row[1]);
+                o.put("description",   row[2]);
+                o.put("price",         row[3]);
                 o.put("instructor_id", row[4]);
-                o.put("category_id", row[5]);
+                o.put("category_id",   row[5]);
                 o.put("max_participants", row[6]);
-                o.put("start_date", row[7]);
-                o.put("end_date", row[8]);
+                o.put("start_date",    row[7]);
+                o.put("end_date",      row[8]);
                 o.put("instructor_name", row[9] != null ? row[9] : "Ismeretlen");
+                o.put("instructor_profile_picture", row[10] != null ? row[10] : JSONObject.NULL);
+                o.put("header_image",  row[11] != null ? row[11] : JSONObject.NULL);
                 arr.put(o);
             }
             resp.put("status", "Success");
             resp.put("statusCode", 200);
+            resp.put("data", arr);
             resp.put("courses", arr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -206,7 +218,7 @@ public class CoursesService {
     }
     
     // ════════════════════════════════════════════════════════════════════════
-    // GET COURSE BY ID
+    // GET COURSE BY ID (with instructor details)
     // ════════════════════════════════════════════════════════════════════════
     public JSONObject getCourseById(int id) {
         JSONObject resp = new JSONObject();
@@ -227,9 +239,30 @@ public class CoursesService {
             data.put("max_participants", course.getMaxParticipants());
             data.put("start_date", extractStartDateIso(course));
             data.put("end_date", extractEndDateIso(course));
+            
+            // Fetch instructor details
+            if (course.getInstructorId() != null) {
+                try {
+                    Users instructor = em.find(Users.class, course.getInstructorId());
+                    if (instructor != null) {
+                        JSONObject instructorData = new JSONObject();
+                        instructorData.put("id", instructor.getId());
+                        instructorData.put("name", instructor.getName());
+                        instructorData.put("email", instructor.getEmail());
+                        instructorData.put("role", instructor.getRole());
+                        instructorData.put("profile_picture", instructor.getProfilePicture());
+                        instructorData.put("created_at", instructor.getCreatedAt().toString());
+                        data.put("instructor", instructorData);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error fetching instructor: " + e.getMessage());
+                }
+            }
+            
             resp.put("status", "Success");
             resp.put("statusCode", 200);
-            resp.put("course", data);
+            resp.put("data", data);  // Változtatva "course"-ról "data"-ra
+            resp.put("course", data);  // Megtartjuk a régi kulcsot is a kompatibilitás miatt
         } catch (Exception e) {
             e.printStackTrace();
             resp.put("statusCode", 500);
@@ -469,6 +502,74 @@ public class CoursesService {
             resp.put("status", "MaterialUploaded");
             resp.put("message", "Anyag sikeresen feltöltve");
             resp.put("fileUrl", fileUrl);
+
+        } catch (IOException e) {
+            resp.put("statusCode", 500);
+            resp.put("message", "Fájl mentési hiba: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            resp.put("statusCode", 500);
+            resp.put("message", "Adatbázis hiba: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return resp;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // FEJLÉC KÉP FELTÖLTÉSE - uploads mappába (mint a profilképek)
+    // ════════════════════════════════════════════════════════════════════════
+    public JSONObject uploadHeaderImage(int courseId, int userId, java.io.InputStream fileStream, String fileName) {
+        JSONObject resp = new JSONObject();
+
+        try {
+            // Ellenőrizzük, hogy a tanfolyam létezik és a felhasználó az oktató
+            Courses course = em.find(Courses.class, courseId);
+            if (course == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Tanfolyam nem található");
+                return resp;
+            }
+
+            if (!course.getInstructorId().equals(userId)) {
+                resp.put("statusCode", 403);
+                resp.put("message", "Csak a tanfolyam oktatója töltheti fel a fejléc képet");
+                return resp;
+            }
+
+            // Fájl kiterjesztés
+            String ext = "";
+            if (fileName != null && fileName.contains(".")) {
+                ext = fileName.substring(fileName.lastIndexOf("."));
+            }
+
+            // Egyedi fájlnév generálása
+            String uniqueFileName = "course_header_" + courseId + "_" + System.currentTimeMillis() + ext;
+
+            // Fájl mentési útvonal - uploads/course_headers könyvtárba (mint a profilképek)
+            String uploadsDir = "C:/Users/Bagoly Donát/Desktop/SkillBook/server/wildfly-preview-26.1.1.Final/standalone/data/uploads/course_headers/";
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadsDir);
+
+            // Könyvtár létrehozása, ha nem létezik
+            if (!java.nio.file.Files.exists(uploadPath)) {
+                java.nio.file.Files.createDirectories(uploadPath);
+            }
+
+            // Fájl mentése
+            java.nio.file.Path filePath = uploadPath.resolve(uniqueFileName);
+            java.nio.file.Files.copy(fileStream, filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            // URL generálása - UploadsController-en keresztül
+            String fileUrl = "/SkillBook/api/Uploads/course_headers/" + uniqueFileName;
+
+            // Tanfolyam frissítése az új fejléc képpel
+            course.setHeaderImage(fileUrl);
+            em.merge(course);
+
+            resp.put("statusCode", 200);
+            resp.put("status", "HeaderImageUploaded");
+            resp.put("message", "Fejléc kép sikeresen feltöltve");
+            resp.put("headerImageUrl", fileUrl);
 
         } catch (IOException e) {
             resp.put("statusCode", 500);

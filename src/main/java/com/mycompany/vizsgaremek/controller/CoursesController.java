@@ -205,4 +205,68 @@ public class CoursesController {
             return Response.status(500).entity(err.toString()).build();
         }
     }
+
+    @POST
+    @Path("uploadHeaderImage/{courseId}")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadHeaderImage(
+            @PathParam("courseId") int courseId,
+            @Context HttpServletRequest request) {
+
+        Integer userId = (Integer) request.getAttribute("userId");
+        if (userId == null) {
+            JSONObject err = new JSONObject();
+            err.put("statusCode", 401);
+            err.put("message", "Unauthorized - missing userId");
+            return Response.status(401).entity(err.toString()).build();
+        }
+
+        try {
+            if (!ServletFileUpload.isMultipartContent(request)) {
+                JSONObject err = new JSONObject();
+                err.put("statusCode", 400);
+                err.put("message", "A kérés nem multipart formátumú");
+                return Response.status(400).entity(err.toString()).build();
+            }
+
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setSizeMax(10L * 1024 * 1024);      // max 10 MB
+            upload.setFileSizeMax(10L * 1024 * 1024);  // max 10 MB
+            
+            List<FileItem> items = upload.parseRequest(request);
+            
+            InputStream fileStream = null;
+            String fileName = null;
+            
+            for (FileItem item : items) {
+                if (!item.isFormField() && "headerImage".equals(item.getFieldName())) {
+                    fileStream = item.getInputStream();
+                    fileName = item.getName();
+                    break;
+                }
+            }
+
+            if (fileStream == null) {
+                JSONObject err = new JSONObject();
+                err.put("statusCode", 400);
+                err.put("message", "Nincs feltöltött fájl");
+                return Response.status(400).entity(err.toString()).build();
+            }
+
+            JSONObject result = coursesService.uploadHeaderImage(courseId, userId, fileStream, fileName);
+
+            return Response.status(result.optInt("statusCode", 500))
+                    .entity(result.toString())
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JSONObject err = new JSONObject();
+            err.put("statusCode", 500);
+            err.put("message", "Fájl feldolgozási hiba: " + e.getMessage());
+            return Response.status(500).entity(err.toString()).build();
+        }
+    }
 }

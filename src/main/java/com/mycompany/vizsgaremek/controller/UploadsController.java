@@ -82,4 +82,73 @@ public class UploadsController {
                     .build();
         }
     }
+
+    /**
+     * Tanfolyam fejléc kép lekérése fájlnév alapján
+     * GET /api/Uploads/course_headers/{filename}
+     * 
+     * Példa: http://127.0.0.1:8080/SkillBook/api/Uploads/course_headers/course_header_55_1771283127614.jpg
+     */
+    @GET
+    @Path("course_headers/{filename}")
+    @Produces("image/*")  // Bármilyen képtípus
+    public Response getCourseHeader(@PathParam("filename") String filename) {
+        try {
+            System.out.println("🎨 TANFOLYAM FEJLÉC KÉP LEKÉRÉS: " + filename);
+
+            // Biztonság: ne engedjük a "../" karaktereket (path traversal attack védelem)
+            if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+                System.err.println("❌ BIZTONSÁGI HIBA: Érvénytelen fájlnév");
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"message\":\"Érvénytelen fájlnév\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            // Fájl lekérése a lemezről - course_headers mappából
+            String uploadsDir = "C:/Users/Bagoly Donát/Desktop/SkillBook/server/wildfly-preview-26.1.1.Final/standalone/data/uploads/course_headers/";
+            File imageFile = new File(uploadsDir + filename);
+
+            if (!imageFile.exists()) {
+                System.err.println("❌ Fájl nem található: " + imageFile.getAbsolutePath());
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"message\":\"Kép nem található\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            // MIME type meghatározása fájlkiterjesztés alapján
+            String contentType = "image/jpeg";  // alapértelmezett
+            String lowerFilename = filename.toLowerCase();
+            
+            if (lowerFilename.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (lowerFilename.endsWith(".gif")) {
+                contentType = "image/gif";
+            } else if (lowerFilename.endsWith(".webp")) {
+                contentType = "image/webp";
+            } else if (lowerFilename.endsWith(".jpg") || lowerFilename.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            }
+
+            // Fájl beolvasása és visszaküldése
+            byte[] imageData = Files.readAllBytes(imageFile.toPath());
+
+            System.out.println("✅ Tanfolyam fejléc kép kiszolgálva: " + filename + " (" + imageData.length + " byte)");
+
+            return Response.ok(imageData)
+                    .type(contentType)
+                    .header("Cache-Control", "public, max-age=86400")  // 24 óra cache
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("❌ Hiba a kép kiszolgálása során: " + e.getMessage());
+            
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"message\":\"Szerver hiba: " + e.getMessage() + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
 }

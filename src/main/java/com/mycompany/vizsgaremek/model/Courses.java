@@ -46,6 +46,12 @@ public class Courses implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date endDate;
     
+    // ════════════════════════════════════════════════════════════════════════
+    // ÚJ MEZŐ: FEJLÉC KÉP
+    // ════════════════════════════════════════════════════════════════════════
+    @Column(name = "header_image", length = 500)
+    private String headerImage;
+    
     // Constructors
     public Courses() {
     }
@@ -133,6 +139,17 @@ public class Courses implements Serializable {
     
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+    
+    // ════════════════════════════════════════════════════════════════════════
+    // FEJLÉC KÉP GETTER/SETTER
+    // ════════════════════════════════════════════════════════════════════════
+    public String getHeaderImage() {
+        return headerImage;
+    }
+    
+    public void setHeaderImage(String headerImage) {
+        this.headerImage = headerImage;
     }
     
     @Override

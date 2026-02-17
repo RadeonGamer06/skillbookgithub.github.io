@@ -16,10 +16,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-@Path("/chat")
+// ════════════════════════════════════════════════════════════════════
+// FONTOS: @Path "chat" (perjel nélkül), hogy a JwtAuthFilter
+// "chat/..." prefix-szel megtalálja és a userId attribute-ot beállítsa
+// ════════════════════════════════════════════════════════════════════
+@Path("chat")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class MessagesController {
@@ -30,129 +33,163 @@ public class MessagesController {
     @Inject
     private MessagesService messagesService;
 
-    /**
-     * 1. FELHASZNÁLÓK / BESZÉLGETÉSEK LISTÁZÁSA
-     * Megkeresi az összes felhasználót, akivel a bejelentkezett user beszélgethet.
-     */
+    // ════════════════════════════════════════════════════════════════════════
+    // 1. ÖSSZES FELHASZNÁLÓ LEKÉRÉSE (chat sidebar - "Összes felhasználó")
+    //    GET /api/chat/users
+    //    Visszaadja az összes usert (saját magán kívül) + utolsó üzenet infó
+    // ════════════════════════════════════════════════════════════════════════
     @GET
-    @Path("/users")
+    @Path("users")
     public Response getChatUsers(@Context HttpServletRequest request) {
         try {
             Integer myId = (Integer) request.getAttribute("userId");
             if (myId == null) {
-                return Response.status(401).entity("{\"error\":\"Bejelentkezés szükséges\"}").build();
+                return Response.status(401)
+                        .entity("{\"error\":\"Bejelentkezés szükséges\"}")
+                        .build();
             }
 
-            // Összes többi felhasználó lekérése
-            List<Users> users = em.createQuery("SELECT u FROM Users u WHERE u.id != :id", Users.class)
+            // Összes többi felhasználó
+            List<Users> users = em.createQuery(
+                    "SELECT u FROM Users u WHERE u.id != :id ORDER BY u.name ASC",
+                    Users.class)
                     .setParameter("id", myId)
                     .getResultList();
 
-            List<ConversationDto> resultList = new ArrayList<>();
-
+            JSONArray arr = new JSONArray();
             for (Users partner : users) {
-                // Lekérjük a chat előzményt a partnerrel az utolsó üzenet miatt
+                // Utolsó üzenet lekérése
                 List<Messages> chat = messagesService.getChat(myId, partner.getId());
                 Messages last = chat.isEmpty() ? null : chat.get(chat.size() - 1);
 
-                String preview = (last != null) 
-                    ? (last.getContent().length() > 60 ? last.getContent().substring(0, 57) + "..." : last.getContent())
-                    : "Nincs üzenet";
-
-                resultList.add(new ConversationDto(
-                        partner.getId(),
-                        partner.getName() != null ? partner.getName() : partner.getEmail(),
-                        partner.getRole(),
-                        last != null ? last.getSentAt().toString() : null,
-                        preview
-                ));
+                JSONObject obj = new JSONObject();
+                obj.put("id",   partner.getId());
+                obj.put("name", partner.getName() != null ? partner.getName() : partner.getEmail());
+                obj.put("email", partner.getEmail() != null ? partner.getEmail() : "");
+                obj.put("role", partner.getRole() != null ? partner.getRole() : "");
+                obj.put("profilePicture",
+                        partner.getProfilePicture() != null ? partner.getProfilePicture() : "");
+                obj.put("hasConversation", last != null);
+                obj.put("lastMessageAt",
+                        last != null ? last.getSentAt().toString() : JSONObject.NULL);
+                obj.put("lastMessagePreview",
+                        last != null
+                                ? (last.getContent().length() > 55
+                                        ? last.getContent().substring(0, 52) + "..."
+                                        : last.getContent())
+                                : "");
+                arr.put(obj);
             }
 
-            // Rendezés: akinél van frissebb üzenet, az kerül előre
-            resultList.sort((a, b) -> {
-                if (a.lastMessageAt == null) return 1;
-                if (b.lastMessageAt == null) return -1;
-                return b.lastMessageAt.compareTo(a.lastMessageAt);
-            });
-
-            return Response.ok(new JSONArray(resultList).toString()).build();
+            JSONObject resp = new JSONObject();
+            resp.put("statusCode", 200);
+            resp.put("data", arr);
+            return Response.ok(resp.toString()).build();
 
         } catch (Exception e) {
-            return Response.status(500).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+            e.printStackTrace();
+            JSONObject err = new JSONObject();
+            err.put("statusCode", 500);
+            err.put("error", e.getMessage());
+            return Response.status(500).entity(err.toString()).build();
         }
     }
 
-    /**
-     * 2. KONKRÉT CHAT TÖRTÉNET LEKÉRÉSE
-     */
+    // ════════════════════════════════════════════════════════════════════════
+    // 2. KONKRÉT CHAT ÜZENETEK LEKÉRÉSE KÉT USER KÖZÖTT
+    //    GET /api/chat/messages?partnerId=5
+    // ════════════════════════════════════════════════════════════════════════
     @GET
-    @Path("/getMessages")
-    public Response getMessages(@Context HttpServletRequest request, @QueryParam("partnerId") int partnerId) {
+    @Path("messages")
+    public Response getMessages(
+            @Context HttpServletRequest request,
+            @QueryParam("partnerId") int partnerId) {
         try {
             Integer myId = (Integer) request.getAttribute("userId");
-            if (myId == null) return Response.status(401).build();
+            if (myId == null) {
+                return Response.status(401)
+                        .entity("{\"statusCode\":401,\"error\":\"Bejelentkezés szükséges\"}")
+                        .build();
+            }
 
             List<Messages> messages = messagesService.getChat(myId, partnerId);
             JSONArray arr = new JSONArray();
 
             for (Messages m : messages) {
                 JSONObject obj = new JSONObject();
-                obj.put("id", m.getId());
-                obj.put("content", m.getContent());
-                obj.put("sentAt", m.getSentAt().toString());
-                obj.put("isMe", m.getSender().getId().equals(myId));
+                obj.put("id",       m.getId());
+                obj.put("content",  m.getContent());
+                obj.put("sentAt",   m.getSentAt().toString());
+                obj.put("senderId", m.getSender().getId());
+                obj.put("isMe",     m.getSender().getId() == myId);
                 arr.put(obj);
             }
-            return Response.ok(arr.toString()).build();
+
+            JSONObject resp = new JSONObject();
+            resp.put("statusCode", 200);
+            resp.put("data", arr);
+            return Response.ok(resp.toString()).build();
+
         } catch (Exception e) {
-            return Response.status(500).entity("{\"error\":\"Hiba a lekérés során\"}").build();
+            e.printStackTrace();
+            JSONObject err = new JSONObject();
+            err.put("statusCode", 500);
+            err.put("error", "Hiba a lekérés során: " + e.getMessage());
+            return Response.status(500).entity(err.toString()).build();
         }
     }
 
-    /**
-     * 3. ÜZENET KÜLDÉSE
-     */
+    // ════════════════════════════════════════════════════════════════════════
+    // 3. ÜZENET KÜLDÉSE
+    //    POST /api/chat/send
+    //    Body: { "receiverId": 5, "content": "Szia!" }
+    // ════════════════════════════════════════════════════════════════════════
     @POST
-    @Path("/send")
+    @Path("send")
     @Transactional
-    public Response sendMessage(@Context HttpServletRequest request, String body) {
+    public Response sendMessage(
+            @Context HttpServletRequest request,
+            String body) {
         try {
             Integer myId = (Integer) request.getAttribute("userId");
-            if (myId == null) return Response.status(401).build();
+            if (myId == null) {
+                return Response.status(401)
+                        .entity("{\"statusCode\":401,\"error\":\"Bejelentkezés szükséges\"}")
+                        .build();
+            }
 
             JSONObject json = new JSONObject(body);
-            int receiverId = json.getInt("receiverId");
-            String content = json.getString("content");
+            int receiverId   = json.getInt("receiverId");
+            String content   = json.getString("content").trim();
 
-            Users sender = em.find(Users.class, myId);
+            if (content.isEmpty()) {
+                return Response.status(400)
+                        .entity("{\"statusCode\":400,\"error\":\"Az üzenet nem lehet üres\"}")
+                        .build();
+            }
+
+            Users sender   = em.find(Users.class, myId);
             Users receiver = em.find(Users.class, receiverId);
 
             if (receiver == null) {
-                return Response.status(404).entity("{\"error\":\"Címzett nem található\"}").build();
+                return Response.status(404)
+                        .entity("{\"statusCode\":404,\"error\":\"Címzett nem található\"}")
+                        .build();
             }
 
             messagesService.sendMessage(sender, receiver, content);
 
-            return Response.ok("{\"message\":\"Sikeres küldés\"}").build();
+            JSONObject resp = new JSONObject();
+            resp.put("statusCode", 201);
+            resp.put("message", "Üzenet sikeresen elküldve");
+            return Response.status(201).entity(resp.toString()).build();
+
         } catch (Exception e) {
-            return Response.status(500).entity("{\"error\":\"Szerver hiba: " + e.getMessage() + "\"}").build();
-        }
-    }
-
-    // Segédosztály a lista formázásához
-    public static class ConversationDto {
-        public Integer id;
-        public String name;
-        public String role;
-        public String lastMessageAt;
-        public String lastMessagePreview;
-
-        public ConversationDto(Integer id, String name, String role, String lastAt, String preview) {
-            this.id = id;
-            this.name = name;
-            this.role = role;
-            this.lastMessageAt = lastAt;
-            this.lastMessagePreview = preview;
+            e.printStackTrace();
+            JSONObject err = new JSONObject();
+            err.put("statusCode", 500);
+            err.put("error", "Szerver hiba: " + e.getMessage());
+            return Response.status(500).entity(err.toString()).build();
         }
     }
 }

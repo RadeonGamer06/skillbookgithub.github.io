@@ -11,30 +11,40 @@ public class Messages {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
+    // sender_id FK → users.id
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sender_id", nullable = false)
     private Users sender;
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
+    // receiver_id FK → users.id
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "receiver_id", nullable = false)
     private Users receiver;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private LocalDateTime sentAt = LocalDateTime.now();
+    // Az adatbázisban "sentAt" az oszlop neve (DATETIME DEFAULT CURRENT_TIMESTAMP)
+    @Column(name = "sentAt")
+    private LocalDateTime sentAt;
 
-    public Messages() {}
-
-    public Messages(Users sender, Users receiver, String content) {
-        this.sender = sender;
-        this.receiver = receiver;
-        this.content = content;
+    public Messages() {
+        this.sentAt = LocalDateTime.now();
     }
 
-    public int getId() { return id; }
-    public Users getSender() { return sender; }
-    public Users getReceiver() { return receiver; }
-    public String getContent() { return content; }
-    public LocalDateTime getSentAt() { return sentAt; }
+    public Messages(Users sender, Users receiver, String content) {
+        this.sender   = sender;
+        this.receiver = receiver;
+        this.content  = content;
+        this.sentAt   = LocalDateTime.now();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // GETTEREK
+    // ════════════════════════════════════════════════════════════════
+    public int getId()              { return id; }
+    public Users getSender()        { return sender; }
+    public Users getReceiver()      { return receiver; }
+    public String getContent()      { return content; }
+    public LocalDateTime getSentAt(){ return sentAt; }
 }

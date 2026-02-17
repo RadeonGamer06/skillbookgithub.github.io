@@ -70,7 +70,7 @@ public class ReviewsService {
         try {
             Query query = em.createNativeQuery(
                 "SELECT cr.id, cr.user_id, cr.course_id, cr.rating, cr.comment, cr.created_at, " +
-                "u.name as user_name, u.email as user_email " +
+                "u.name as user_name, u.email as user_email, u.profile_picture as user_profile_picture " +
                 "FROM course_reviews cr " +
                 "LEFT JOIN users u ON cr.user_id = u.id " +
                 "WHERE cr.course_id = :courseId " +
@@ -91,6 +91,7 @@ public class ReviewsService {
                 review.put("created_at", row[5] != null ? row[5].toString() : "");
                 review.put("user_name", row[6] != null ? row[6] : "Névtelen");
                 review.put("user_email", row[7] != null ? row[7] : "");
+                review.put("user_profile_picture", row[8] != null ? row[8] : "");
                 reviews.put(review);
             }
 

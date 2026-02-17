@@ -28,19 +28,8 @@ public class EmailService {
      */
     public boolean sendContactEmail(String senderName, String senderEmail, String subject, String messageText) {
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-                }
-            });
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Kapcsolat"));
@@ -67,19 +56,8 @@ public class EmailService {
      */
     public boolean sendWelcomeEmail(String userName, String userEmail) {
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-                }
-            });
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook"));
@@ -110,19 +88,8 @@ public class EmailService {
                                           boolean emailChanged, String oldEmail, String newEmail,
                                           boolean passwordChanged) {
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-                }
-            });
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Biztonság"));
@@ -162,19 +129,8 @@ public class EmailService {
      */
     public boolean sendEmailChangeConfirmation(String userName, String newEmail, String oldEmail) {
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-                }
-            });
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook"));
@@ -201,19 +157,8 @@ public class EmailService {
      */
     public boolean sendPasswordChangeEmail(String userName, String userEmail) {
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
-            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-            Session session = Session.getInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-                }
-            });
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Biztonság"));
@@ -233,6 +178,127 @@ public class EmailService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 🆕 PROFILKÉP VÁLTOZÁS ÉRTESÍTŐ EMAIL
+     */
+    public boolean sendProfilePictureChangeEmail(String userName, String userEmail) {
+        try {
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Biztonság"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(userEmail));
+            message.setSubject("🖼️ Profilképed megváltozott - SkillBook");
+
+            String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+                "<style>" +
+                "body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px}" +
+                ".container{max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1)}" +
+                ".header{background:linear-gradient(135deg,#7c3aed,#059669);color:white;padding:30px;text-align:center}" +
+                ".header h1{margin:0;font-size:26px}" +
+                ".content{padding:30px;color:#333;line-height:1.6}" +
+                ".change-item{margin:20px 0;padding:15px;background:#f8f9fa;border-radius:8px;display:flex;align-items:center;gap:15px}" +
+                ".change-icon{font-size:36px}" +
+                ".timestamp{background:#e5e7eb;padding:10px;border-radius:5px;text-align:center;font-size:14px;margin:20px 0}" +
+                ".security-notice{background:#dbeafe;border-left:4px solid #3b82f6;padding:15px;margin:20px 0;border-radius:5px}" +
+                ".footer{background:#f8f9fa;padding:20px;text-align:center;color:#666;font-size:14px}" +
+                "</style></head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h1>🖼️ Profilképed módosult</h1><p style='margin:8px 0 0;opacity:.9'>SkillBook Biztonsági Értesítés</p></div>" +
+                "<div class='content'>" +
+                "<p>Kedves " + htmlEscape(userName) + "!</p>" +
+                "<p>Értesítünk, hogy a SkillBook fiókod profilképe megváltozott.</p>" +
+                "<div class='change-item'><span class='change-icon'>🖼️</span><div><strong>Profilkép frissítve</strong><br><span style='color:#16a34a'>Az új profilképed sikeresen feltöltésre került.</span></div></div>" +
+                "<div class='timestamp'><strong>Módosítás időpontja:</strong> " + timestamp + "</div>" +
+                "<div class='security-notice'><strong>⚠️ Nem te voltál?</strong><br>Ha te nem változtattad meg a profilképed, azonnal lépj kapcsolatba velünk: <a href='mailto:skillbookweb@gmail.com'>skillbookweb@gmail.com</a></div>" +
+                "</div><div class='footer'><p>© 2025 SkillBook – A biztonságod a legfontosabb számunkra</p></div></div></body></html>";
+
+            message.setContent(html, "text/html; charset=utf-8");
+            Transport.send(message);
+            System.out.println("✅ Profilkép módosítási email elküldve: " + userEmail);
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Profilkép email küldési hiba: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 🆕 FIÓK TÖRLÉS ÉRTESÍTŐ EMAIL
+     */
+    public boolean sendAccountDeletedEmail(String userName, String userEmail) {
+        try {
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(userEmail));
+            message.setSubject("👋 Fiókod törölve lett - SkillBook");
+
+            String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+                "<style>" +
+                "body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px}" +
+                ".container{max-width:600px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1)}" +
+                ".header{background:linear-gradient(135deg,#dc2626,#f59e0b);color:white;padding:30px;text-align:center}" +
+                ".header h1{margin:0;font-size:26px}" +
+                ".content{padding:30px;color:#333;line-height:1.6}" +
+                ".info-box{background:#fef2f2;border-left:4px solid #dc2626;padding:18px;margin:20px 0;border-radius:6px}" +
+                ".timestamp{background:#e5e7eb;padding:10px;border-radius:5px;text-align:center;font-size:14px;margin:20px 0}" +
+                ".notice{background:#dbeafe;border-left:4px solid #3b82f6;padding:15px;margin:20px 0;border-radius:5px}" +
+                ".footer{background:#f8f9fa;padding:20px;text-align:center;color:#666;font-size:14px}" +
+                "</style></head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h1>👋 Fiókod törölve</h1><p style='margin:8px 0 0;opacity:.9'>SkillBook – Törlési Értesítés</p></div>" +
+                "<div class='content'>" +
+                "<p>Kedves " + htmlEscape(userName) + "!</p>" +
+                "<p>Értesítünk, hogy a SkillBook felhasználói fiókod <strong>véglegesen törlésre került</strong>.</p>" +
+                "<div class='info-box'>🗑️ <strong>Minden adatod, beiratkozásod és előzményed törölve lett.</strong><br>Ez a folyamat visszafordíthatatlan.</div>" +
+                "<div class='timestamp'><strong>Törlés időpontja:</strong> " + timestamp + "</div>" +
+                "<div class='notice'><strong>⚠️ Nem te törölted a fiókodat?</strong><br>Ha te nem kezdeményezted a törlést, azonnal vedd fel velünk a kapcsolatot: <a href='mailto:skillbookweb@gmail.com'>skillbookweb@gmail.com</a></div>" +
+                "<p>Ha a jövőben ismét szeretnéd használni a SkillBook szolgáltatásait, bármikor regisztrálhatsz újra.</p>" +
+                "<p>Köszönjük, hogy a SkillBook tagja voltál! 🙏</p>" +
+                "</div><div class='footer'><p>© 2025 SkillBook. Minden jog fenntartva.</p></div></div></body></html>";
+
+            message.setContent(html, "text/html; charset=utf-8");
+            Transport.send(message);
+            System.out.println("✅ Fiók törlési email elküldve: " + userEmail);
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Törlési email küldési hiba: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ─── SMTP HELPER-EK ─────────────────────────────────────────────────────
+    private Properties buildSmtpProps() {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        return props;
+    }
+
+    private Session buildSession(Properties props) {
+        return Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
+            }
+        });
     }
 
     // ========================================
@@ -560,18 +626,8 @@ public class EmailService {
     
     public boolean sendForgotPasswordEmail(String userName, String userEmail, String tempPassword) {
     try {
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-        Session session = Session.getInstance(props, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(EMAIL_FROM, PASSWORD);
-            }
-        });
+        Properties props = buildSmtpProps();
+        Session session = buildSession(props);
 
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook"));

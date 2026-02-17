@@ -9,18 +9,33 @@
 
   <style>
     :root {
-      --bg-1: #070a14;
-      --bg-2: #0f1731;
-      --card: rgba(255,255,255,.08);
-      --card-2: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.14);
-      --text: #f3f6ff;
-      --muted: rgba(243,246,255,.72);
-      --accent: #60a5fa;
-      --accent-2: #a78bfa;
-      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --bg-1: #f5f3ff;
+      --bg-2: #e9d5ff;
+      --card: rgba(255,255,255,0.85);
+      --card-2: rgba(255,255,255,0.7);
+      --border: rgba(139,92,246,0.2);
+      --text: #1e1b4b;
+      --muted: rgba(30,27,75,0.65);
+      --accent: #7c3aed;
+      --accent-2: #059669;
+      --shadow: 0 10px 40px rgba(124,58,237,0.15);
       --radius: 20px;
-      --star-empty: rgba(255,255,255,.25);
+      --star-empty: rgba(139,92,246,0.3);
+      --star-filled: #fbbf24;
+    }
+
+    [data-theme="dark"] {
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --card: rgba(30,41,59,0.85);
+      --card-2: rgba(30,41,59,0.7);
+      --border: rgba(139,92,246,0.3);
+      --text: #f1f5f9;
+      --muted: rgba(241,245,249,0.65);
+      --accent: #7c3aed;
+      --accent-2: #059669;
+      --shadow: 0 10px 40px rgba(0,0,0,0.5);
+      --star-empty: rgba(255,255,255,0.25);
       --star-filled: #fbbf24;
     }
 
@@ -30,12 +45,11 @@
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
-      background:
-        radial-gradient(900px 540px at 18% 12%, rgba(167,139,250,.35), transparent 60%),
-        radial-gradient(900px 540px at 86% 22%, rgba(96,165,250,.28), transparent 55%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 100%);
+      background-attachment: fixed;
       overflow-x: hidden;
       min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     body::before {
@@ -44,7 +58,7 @@
       inset: -120px -140px auto auto;
       width: 560px;
       height: 560px;
-      background: radial-gradient(circle at 35% 35%, rgba(96,165,250,.45), transparent 62%);
+      background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.25), transparent 62%);
       filter: blur(55px);
       opacity: .55;
       z-index: -1;
@@ -64,9 +78,14 @@
       justify-content: space-between;
       gap: 16px;
       padding: 18px 26px;
-      background: rgba(7,10,20,.58);
+      background: rgba(255,255,255,0.8);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="dark"] header {
+      background: rgba(30,41,59,0.8);
     }
 
     .header-left {
@@ -102,18 +121,29 @@
       color: var(--text);
       text-decoration: none;
       padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.6);
       transition: transform .18s ease, background .18s ease, border-color .18s ease;
       cursor: pointer;
       font-family: inherit;
       font-size: inherit;
     }
+
+    [data-theme="dark"] nav a,
+    [data-theme="dark"] nav button {
+      background: rgba(30,41,59,0.6);
+    }
+    
     nav a:hover, nav button:hover {
       transform: translateY(-1px);
-      background: rgba(255,255,255,.08);
-      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,0.9);
+      border-color: var(--accent);
+    }
+
+    [data-theme="dark"] nav a:hover,
+    [data-theme="dark"] nav button:hover {
+      background: rgba(30,41,59,0.9);
     }
 
     .auth-links {
@@ -139,12 +169,16 @@
       background: none;
       border: none;
       padding: 6px 10px;
-      border-radius: 999px;
+      border-radius: 4px;
       cursor: pointer;
       transition: background 0.18s;
     }
     .user-menu-trigger:hover {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.6);
+    }
+
+    [data-theme="dark"] .user-menu-trigger:hover {
+      background: rgba(30,41,59,0.6);
     }
 
     .user-info {
@@ -159,13 +193,18 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(96,165,250,.8), rgba(167,139,250,.8));
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 14px;
-      color: var(--text);
+      color: white;
+      overflow: hidden;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .user-name {
@@ -186,7 +225,7 @@
       margin-top: 8px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 4px;
       min-width: 180px;
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -196,6 +235,7 @@
       transition: all 0.18s ease;
       z-index: 100;
     }
+    
     .user-dropdown.visible {
       opacity: 1;
       transform: translateY(0);
@@ -525,6 +565,16 @@
       font-weight: 600;
       font-size: 16px;
       flex-shrink: 0;
+      overflow: hidden;
+      border: 2px solid rgba(139,92,246,0.25);
+    }
+
+    .review-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
     }
 
     .review-author-info {
@@ -737,6 +787,18 @@
     let instructor = null;
     let selectedRating = 0;
 
+    // ════════════════════════════════════════════════════════════════════════
+    // THEME SYSTEM - Initialize theme on page load
+    // ════════════════════════════════════════════════════════════════════════
+    (function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    })();
+
     function authHeaders() {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       return token ? { 'Authorization': 'Bearer ' + token } : {};
@@ -761,12 +823,44 @@
 
       if (token && userStr) {
         try {
-          const user = JSON.parse(userStr);
-          currentUser = user;
+          // Friss adatok lekérése a szerverről (profilkép miatt)
+          let user;
+          try {
+            const res = await fetch('/SkillBook/api/Users/me', {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const result = await res.json();
+            if (res.ok && result.statusCode === 200 && result.data) {
+              user = result.data;
+              localStorage.setItem('user', JSON.stringify(user));
+              sessionStorage.setItem('user', JSON.stringify(user));
+            } else {
+              user = JSON.parse(userStr);
+            }
+          } catch (fetchErr) {
+            user = JSON.parse(userStr);
+          }
 
+          currentUser = user;
           userName.textContent = user.name || user.email;
-          const initial = (user.name || user.email || '?')[0].toUpperCase();
-          userAvatar.textContent = initial;
+
+          // Profilkép vagy kezdőbetű megjelenítése
+          const rawPic = user.profilePicture || user.profile_picture;
+          const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
+          if (hasPic) {
+            const picUrl = rawPic.startsWith('http')
+              ? rawPic
+              : window.location.origin + (rawPic.startsWith('/') ? '' : '/') + rawPic;
+            userAvatar.style.backgroundImage = 'url(' + picUrl + ')';
+            userAvatar.style.backgroundSize = 'cover';
+            userAvatar.style.backgroundPosition = 'center';
+            userAvatar.style.backgroundRepeat = 'no-repeat';
+            userAvatar.textContent = '';
+          } else {
+            const initial = (user.name || user.email || '?')[0].toUpperCase();
+            userAvatar.textContent = initial;
+            userAvatar.style.backgroundImage = '';
+          }
 
           userMenuContainer.classList.add('visible');
           authLinks.classList.add('hidden');
@@ -811,8 +905,21 @@
         console.log('Course response:', data); // Debug
         
         if (res.ok && data.statusCode === 200) {
-          course = data.course; // Backend "course" kulcsot küld
-          await loadInstructor(course.instructor_id);
+          course = data.data || data.course; // Mindkét kulcsot támogatjuk
+          if (!course) {
+            showMessage('Nem sikerült betölteni a tanfolyam adatait', 'error');
+            return;
+          }
+          
+          // Ha az oktató adatai benne vannak a course objektumban, használjuk azokat
+          if (course.instructor) {
+            instructor = course.instructor;
+            renderInstructorCard(instructor);
+          } else {
+            // Fallback: külön lekérjük az oktató adatait
+            await loadInstructor(course.instructor_id || course.instructorId);
+          }
+          
           renderCourseDetails(course);
           await loadReviews(courseId);
           
@@ -852,16 +959,18 @@
       if (!instructor) return;
 
       const initial = (instructor.name || instructor.email || '?')[0].toUpperCase();
-      const avatarHTML = instructor.profile_picture 
-        ? `<img src="${instructor.profile_picture}" alt="${instructor.name}">`
-        : initial;
+      const profilePic = instructor.profile_picture || instructor.profilePicture;
+      
+      const avatarHTML = profilePic
+        ? `<div class="instructor-avatar" style="background-image: url('${profilePic}'); background-size: cover; background-position: center;"></div>`
+        : `<div class="instructor-avatar">${initial}</div>`;
 
       container.innerHTML = `
-        <div class="instructor-avatar">${avatarHTML}</div>
+        ${avatarHTML}
         <div class="instructor-info">
           <h3>Oktató: ${instructor.name || 'Névtelen'}</h3>
           <p><i class='bx bx-envelope'></i> ${instructor.email}</p>
-          <p><i class='bx bx-user-check'></i> ${instructor.role === 'instructor' ? 'Oktató' : 'Felhasználó'}</p>
+          <p><i class='bx bx-calendar-check'></i> Regisztráció: ${formatDate(instructor.created_at || instructor.createdAt)}</p>
         </div>
       `;
     }
@@ -900,21 +1009,46 @@
     }
 
     async function loadReviews(courseId) {
+      console.log('🔄 loadReviews called with courseId:', courseId);
       try {
-        const res = await fetch(`${API_BASE_URL}/Reviews/getByCourse/${courseId}`);
+        // Include auth headers in case the endpoint requires authentication
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        // Add Authorization header if token exists
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+          console.log('🔑 Token added to request');
+        } else {
+          console.log('⚠️ No token found - requesting without authentication');
+        }
+        
+        const res = await fetch(`${API_BASE_URL}/Reviews/getByCourse/${courseId}`, {
+          method: 'GET',
+          headers: headers
+        });
+        
         const data = await res.json();
         
-        console.log('Reviews response:', data); // Debug
+        console.log('📦 Reviews response:', data);
+        console.log('✅ Response status:', res.status, res.ok);
+        console.log('📊 Status code from data:', data.statusCode);
         
         if (res.ok && data.statusCode === 200) {
           const reviews = data.reviews || [];
+          console.log('⭐ Number of reviews:', reviews.length);
+          console.log('📝 Reviews array:', reviews);
           renderReviews(reviews);
           calculateAverageRating(reviews);
         } else {
+          console.log('⚠️ Response not OK or statusCode not 200');
+          console.log('❌ Error:', data.message || 'Unknown error');
           renderReviews([]);
         }
       } catch (e) {
-        console.error('Hiba az értékelések betöltésekor:', e);
+        console.error('❌ Hiba az értékelések betöltésekor:', e);
         renderReviews([]);
       }
     }
@@ -932,13 +1066,35 @@
         return;
       }
 
-      container.innerHTML = reviews.map(review => `
+      container.innerHTML = reviews.map(review => {
+        // Mezőnév kompatibilitás: régi stored proc "reviewer_name", új "user_name"
+        const displayName = review.user_name || review.reviewer_name || 'Névtelen';
+        const displayEmail = review.user_email || '';
+        const initial = getInitial(displayName || displayEmail);
+
+        // Profilkép kezelés
+        const rawPic = review.user_profile_picture || review.profile_picture;
+        const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
+        let avatarHTML;
+        if (hasPic) {
+          const picUrl = rawPic.startsWith('http')
+            ? rawPic
+            : window.location.origin + (rawPic.startsWith('/') ? '' : '/') + rawPic;
+          avatarHTML = `<div class="review-avatar" data-initial="${initial}">
+            <img src="${picUrl}" alt="${displayName}"
+                 onerror="this.parentElement.innerHTML=this.parentElement.dataset.initial;">
+          </div>`;
+        } else {
+          avatarHTML = `<div class="review-avatar">${initial}</div>`;
+        }
+
+        return `
         <div class="review-item">
           <div class="review-header">
             <div class="review-author">
-              <div class="review-avatar">${getInitial(review.user_name || review.user_email)}</div>
+              ${avatarHTML}
               <div class="review-author-info">
-                <div class="review-author-name">${review.user_name || 'Névtelen'}</div>
+                <div class="review-author-name">${displayName}</div>
                 <div class="review-date">${formatDate(review.created_at)}</div>
               </div>
             </div>
@@ -948,7 +1104,8 @@
           </div>
           ${review.comment ? `<div class="review-content">${review.comment}</div>` : ''}
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function calculateAverageRating(reviews) {
@@ -1041,12 +1198,16 @@
 
     // Submit review
     document.getElementById('submitReview').addEventListener('click', async function() {
+      console.log('🚀 Submit review button clicked');
+      
       if (!currentUser) {
+        console.log('❌ No current user');
         showMessage('Jelentkezz be az értékeléshez!', 'error');
         return;
       }
 
       if (selectedRating === 0) {
+        console.log('❌ No rating selected');
         showMessage('Válassz csillagot az értékeléshez!', 'error');
         return;
       }
@@ -1054,6 +1215,12 @@
       const comment = document.getElementById('reviewComment').value.trim();
       const urlParams = new URLSearchParams(window.location.search);
       const courseId = urlParams.get('id');
+
+      console.log('📝 Submitting review:', {
+        courseId,
+        rating: selectedRating,
+        comment
+      });
 
       const reviewData = {
         course_id: parseInt(courseId),
@@ -1072,18 +1239,22 @@
         });
 
         const data = await res.json();
+        console.log('📬 Submit response:', data);
 
         if (res.ok && data.statusCode === 201) {
           showMessage('✅ Értékelés sikeresen elküldve!', 'success');
           document.getElementById('reviewComment').value = '';
           selectedRating = 0;
           updateStarDisplay(0);
+          console.log('🔄 Calling loadReviews after successful submit...');
           await loadReviews(courseId);
+          console.log('✅ loadReviews completed');
         } else {
+          console.log('❌ Submit failed:', data);
           showMessage('❌ Hiba: ' + (data.message || 'Próbáld újra!'), 'error');
         }
       } catch (e) {
-        console.error('Hiba az értékelés küldésekor:', e);
+        console.error('❌ Hiba az értékelés küldésekor:', e);
         showMessage('❌ Hálózati hiba!', 'error');
       }
     });

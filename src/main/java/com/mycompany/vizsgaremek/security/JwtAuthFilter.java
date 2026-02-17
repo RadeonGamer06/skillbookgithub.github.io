@@ -18,7 +18,9 @@ public class JwtAuthFilter implements ContainerRequestFilter {
     @Context
     private HttpServletRequest servletRequest;
 
-    // ✅ FONTOS: NINCS kezdő perjel!
+    // ════════════════════════════════════════════════════════════════════════
+    // FONTOS: NINCS kezdő perjel! A path így érkezik: "Users/login" stb.
+    // ════════════════════════════════════════════════════════════════════════
     private static final String[] PUBLIC_PREFIXES = {
             "Users/login",
             "Users/createUser",
@@ -29,13 +31,13 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             "Courses/getCourseById",
             "Contact/sendMessage",
             "Categories/getAllCategories",
-            "Uploads/"  // ✅ ÚJ - képek lekérése publikus
+            "Uploads/"
     };
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        // ✅ CORS preflight (ha van CORS) – ezt engedjük át
+        // CORS preflight → átengedjük
         if ("OPTIONS".equalsIgnoreCase(requestContext.getMethod())) {
             return;
         }
@@ -46,7 +48,7 @@ public class JwtAuthFilter implements ContainerRequestFilter {
 
         System.out.println("JWT FILTER PATH = " + path);
 
-        // ✅ Public endpointok
+        // Public endpointok ellenőrzése
         for (String prefix : PUBLIC_PREFIXES) {
             if (path.startsWith(prefix)) {
                 System.out.println("JWT FILTER: Public path, engedélyezve");
@@ -54,13 +56,14 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             }
         }
 
-        // ✅ JWT kell
+        // JWT token kötelező
         String authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("JWT FILTER: Nincs Bearer token");
             requestContext.abortWith(
                     Response.status(Response.Status.UNAUTHORIZED)
                             .entity("{\"message\":\"Missing or invalid Authorization header\"}")
+                            .type("application/json")
                             .build()
             );
             return;
@@ -75,12 +78,17 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             if (userId == null) {
                 requestContext.abortWith(
                         Response.status(Response.Status.UNAUTHORIZED)
-                                .entity("{\"message\":\"Invalid token\"}")
+                                .entity("{\"message\":\"Invalid token - missing userId\"}")
+                                .type("application/json")
                                 .build()
                 );
                 return;
             }
 
+            // ════════════════════════════════════════════════════════════
+            // userId beállítása a request attribute-ba → így éri el minden
+            // Controller a @Context HttpServletRequest request.getAttribute("userId")-vel
+            // ════════════════════════════════════════════════════════════
             if (servletRequest != null) {
                 servletRequest.setAttribute("userId", userId);
                 System.out.println("JWT FILTER: userId beállítva = " + userId);
@@ -93,6 +101,7 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             requestContext.abortWith(
                     Response.status(Response.Status.UNAUTHORIZED)
                             .entity("{\"message\":\"Invalid or expired token\"}")
+                            .type("application/json")
                             .build()
             );
         }

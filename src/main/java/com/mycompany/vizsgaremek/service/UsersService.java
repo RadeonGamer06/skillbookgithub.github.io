@@ -150,6 +150,14 @@ public class UsersService {
                 
                 System.out.println("✅ Profilkép sikeresen frissítve: " + profilePicUrl);
 
+                // ── EMAIL ÉRTESÍTŐ profilkép változásról ────────────────
+                try {
+                    emailService.sendProfilePictureChangeEmail(user.getName(), user.getEmail());
+                    System.out.println("✅ Profilkép módosítási email elküldve");
+                } catch (Exception emailEx) {
+                    System.err.println("⚠️ Profilkép email hiba (nem blokkoló): " + emailEx.getMessage());
+                }
+
                 resp.put("statusCode", 200);
                 resp.put("message", "Profilkép sikeresen feltöltve");
                 resp.put("profilePicture", profilePicUrl);
@@ -286,10 +294,22 @@ public class UsersService {
                 return resp;
             }
 
+            // Adatok elmentése email küldéshez (törlés előtt!)
+            String userName  = user.getName();
+            String userEmail = user.getEmail();
+
             StoredProcedureQuery query = em.createStoredProcedureQuery("deleteUser");
             query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
             query.setParameter("userIdIN", userId);
             query.execute();
+
+            // ── EMAIL ÉRTESÍTŐ fiók törlésről ───────────────────────────
+            try {
+                emailService.sendAccountDeletedEmail(userName, userEmail);
+                System.out.println("✅ Fiók törlési email elküldve: " + userEmail);
+            } catch (Exception emailEx) {
+                System.err.println("⚠️ Törlési email hiba (nem blokkoló): " + emailEx.getMessage());
+            }
 
             resp.put("status", "UserDeleted");
             resp.put("statusCode", 200);
@@ -421,30 +441,63 @@ public class UsersService {
                 return resp;
             }
 
-            String newNameValue = name != null && !name.trim().isEmpty() ? name.trim() : user.getName();
-            String newEmailValue = email != null && !email.trim().isEmpty() ? email.trim() : user.getEmail();
+            // Régi értékek elmentése az email értesítőhöz
+            String oldName  = user.getName();
+            String oldEmail = user.getEmail();
+
+            String newNameValue  = name  != null && !name.trim().isEmpty()  ? name.trim()  : oldName;
+            String newEmailValue = email != null && !email.trim().isEmpty() ? email.trim() : oldEmail;
 
             StoredProcedureQuery query = em.createStoredProcedureQuery("updateUser");
             query.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("roleIN", String.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("nameIN",   String.class,  ParameterMode.IN);
+            query.registerStoredProcedureParameter("emailIN",  String.class,  ParameterMode.IN);
+            query.registerStoredProcedureParameter("roleIN",   String.class,  ParameterMode.IN);
 
             query.setParameter("userIdIN", userId);
-            query.setParameter("nameIN", newNameValue);
-            query.setParameter("emailIN", newEmailValue);
-            query.setParameter("roleIN", user.getRole());
+            query.setParameter("nameIN",   newNameValue);
+            query.setParameter("emailIN",  newEmailValue);
+            query.setParameter("roleIN",   user.getRole());
 
             query.execute();
 
+            boolean passwordChanged = false;
             if (newPassword != null && !newPassword.trim().isEmpty()) {
                 String hashed = BCrypt.hashpw(newPassword.trim(), BCrypt.gensalt(12));
                 StoredProcedureQuery pwQuery = em.createStoredProcedureQuery("updateUserPassword");
-                pwQuery.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
+                pwQuery.registerStoredProcedureParameter("userIdIN",  Integer.class, ParameterMode.IN);
                 pwQuery.registerStoredProcedureParameter("passwordIN", String.class, ParameterMode.IN);
-                pwQuery.setParameter("userIdIN", userId);
+                pwQuery.setParameter("userIdIN",  userId);
                 pwQuery.setParameter("passwordIN", hashed);
                 pwQuery.execute();
+                passwordChanged = true;
+            }
+
+            // ── EMAIL ÉRTESÍTŐK ──────────────────────────────────────────
+            boolean nameChanged  = !newNameValue.equals(oldName);
+            boolean emailChanged = !newEmailValue.equals(oldEmail);
+
+            // Csak akkor küldünk emailt, ha tényleg változott valami
+            if (nameChanged || emailChanged || passwordChanged) {
+                try {
+                    // Összesítő értesítő (a régi, vagy ha email változott, mindkét címre)
+                    emailService.sendProfileChangeEmail(
+                        newNameValue, emailChanged ? oldEmail : newEmailValue,
+                        nameChanged,  oldName,  newNameValue,
+                        emailChanged, oldEmail, newEmailValue,
+                        passwordChanged
+                    );
+
+                    // Ha email változott: megerősítő az ÚJ email címre is
+                    if (emailChanged) {
+                        emailService.sendEmailChangeConfirmation(newNameValue, newEmailValue, oldEmail);
+                    }
+
+                    System.out.println("✅ Profil módosítási email(ek) elküldve");
+                } catch (Exception emailEx) {
+                    // Email hiba nem akasztja meg a sikeres mentést
+                    System.err.println("⚠️ Profil email hiba (nem blokkoló): " + emailEx.getMessage());
+                }
             }
 
             resp.put("status", "ProfileUpdated");
