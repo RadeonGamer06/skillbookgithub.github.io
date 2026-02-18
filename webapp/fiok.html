@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiókom - SkillBook</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/x-icon" href="fav.png">
+
+    <style>
+        :root {
+            --bg-1: #f5f3ff;
+            --bg-2: #e9d5ff;
+            --card: rgba(255,255,255,0.85);
+            --border: rgba(139,92,246,0.2);
+            --text: #1e1b4b;
+            --muted: rgba(30,27,75,0.65);
+            --accent: #7c3aed;
+            --accent-2: #059669;
+            --shadow: 0 10px 40px rgba(124,58,237,0.15);
+            --radius: 4px;
+        }
+
+        [data-theme="dark"] {
+            --bg-1: #0f172a;
+            --bg-2: #1e293b;
+            --card: rgba(30,41,59,0.85);
+            --border: rgba(139,92,246,0.3);
+            --text: #f1f5f9;
+            --muted: rgba(241,245,249,0.65);
+            --accent: #7c3aed;
+            --accent-2: #059669;
+            --shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 24px;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -120px -140px auto auto;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.25), transparent 62%);
+            filter: blur(55px);
+            opacity: .55;
+            z-index: -1;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+
+        @keyframes floatGlow {
+            0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+            50%     { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
+        }
+
+        main {
+            max-width: 600px;
+            margin: 28px auto 0;
+        }
+
+        .profile-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+
+
+        .Back {
+            width: min(1100px, calc(100% - 40px));
+            margin: 18px auto 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            align-self: stretch;
+        }
+
+        .Back a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.6);
+            transition: all 0.18s ease;
+        }
+
+        [data-theme="dark"] .Back a {
+            background: rgba(30,41,59,0.6);
+        }
+
+        .Back a:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.9);
+            border-color: var(--accent);
+        }
+
+        [data-theme="dark"] .Back a:hover {
+            background: rgba(30,41,59,0.9);
+        }
+
+        h1 { margin: 0 0 24px; font-size: 1.8rem; text-align: center; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--muted); }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.6);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] input {
+            background: rgba(30,41,59,0.6);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; }
+
+        .btn-danger { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
+
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            font-size: 0.95rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            max-width: 380px;
+        }
+
+        .message-box.success { background: rgba(5,150,105,0.9); color: white; }
+        .message-box.error   { background: rgba(220,38,38,0.9); color: white; }
+
+        #userName, #userEmail, #userRole {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: var(--muted);
+        }
+
+        #userName strong, #userEmail strong, #userRole strong {
+            color: var(--text);
+        }
+
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            border: 3px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spinner 0.8s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        #currentAvatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            transition: border-color 0.3s ease;
+        }
+
+        [data-theme="dark"] #currentAvatar {
+            background: var(--bg-2);
+            border-color: var(--accent) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="Back">
+        <i class='bx bx-arrow-back'></i> 
+        <a href="pro.html">Vissza a főoldalra</a>
+    </div>
+
+    <main>
+        <div class="profile-card">
+            <h1>Fiókom</h1>
+
+            <!-- ÚJ: PROFILKÉP MÓDOSÍTÁS -->
+            <div class="form-group" style="text-align:center; margin-bottom:25px;">
+                <label>Profilkép</label>
+                <div id="currentAvatar" style="width:120px;height:120px;margin:15px auto; border-radius:50%; overflow:hidden; background:#333; border:3px solid #60a5fa;">
+                    <!-- Itt jelenik meg a kép vagy kezdőbetű -->
+                </div>
+                <input type="file" id="newProfilePicture" accept="image/*">
+                <button type="button" id="uploadAvatarBtn" class="btn btn-primary" style="margin-top:10px;">Profilkép feltöltése</button>
+            </div>
+
+            <!-- Felhasználó adatok megjelenítése -->
+            <p id="userName"><strong>Név:</strong> Betöltés...</p>
+            <p id="userEmail"><strong>Email:</strong> Betöltés...</p>
+            <p id="userRole"><strong>Szerepkör:</strong> Betöltés...</p>
+
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="name">Név módosítása</label>
+                    <input type="text" id="name" placeholder="Új név (opcionális)">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email módosítása</label>
+                    <input type="email" id="email" placeholder="Új email (opcionális)">
+                </div>
+
+                <div class="form-group">
+                    <label for="currentPassword">Jelenlegi jelszó</label>
+                    <input type="password" id="currentPassword" placeholder="Jelenlegi jelszó (kötelező módosításhoz)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">Új jelszó</label>
+                    <input type="password" id="newPassword" placeholder="Új jelszó (opcionális)">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-bottom:12px;">Módosítások mentése</button>
+            </form>
+
+            <button id="deleteAccountBtn" class="btn btn-danger" style="width:100%;">Fiók törlése</button>
+        </div>
+    </main>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <script>
+        // Apply saved theme immediately
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+
+        const API_BASE_URL = `/SkillBook/api/Users`;
+        const tokenStorage = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        // Üzenet megjelenítése
+        function showMessage(message, isError = false) {
+            const box = document.getElementById('messageBox');
+            box.textContent = message;
+            box.className = 'message-box ' + (isError ? 'error' : 'success');
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        // Auth ellenőrzés
+        async function checkAuth() {
+            if (!tokenStorage) {
+                window.location.href = 'bejelentkezes.html';
+                return;
+            }
+            const res = await fetch(API_BASE_URL + '/me', {
+                headers: { 'Authorization': `Bearer ${tokenStorage}` }
+            });
+            if (res.status === 401) {
+                window.location.href = 'bejelentkezes.html';
+            }
+        }
+
+        // Felhasználó adatok betöltése
+        async function loadUserData() {
+            try {
+                const res = await fetch(API_BASE_URL + '/me', {
+                    headers: { 'Authorization': `Bearer ${tokenStorage}` }
+                });
+                const data = await res.json();
+                if (data.statusCode === 200) {
+                    const user = data.data;
+                    document.getElementById('userName').innerHTML = `<strong>Név:</strong> ${user.name}`;
+                    document.getElementById('userEmail').innerHTML = `<strong>Email:</strong> ${user.email}`;
+                    document.getElementById('userRole').innerHTML = `<strong>Szerepkör:</strong> ${user.role}`;
+                    // Ha van profilePicture a válaszban, tedd bele az avatarba
+                    const avatar = document.getElementById('currentAvatar');
+                    if (user.profilePicture) {
+                        avatar.innerHTML = `<img src="${user.profilePicture}" alt="Profilkép" style="width:100%; height:100%; object-fit:cover;">`;
+                    } else {
+                        avatar.innerHTML = user.name.charAt(0).toUpperCase();  // Kezdőbetű
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Profil frissítése (jelenlegi form)
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value.trim();
+
+            if (!currentPassword) {
+                showMessage('Jelenlegi jelszó kötelező!', true);
+                return;
+            }
+
+            const body = {};
+            if (name) body.name = name;
+            if (email) body.email = email;
+            body.currentPassword = currentPassword;
+            if (newPassword) body.newPassword = newPassword;
+
+            try {
+                const res = await fetch(API_BASE_URL + '/updateProfile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenStorage}`
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const result = await res.json();
+
+                if (result.statusCode === 200) {
+                    showMessage('Adatok sikeresen frissítve!', false);
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('currentPassword').value = '';
+                    loadUserData();  // Újratöltés
+                } else {
+                    showMessage(result.message || 'Hiba történt a mentés során', true);
+                }
+            } catch (err) {
+                console.error('Update profile error:', err);
+                showMessage('Nem sikerült menteni: ' + err.message, true);
+            }
+        });
+
+        // ÚJ: PROFILKÉP FELTÖLTÉS
+        document.getElementById('uploadAvatarBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('newProfilePicture');
+            const file = fileInput.files[0];
+            if (!file) {
+                showMessage('Válassz ki egy képet!', true);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+
+            try {
+                const res = await fetch(API_BASE_URL + '/updateProfilePicture', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${tokenStorage}`
+                    },
+                    body: formData
+                });
+
+                const result = await res.json();
+
+                if (result.statusCode === 200) {
+                    showMessage('Profilkép sikeresen frissítve!', false);
+                    loadUserData();  // Újratöltés, hogy látszódjon az új kép
+                    fileInput.value = '';  // Input reset
+                } else {
+                    showMessage(result.message || 'Hiba történt a feltöltés során', true);
+                }
+            } catch (err) {
+                console.error('Upload avatar error:', err);
+                showMessage('Nem sikerült feltölteni: ' + err.message, true);
+            }
+        });
+
+        // Fiók törlése
+        document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+            if (!confirm('Biztosan törölni szeretnéd a fiókodat? Ez a művelet VISSZAVONHATATLAN!')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE_URL + '/deleteMe', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${tokenStorage}` }
+                });
+
+                const result = await res.json();
+
+                if (result.statusCode === 200) {
+                    alert('Fiókod törölve lett. Viszlát!');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    sessionStorage.clear();
+                    window.location.href = 'pro.html';
+                } else {
+                    showMessage(result.message || 'Hiba történt a törlés során', true);
+                }
+            } catch (err) {
+                console.error('Delete account error:', err);
+                showMessage('Nem sikerült törölni a fiókot: ' + err.message, true);
+            }
+        });
+
+        // Betöltéskor
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('API Base URL:', API_BASE_URL);
+            checkAuth();
+            loadUserData();
+        });
+        
+        
+    </script>
+
+    <footer style="width: 100%; text-align: center; padding: 22px 14px; color: var(--muted); border-top: 1px solid var(--border); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); margin-top: auto; transition: background 0.3s ease;">
+        2025 | SkillBook
+    </footer>
+
+    <style>
+        [data-theme="dark"] footer {
+            background: rgba(30,41,59,0.6) !important;
+        }
+    </style>
+
+</body>
+</html>

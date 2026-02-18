@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tanfolyam részletek | SkillBook</title>
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-1: #f5f3ff;
+      --bg-2: #e9d5ff;
+      --card: rgba(255,255,255,0.85);
+      --card-2: rgba(255,255,255,0.7);
+      --border: rgba(139,92,246,0.2);
+      --text: #1e1b4b;
+      --muted: rgba(30,27,75,0.65);
+      --accent: #7c3aed;
+      --accent-2: #059669;
+      --shadow: 0 10px 40px rgba(124,58,237,0.15);
+      --radius: 20px;
+      --star-empty: rgba(139,92,246,0.3);
+      --star-filled: #fbbf24;
+    }
+
+    [data-theme="dark"] {
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --card: rgba(30,41,59,0.85);
+      --card-2: rgba(30,41,59,0.7);
+      --border: rgba(139,92,246,0.3);
+      --text: #f1f5f9;
+      --muted: rgba(241,245,249,0.65);
+      --accent: #7c3aed;
+      --accent-2: #059669;
+      --shadow: 0 10px 40px rgba(0,0,0,0.5);
+      --star-empty: rgba(255,255,255,0.25);
+      --star-filled: #fbbf24;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -120px -140px auto auto;
+      width: 560px;
+      height: 560px;
+      background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.25), transparent 62%);
+      filter: blur(55px);
+      opacity: .55;
+      z-index: -1;
+      animation: floatGlow 12s ease-in-out infinite;
+    }
+    @keyframes floatGlow {
+      0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+      50% { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 26px;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="dark"] header {
+      background: rgba(30,41,59,0.8);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      font-size: 1.4rem;
+      letter-spacing: .4px;
+    }
+    .logo span { color: var(--muted); font-weight: 600; }
+    .logo strong {
+      color: var(--text);
+      font-weight: 800;
+      background: linear-gradient(135deg, rgba(96,165,250,1), rgba(167,139,250,1));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    nav a, nav button {
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.6);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    [data-theme="dark"] nav a,
+    [data-theme="dark"] nav button {
+      background: rgba(30,41,59,0.6);
+    }
+    
+    nav a:hover, nav button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.9);
+      border-color: var(--accent);
+    }
+
+    [data-theme="dark"] nav a:hover,
+    [data-theme="dark"] nav button:hover {
+      background: rgba(30,41,59,0.9);
+    }
+
+    .auth-links {
+      display: flex;
+      gap: 10px;
+    }
+    .auth-links.hidden {
+      display: none;
+    }
+
+    .user-menu-container {
+      position: relative;
+      display: none;
+    }
+    .user-menu-container.visible {
+      display: block;
+    }
+
+    .user-menu-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .user-menu-trigger:hover {
+      background: rgba(255,255,255,0.6);
+    }
+
+    [data-theme="dark"] .user-menu-trigger:hover {
+      background: rgba(30,41,59,0.6);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+      overflow: hidden;
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .user-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dropdown-arrow {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      min-width: 180px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: all 0.18s ease;
+      z-index: 100;
+    }
+    
+    .user-dropdown.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      color: var(--text);
+      text-decoration: none;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .dropdown-item:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .logout {
+      color: #ff6b6b !important;
+    }
+    .logout:hover {
+      background: rgba(255,107,107,0.15) !important;
+    }
+
+    main {
+      width: min(1100px, calc(100% - 40px));
+      margin: 28px auto 60px;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      margin-bottom: 20px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .back-button:hover {
+      background: rgba(96,165,250,0.1);
+    }
+
+    /* Instructor Profile Card */
+    .instructor-card {
+      background: var(--card);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .instructor-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(96,165,250,.9), rgba(167,139,250,.9));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 32px;
+      color: var(--text);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .instructor-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .instructor-info {
+      flex: 1;
+    }
+
+    .instructor-info h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .instructor-info p {
+      margin: 4px 0;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instructor-info i {
+      color: var(--accent);
+    }
+
+    /* Course Details Card */
+    .course-details {
+      background: var(--card);
+      padding: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .course-details h2 {
+      margin: 0 0 20px 0;
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .course-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .meta-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .course-description {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    /* Reviews Section */
+    .reviews-section {
+      background: var(--card);
+      padding: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      animation: slideIn 0.6s ease-out;
+    }
+
+    .reviews-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .reviews-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .average-rating {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rating-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--star-filled);
+    }
+
+    .rating-stars {
+      display: flex;
+      gap: 4px;
+    }
+
+    .rating-count {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Star Rating Input */
+    .rating-input {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .star {
+      font-size: 32px;
+      color: var(--star-empty);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .star:hover,
+    .star.hovered {
+      color: var(--star-filled);
+      transform: scale(1.1);
+    }
+
+    .star.filled {
+      color: var(--star-filled);
+    }
+
+    /* Review Form */
+    .review-form {
+      background: var(--card-2);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .review-form textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      min-height: 100px;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+
+    .review-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .review-form button {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none;
+      border-radius: 8px;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .review-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(96,165,250,0.3);
+    }
+
+    .review-form button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Review List */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .review-item {
+      background: var(--card-2);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .review-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .review-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(96,165,250,.7), rgba(167,139,250,.7));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 2px solid rgba(139,92,246,0.25);
+    }
+
+    .review-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .review-author-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .review-author-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .review-date {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .review-rating {
+      display: flex;
+      gap: 2px;
+    }
+
+    .review-rating .star {
+      font-size: 16px;
+      cursor: default;
+    }
+
+    .review-content {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+
+    .empty-reviews {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty-reviews i {
+      font-size: 3rem;
+      opacity: 0.3;
+      margin-bottom: 12px;
+    }
+
+    .message-box {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 1000;
+      animation: slideInRight 0.3s ease-out;
+    }
+
+    .message-box.success {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid rgba(34,197,94,0.5);
+      color: #86efac;
+    }
+
+    .message-box.error {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.5);
+      color: #fca5a5;
+    }
+
+    .message-box.info {
+      background: rgba(96,165,250,0.2);
+      border: 1px solid rgba(96,165,250,0.5);
+      color: var(--accent);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .instructor-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .course-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Message Box -->
+  <div id="messageBox" class="message-box"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <div class="logo">
+        <span>Skill</span><strong>Book</strong>
+      </div>
+    </div>
+
+    <nav>
+      <a href="pro.html">Kezdőlap</a>
+      <a href="courses.html">Tanfolyamok</a>
+      <a href="my-courses.html" id="myCoursesNav">Tanfolyamaim</a>
+      <a href="#">Naptár</a>
+      <a href="kapcsolat.html">Kapcsolat</a>
+
+      <div id="authLinks" class="auth-links">
+        <a href="bejelentkezes.html">Bejelentkezés</a>
+        <a href="regisztracio.html">Regisztráció</a>
+      </div>
+
+      <div class="user-menu-container" id="userMenuContainer">
+        <button class="user-menu-trigger" id="userMenuTrigger">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-name" id="userName">Vendég</span>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+
+        <div class="user-dropdown" id="userDropdown">
+          <a href="fiok.html" class="dropdown-item">Fiókom</a>
+          <a href="#" class="dropdown-item">Beállítások</a>
+          <div class="dropdown-divider"></div>
+          <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <a href="courses.html" class="back-button">
+      <i class='bx bx-arrow-back'></i>
+      Vissza a tanfolyamokhoz
+    </a>
+
+    <!-- Instructor Profile -->
+    <div id="instructorCard" class="instructor-card hidden"></div>
+
+    <!-- Course Details -->
+    <div id="courseDetails" class="course-details hidden"></div>
+
+    <!-- Reviews Section -->
+    <div id="reviewsSection" class="reviews-section hidden">
+      <div class="reviews-header">
+        <h3>Értékelések és hozzászólások</h3>
+        <div class="average-rating" id="averageRating"></div>
+      </div>
+
+      <!-- Review Form -->
+      <div class="review-form" id="reviewForm">
+        <h4 style="margin-top: 0; color: var(--text);">Értékeld a tanfolyamot</h4>
+        <div class="rating-input" id="ratingInput">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+        <textarea id="reviewComment" placeholder="Írd le a tapasztalataidat..."></textarea>
+        <button id="submitReview">Értékelés beküldése</button>
+      </div>
+
+      <!-- Reviews List -->
+      <div class="reviews-list" id="reviewsList"></div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE_URL = '/SkillBook/api';
+    let currentUser = null;
+    let course = null;
+    let instructor = null;
+    let selectedRating = 0;
+
+    // ════════════════════════════════════════════════════════════════════════
+    // THEME SYSTEM - Initialize theme on page load
+    // ════════════════════════════════════════════════════════════════════════
+    (function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    })();
+
+    function authHeaders() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      return token ? { 'Authorization': 'Bearer ' + token } : {};
+    }
+
+    function showMessage(message, type = 'info') {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = message;
+      messageBox.className = 'message-box ' + type;
+      messageBox.style.display = 'block';
+      setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
+    }
+
+    async function checkAuth() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+      const userMenuContainer = document.getElementById('userMenuContainer');
+      const userName = document.getElementById('userName');
+      const userAvatar = document.getElementById('userAvatar');
+      const authLinks = document.getElementById('authLinks');
+
+      if (token && userStr) {
+        try {
+          // Friss adatok lekérése a szerverről (profilkép miatt)
+          let user;
+          try {
+            const res = await fetch('/SkillBook/api/Users/me', {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const result = await res.json();
+            if (res.ok && result.statusCode === 200 && result.data) {
+              user = result.data;
+              localStorage.setItem('user', JSON.stringify(user));
+              sessionStorage.setItem('user', JSON.stringify(user));
+            } else {
+              user = JSON.parse(userStr);
+            }
+          } catch (fetchErr) {
+            user = JSON.parse(userStr);
+          }
+
+          currentUser = user;
+          userName.textContent = user.name || user.email;
+
+          // Profilkép vagy kezdőbetű megjelenítése
+          const rawPic = user.profilePicture || user.profile_picture;
+          const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
+          if (hasPic) {
+            const picUrl = rawPic.startsWith('http')
+              ? rawPic
+              : window.location.origin + (rawPic.startsWith('/') ? '' : '/') + rawPic;
+            userAvatar.style.backgroundImage = 'url(' + picUrl + ')';
+            userAvatar.style.backgroundSize = 'cover';
+            userAvatar.style.backgroundPosition = 'center';
+            userAvatar.style.backgroundRepeat = 'no-repeat';
+            userAvatar.textContent = '';
+          } else {
+            const initial = (user.name || user.email || '?')[0].toUpperCase();
+            userAvatar.textContent = initial;
+            userAvatar.style.backgroundImage = '';
+          }
+
+          userMenuContainer.classList.add('visible');
+          authLinks.classList.add('hidden');
+        } catch (e) {
+          console.error('Hiba a user betöltésekor:', e);
+          showNotLoggedIn();
+        }
+      } else {
+        showNotLoggedIn();
+      }
+    }
+
+    function showNotLoggedIn() {
+      document.getElementById('userMenuContainer')?.classList.remove('visible');
+      document.getElementById('authLinks')?.classList.remove('hidden');
+      document.getElementById('userDropdown')?.classList.remove('visible');
+      currentUser = null;
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      currentUser = null;
+      alert('Sikeresen kijelentkeztél!');
+      window.location.href = 'pro.html';
+    }
+
+    async function loadCourseDetails() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('id');
+      if (!courseId) {
+        showMessage('Hiányzó tanfolyam ID!', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/Courses/getCourseById/${courseId}`);
+        const data = await res.json();
+        
+        console.log('Course response:', data); // Debug
+        
+        if (res.ok && data.statusCode === 200) {
+          course = data.data || data.course; // Mindkét kulcsot támogatjuk
+          if (!course) {
+            showMessage('Nem sikerült betölteni a tanfolyam adatait', 'error');
+            return;
+          }
+          
+          // Ha az oktató adatai benne vannak a course objektumban, használjuk azokat
+          if (course.instructor) {
+            instructor = course.instructor;
+            renderInstructorCard(instructor);
+          } else {
+            // Fallback: külön lekérjük az oktató adatait
+            await loadInstructor(course.instructor_id || course.instructorId);
+          }
+          
+          renderCourseDetails(course);
+          await loadReviews(courseId);
+          
+          // Felfedés animáció
+          setTimeout(() => {
+            document.getElementById('instructorCard')?.classList.remove('hidden');
+            document.getElementById('courseDetails')?.classList.remove('hidden');
+            document.getElementById('reviewsSection')?.classList.remove('hidden');
+          }, 100);
+        } else {
+          showMessage('Hiba a tanfolyam betöltésekor: ' + (data.message || 'Nem található'), 'error');
+        }
+      } catch (e) {
+        showMessage('Hiba a betöltéskor!', 'error');
+        console.error(e);
+      }
+    }
+
+    async function loadInstructor(instructorId) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/Users/getUserById/${instructorId}`);
+        const data = await res.json();
+        
+        console.log('Instructor response:', data); // Debug
+        
+        if (res.ok && data.statusCode === 200) {
+          instructor = data.data;
+          renderInstructorCard(instructor);
+        }
+      } catch (e) {
+        console.error('Hiba a tanár betöltésekor:', e);
+      }
+    }
+
+    function renderInstructorCard(instructor) {
+      const container = document.getElementById('instructorCard');
+      if (!instructor) return;
+
+      const initial = (instructor.name || instructor.email || '?')[0].toUpperCase();
+      const profilePic = instructor.profile_picture || instructor.profilePicture;
+      
+      const avatarHTML = profilePic
+        ? `<div class="instructor-avatar" style="background-image: url('${profilePic}'); background-size: cover; background-position: center;"></div>`
+        : `<div class="instructor-avatar">${initial}</div>`;
+
+      container.innerHTML = `
+        ${avatarHTML}
+        <div class="instructor-info">
+          <h3>Oktató: ${instructor.name || 'Névtelen'}</h3>
+          <p><i class='bx bx-envelope'></i> ${instructor.email}</p>
+          <p><i class='bx bx-calendar-check'></i> Regisztráció: ${formatDate(instructor.created_at || instructor.createdAt)}</p>
+        </div>
+      `;
+    }
+
+    function renderCourseDetails(course) {
+      const container = document.getElementById('courseDetails');
+      container.innerHTML = `
+        <h2>${course.title || 'Névtelen tanfolyam'}</h2>
+        
+        <div class="course-meta">
+          <div class="meta-item">
+            <span class="meta-label">Ár</span>
+            <span class="meta-value">${formatPrice(course.price || 0)} Ft</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Kezdés</span>
+            <span class="meta-value">${formatDate(course.start_date)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Befejezés</span>
+            <span class="meta-value">${formatDate(course.end_date)}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Max létszám</span>
+            <span class="meta-value">${course.max_participants || '∞'}</span>
+          </div>
+        </div>
+
+        ${course.description ? `
+          <div class="course-description">
+            <h4 style="margin-top: 0; color: var(--text);">Leírás</h4>
+            <p>${course.description}</p>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    async function loadReviews(courseId) {
+      console.log('🔄 loadReviews called with courseId:', courseId);
+      try {
+        // Include auth headers in case the endpoint requires authentication
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        // Add Authorization header if token exists
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+          console.log('🔑 Token added to request');
+        } else {
+          console.log('⚠️ No token found - requesting without authentication');
+        }
+        
+        const res = await fetch(`${API_BASE_URL}/Reviews/getByCourse/${courseId}`, {
+          method: 'GET',
+          headers: headers
+        });
+        
+        const data = await res.json();
+        
+        console.log('📦 Reviews response:', data);
+        console.log('✅ Response status:', res.status, res.ok);
+        console.log('📊 Status code from data:', data.statusCode);
+        
+        if (res.ok && data.statusCode === 200) {
+          const reviews = data.reviews || [];
+          console.log('⭐ Number of reviews:', reviews.length);
+          console.log('📝 Reviews array:', reviews);
+          renderReviews(reviews);
+          calculateAverageRating(reviews);
+        } else {
+          console.log('⚠️ Response not OK or statusCode not 200');
+          console.log('❌ Error:', data.message || 'Unknown error');
+          renderReviews([]);
+        }
+      } catch (e) {
+        console.error('❌ Hiba az értékelések betöltésekor:', e);
+        renderReviews([]);
+      }
+    }
+
+    function renderReviews(reviews) {
+      const container = document.getElementById('reviewsList');
+      
+      if (reviews.length === 0) {
+        container.innerHTML = `
+          <div class="empty-reviews">
+            <i class='bx bx-message-square-detail'></i>
+            <p>Még nincs értékelés. Légy te az első!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = reviews.map(review => {
+        // Mezőnév kompatibilitás: régi stored proc "reviewer_name", új "user_name"
+        const displayName = review.user_name || review.reviewer_name || 'Névtelen';
+        const displayEmail = review.user_email || '';
+        const initial = getInitial(displayName || displayEmail);
+
+        // Profilkép kezelés
+        const rawPic = review.user_profile_picture || review.profile_picture;
+        const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
+        let avatarHTML;
+        if (hasPic) {
+          const picUrl = rawPic.startsWith('http')
+            ? rawPic
+            : window.location.origin + (rawPic.startsWith('/') ? '' : '/') + rawPic;
+          avatarHTML = `<div class="review-avatar" data-initial="${initial}">
+            <img src="${picUrl}" alt="${displayName}"
+                 onerror="this.parentElement.innerHTML=this.parentElement.dataset.initial;">
+          </div>`;
+        } else {
+          avatarHTML = `<div class="review-avatar">${initial}</div>`;
+        }
+
+        return `
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-author">
+              ${avatarHTML}
+              <div class="review-author-info">
+                <div class="review-author-name">${displayName}</div>
+                <div class="review-date">${formatDate(review.created_at)}</div>
+              </div>
+            </div>
+            <div class="review-rating">
+              ${renderStars(review.rating)}
+            </div>
+          </div>
+          ${review.comment ? `<div class="review-content">${review.comment}</div>` : ''}
+        </div>
+      `;
+      }).join('');
+    }
+
+    function calculateAverageRating(reviews) {
+      const container = document.getElementById('averageRating');
+      
+      if (reviews.length === 0) {
+        container.innerHTML = `<span class="rating-count">Még nincs értékelés</span>`;
+        return;
+      }
+
+      const average = reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
+      const rounded = Math.round(average * 10) / 10;
+
+      container.innerHTML = `
+        <span class="rating-number">${rounded}</span>
+        <div>
+          <div class="rating-stars">${renderStars(rounded)}</div>
+          <div class="rating-count">${reviews.length} értékelés</div>
+        </div>
+      `;
+    }
+
+    function renderStars(rating) {
+      const fullStars = Math.floor(rating);
+      const halfStar = rating % 1 >= 0.5;
+      const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+      let html = '';
+      for (let i = 0; i < fullStars; i++) {
+        html += '<span class="star filled">★</span>';
+      }
+      if (halfStar) {
+        html += '<span class="star filled" style="opacity: 0.6;">★</span>';
+      }
+      for (let i = 0; i < emptyStars; i++) {
+        html += '<span class="star">★</span>';
+      }
+      return html;
+    }
+
+    function getInitial(name) {
+      return (name || '?')[0].toUpperCase();
+    }
+
+    function formatPrice(price) {
+      return new Intl.NumberFormat('hu-HU').format(price);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('hu-HU');
+    }
+
+    // Star rating interactive
+    const stars = document.querySelectorAll('#ratingInput .star');
+    
+    stars.forEach(star => {
+      star.addEventListener('click', function() {
+        selectedRating = parseInt(this.dataset.rating);
+        updateStarDisplay(selectedRating);
+      });
+
+      star.addEventListener('mouseenter', function() {
+        const rating = parseInt(this.dataset.rating);
+        stars.forEach((s, index) => {
+          if (index < rating) {
+            s.classList.add('hovered');
+          } else {
+            s.classList.remove('hovered');
+          }
+        });
+      });
+    });
+
+    document.getElementById('ratingInput').addEventListener('mouseleave', function() {
+      stars.forEach(s => s.classList.remove('hovered'));
+      updateStarDisplay(selectedRating);
+    });
+
+    function updateStarDisplay(rating) {
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('filled');
+        } else {
+          star.classList.remove('filled');
+        }
+      });
+    }
+
+    // Submit review
+    document.getElementById('submitReview').addEventListener('click', async function() {
+      console.log('🚀 Submit review button clicked');
+      
+      if (!currentUser) {
+        console.log('❌ No current user');
+        showMessage('Jelentkezz be az értékeléshez!', 'error');
+        return;
+      }
+
+      if (selectedRating === 0) {
+        console.log('❌ No rating selected');
+        showMessage('Válassz csillagot az értékeléshez!', 'error');
+        return;
+      }
+
+      const comment = document.getElementById('reviewComment').value.trim();
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('id');
+
+      console.log('📝 Submitting review:', {
+        courseId,
+        rating: selectedRating,
+        comment
+      });
+
+      const reviewData = {
+        course_id: parseInt(courseId),
+        rating: selectedRating,
+        comment: comment || null
+      };
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/Reviews/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders()
+          },
+          body: JSON.stringify(reviewData)
+        });
+
+        const data = await res.json();
+        console.log('📬 Submit response:', data);
+
+        if (res.ok && data.statusCode === 201) {
+          showMessage('✅ Értékelés sikeresen elküldve!', 'success');
+          document.getElementById('reviewComment').value = '';
+          selectedRating = 0;
+          updateStarDisplay(0);
+          console.log('🔄 Calling loadReviews after successful submit...');
+          await loadReviews(courseId);
+          console.log('✅ loadReviews completed');
+        } else {
+          console.log('❌ Submit failed:', data);
+          showMessage('❌ Hiba: ' + (data.message || 'Próbáld újra!'), 'error');
+        }
+      } catch (e) {
+        console.error('❌ Hiba az értékelés küldésekor:', e);
+        showMessage('❌ Hálózati hiba!', 'error');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('logoutBtn')?.addEventListener('click', logout);
+      checkAuth();
+      loadCourseDetails();
+    });
+
+    // Dropdown nyitás/zárás
+    document.addEventListener('click', function(e) {
+      const trigger = document.getElementById('userMenuTrigger');
+      const dropdown = document.getElementById('userDropdown');
+      if (!trigger || !dropdown) return;
+
+      if (trigger.contains(e.target)) dropdown.classList.toggle('visible');
+      else if (!dropdown.contains(e.target)) dropdown.classList.remove('visible');
+    });
+  </script>
+</body>
+</html>
