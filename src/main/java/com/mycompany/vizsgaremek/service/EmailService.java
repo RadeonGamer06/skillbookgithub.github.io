@@ -693,6 +693,142 @@ private String buildForgotPasswordEmailHTML(String userName, String tempPassword
            "</html>";
 }
 
+
+    // ════════════════════════════════════════════════════════════════════════
+    // SZÁMLA EMAIL – tanfolyam vásárlás után
+    // ════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Számla / vásárlás visszaigazoló email küldése.
+     */
+    public boolean sendInvoiceEmail(String userName, String userEmail,
+                                    String courseName,
+                                    long coursePrice, long vatAmount, long totalAmount,
+                                    String transactionId,
+                                    String courseStart, String courseEnd,
+                                    String instructorName) {
+        try {
+            Properties props = buildSmtpProps();
+            Session session = buildSession(props);
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Számlázás"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(userEmail));
+            message.setSubject("\uD83E\uDDFE Számla és vásárlás visszaigazolása – SkillBook");
+
+            String html = buildInvoiceEmailHTML(userName, courseName,
+                    coursePrice, vatAmount, totalAmount,
+                    transactionId, courseStart, courseEnd, instructorName);
+            message.setContent(html, "text/html; charset=utf-8");
+
+            Transport.send(message);
+            System.out.println("✅ Számla email elküldve: " + userEmail);
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("❌ Számla email küldési hiba: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private String buildInvoiceEmailHTML(String userName, String courseName,
+                                          long coursePrice, long vatAmount, long totalAmount,
+                                          String transactionId,
+                                          String courseStart, String courseEnd,
+                                          String instructorName) {
+
+        String purchaseDate = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy. MM. dd. HH:mm"));
+
+        String invoiceNumber = "SB-INV-" + LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-"
+                + transactionId.replace("SB-", "");
+
+        String dateRow = "";
+        if (courseStart != null && !courseStart.isEmpty()) {
+            String endPart = (courseEnd != null && !courseEnd.isEmpty()) ? " – " + htmlEscape(courseEnd) : "";
+            dateRow = "<tr><td style=\'padding:10px 16px;color:#555;border-bottom:1px solid #f0f0f0\'>Időpont</td>" +
+                      "<td style=\'padding:10px 16px;text-align:right;font-weight:600;border-bottom:1px solid #f0f0f0\'>" +
+                      htmlEscape(courseStart) + endPart + "</td></tr>";
+        }
+
+        String instructorRow = "";
+        if (instructorName != null && !instructorName.isEmpty()) {
+            instructorRow = "<tr><td style=\'padding:10px 16px;color:#555;border-bottom:1px solid #f0f0f0\'>Oktató</td>" +
+                            "<td style=\'padding:10px 16px;text-align:right;font-weight:600;border-bottom:1px solid #f0f0f0\'>" +
+                            htmlEscape(instructorName) + "</td></tr>";
+        }
+
+        String netto  = String.format("%,d", coursePrice).replace(",", "\u00a0");
+        String vat    = String.format("%,d", vatAmount).replace(",", "\u00a0");
+        String brutto = String.format("%,d", totalAmount).replace(",", "\u00a0");
+
+        return "<!DOCTYPE html><html lang=\'hu\'><head><meta charset=\'UTF-8\'>" +
+            "<style>" +
+            "body{margin:0;padding:0;background:#f0f4ff;font-family:Arial,Helvetica,sans-serif}" +
+            ".wrap{max-width:620px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10)}" +
+            ".top-bar{height:6px;background:linear-gradient(90deg,#7c3aed,#059669)}" +
+            ".header{background:linear-gradient(135deg,#7c3aed 0%,#4338ca 100%);color:white;padding:36px 32px;text-align:center}" +
+            ".header h1{margin:0 0 6px;font-size:26px}" +
+            ".header p{margin:0;opacity:.88;font-size:14px}" +
+            ".badge{display:inline-block;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:4px 16px;font-size:13px;margin-top:14px}" +
+            ".body{padding:32px}" +
+            ".success-box{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:18px 22px;display:flex;align-items:center;gap:14px;margin-bottom:28px}" +
+            ".success-icon{font-size:32px;flex-shrink:0}" +
+            ".success-text h3{margin:0 0 4px;color:#15803d;font-size:16px}" +
+            ".success-text p{margin:0;color:#166534;font-size:13px}" +
+            ".section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#7c3aed;margin:0 0 12px}" +
+            ".course-box{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;overflow:hidden;margin-bottom:24px}" +
+            ".course-name{background:linear-gradient(135deg,#7c3aed,#4338ca);color:white;padding:14px 18px;font-size:15px;font-weight:700}" +
+            ".inv-table{width:100%;border-collapse:collapse}" +
+            ".inv-table td{padding:11px 16px;font-size:14px;color:#333;border-bottom:1px solid #f0f0f0}" +
+            ".inv-table .total td{background:#ede9fe;font-weight:700;font-size:15px;border-top:2px solid #c4b5fd;border-bottom:none}" +
+            ".meta-row{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:28px;gap:8px}" +
+            ".meta-item{background:#f8f9fa;border-radius:6px;padding:8px 14px;flex:1;text-align:center}" +
+            ".meta-item strong{display:block;color:#333;font-size:13px;margin-top:3px}" +
+            ".info-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:16px 18px;font-size:13px;color:#78350f;margin-bottom:24px}" +
+            ".footer{background:#f8f9fa;padding:22px 32px;text-align:center;color:#888;font-size:12px;border-top:1px solid #f0f0f0}" +
+            ".footer a{color:#7c3aed;text-decoration:none}" +
+            "</style></head>" +
+            "<body><div class=\'wrap\'>" +
+            "<div class=\'top-bar\'></div>" +
+            "<div class=\'header\'><h1>&#129518; Vásárlás visszaigazolása</h1>" +
+            "<p>Köszönjük, hogy a SkillBook-ot választottad!</p>" +
+            "<div class=\'badge\'>&#10003; Fizetés sikeres</div></div>" +
+            "<div class=\'body\'>" +
+            "<p style=\'font-size:16px;color:#333;margin:0 0 24px\'>Kedves <strong>" + htmlEscape(userName) + "</strong>!</p>" +
+            "<div class=\'success-box\'><div class=\'success-icon\'>&#127881;</div>" +
+            "<div class=\'success-text\'><h3>Sikeres vásárlás!</h3>" +
+            "<p>Tanfolyamra való beiratkozásod megerősítve és elmentve.</p></div></div>" +
+            "<div class=\'meta-row\'>" +
+            "<div class=\'meta-item\'>Vásárlás dátuma<strong>" + purchaseDate + "</strong></div>" +
+            "<div class=\'meta-item\'>Tranzakció ID<strong>" + htmlEscape(transactionId) + "</strong></div>" +
+            "<div class=\'meta-item\'>Számla száma<strong>" + htmlEscape(invoiceNumber) + "</strong></div>" +
+            "</div>" +
+            "<p class=\'section-title\'>Tanfolyam részletei</p>" +
+            "<div class=\'course-box\'><div class=\'course-name\'>&#128218; " + htmlEscape(courseName) + "</div>" +
+            "<table style=\'width:100%;border-collapse:collapse\'>" +
+            dateRow + instructorRow +
+            "<tr><td style=\'padding:10px 16px;color:#555\'>Hozzáférés</td>" +
+            "<td style=\'padding:10px 16px;text-align:right;font-weight:600\'>Azonnal elérhető</td></tr>" +
+            "</table></div>" +
+            "<p class=\'section-title\'>Számla összesítő</p>" +
+            "<div style=\'background:#f8faff;border:1px solid #e0e7ff;border-radius:10px;overflow:hidden;margin-bottom:24px\'>" +
+            "<table class=\'inv-table\'>" +
+            "<tr><td>Nettó ár</td><td style=\'text-align:right;font-weight:600\'>" + netto + " Ft</td></tr>" +
+            "<tr><td>ÁFA (27%)</td><td style=\'text-align:right;font-weight:600\'>" + vat + " Ft</td></tr>" +
+            "<tr class=\'total\'><td>Fizetett összeg</td><td style=\'text-align:right;color:#7c3aed\'>" + brutto + " Ft</td></tr>" +
+            "</table></div>" +
+            "<div class=\'info-box\'>&#9888;&#65039; <strong>Fontos:</strong> Ez az email egyben a vásárlásod igazolása. " +
+            "Kérjük, őrizd meg. Kérdés esetén: <a href=\'mailto:skillbookweb@gmail.com\'>" +
+            "skillbookweb@gmail.com</a></div>" +
+            "</div>" +
+            "<div class=\'footer\'><p>&#169; 2025 SkillBook – Minden jog fenntartva</p>" +
+            "<p><a href=\'mailto:skillbookweb@gmail.com\'>skillbookweb@gmail.com</a></p></div>" +
+            "</div></body></html>";
+    }
+
 /** Egyszerű HTML escape – biztonsági okokból */
 private String escapeHtml(String s) {
     if (s == null) return "";

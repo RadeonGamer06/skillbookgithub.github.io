@@ -239,6 +239,7 @@ public class CoursesService {
             data.put("max_participants", course.getMaxParticipants());
             data.put("start_date", extractStartDateIso(course));
             data.put("end_date", extractEndDateIso(course));
+            data.put("header_image", course.getHeaderImage() != null ? course.getHeaderImage() : JSONObject.NULL);
             
             // Fetch instructor details
             if (course.getInstructorId() != null) {

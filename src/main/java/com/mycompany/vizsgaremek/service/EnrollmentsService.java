@@ -1,5 +1,7 @@
 package com.mycompany.vizsgaremek.service;
 
+import javax.inject.Inject;
+import com.mycompany.vizsgaremek.model.Users;
 import com.mycompany.vizsgaremek.model.Enrollments;
 import com.mycompany.vizsgaremek.model.Users;
 import com.mycompany.vizsgaremek.model.Courses;
@@ -61,24 +63,30 @@ public class EnrollmentsService {
         try {
             Query q = em.createNativeQuery(
                 "SELECT e.id, e.user_id, e.course_id, e.session_id, e.status, e.created_at, " +
-                "c.title AS course_title, c.start_date, c.end_date " +
+                "c.title AS course_title, c.start_date, c.end_date, " +
+                "c.header_image, c.description, " +
+                "u.name AS instructor_name " +
                 "FROM enrollments e " +
                 "LEFT JOIN courses c ON e.course_id = c.id " +
+                "LEFT JOIN users u ON c.instructor_id = u.id " +
                 "WHERE e.user_id = :uid ORDER BY e.created_at DESC");
             q.setParameter("uid", userId);
             @SuppressWarnings("unchecked")
             List<Object[]> rows = q.getResultList();
             for (Object[] r : rows) {
                 JSONObject o = new JSONObject();
-                o.put("id",           r[0]);
-                o.put("user_id",      r[1]);
-                o.put("course_id",    r[2]);
-                o.put("session_id",   r[3] != null ? r[3] : JSONObject.NULL);
-                o.put("status",       r[4] != null ? r[4] : "registered");
-                o.put("created_at",   r[5] != null ? r[5].toString() : "");
-                o.put("course_title", r[6] != null ? r[6] : "–");
-                o.put("start_date",   r[7] != null ? r[7].toString() : "");
-                o.put("end_date",     r[8] != null ? r[8].toString() : "");
+                o.put("id",              r[0]);
+                o.put("user_id",         r[1]);
+                o.put("course_id",       r[2]);
+                o.put("session_id",      r[3]  != null ? r[3]  : JSONObject.NULL);
+                o.put("status",          r[4]  != null ? r[4]  : "registered");
+                o.put("created_at",      r[5]  != null ? r[5].toString() : "");
+                o.put("course_title",    r[6]  != null ? r[6]  : "–");
+                o.put("start_date",      r[7]  != null ? r[7].toString() : "");
+                o.put("end_date",        r[8]  != null ? r[8].toString() : "");
+                o.put("header_image",    r[9]  != null ? r[9]  : "");
+                o.put("description",     r[10] != null ? r[10] : "");
+                o.put("instructor_name", r[11] != null ? r[11] : "");
                 arr.put(o);
             }
             resp.put("statusCode", 200);
@@ -173,6 +181,66 @@ public class EnrollmentsService {
             ex.printStackTrace();
             resp.put("statusCode", 500);
             resp.put("message", "Hiba: " + ex.getMessage());
+        }
+        return resp;
+    }
+    
+// ══ PATCH: Ezt a metódust add hozzá az EnrollmentsService osztályhoz ══
+// Importok kellenek az osztály tetejére (ha még nincsenek):
+//   import com.mycompany.vizsgaremek.model.Users;
+//   import javax.inject.Inject;
+//   (az EmailService már injektálva van, lásd alább)
+
+// Az osztályon belül szükséges az EmailService injektálása (ha még nincs):
+//   @Inject
+//   private EmailService emailService;
+
+    /**
+     * Számla email küldése a bejelentkezett felhasználónak tanfolyam vásárlás után.
+     */
+    @Inject
+    private EmailService emailService;
+    public JSONObject sendCourseInvoice(Integer userId,
+                                        String courseName,
+                                        long coursePrice, long vatAmount, long totalAmount,
+                                        String transactionId,
+                                        String courseStart, String courseEnd,
+                                        String instructorName) {
+        JSONObject resp = new JSONObject();
+        try {
+            // User adatok lekérése az emailhez
+            Users user = em.find(Users.class, userId);
+            if (user == null) {
+                resp.put("statusCode", 404);
+                resp.put("message", "Felhasználó nem található");
+                return resp;
+            }
+
+            boolean sent = emailService.sendInvoiceEmail(
+                    user.getName(),
+                    user.getEmail(),
+                    courseName,
+                    coursePrice,
+                    vatAmount,
+                    totalAmount,
+                    transactionId,
+                    courseStart,
+                    courseEnd,
+                    instructorName
+            );
+
+            if (sent) {
+                resp.put("statusCode", 200);
+                resp.put("message", "Számla email sikeresen elküldve");
+            } else {
+                resp.put("statusCode", 500);
+                resp.put("message", "Email küldési hiba");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.put("statusCode", 500);
+            resp.put("message", "Hiba: " + e.getMessage());
         }
         return resp;
     }

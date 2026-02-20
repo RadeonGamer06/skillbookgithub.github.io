@@ -86,4 +86,26 @@ public class EnrollmentsController {
                 .entity("{\"statusCode\":401,\"message\":\"Bejelentkezés szükséges\"}")
                 .build();
     }
+    
+    @POST
+    @Path("sendInvoice")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response sendInvoice(String body, @Context HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        if (userId == null) return unauth();
+
+        JSONObject json = new JSONObject(body);
+        JSONObject result = enrollmentsService.sendCourseInvoice(
+                userId,
+                json.optString("courseName", ""),
+                json.optLong("coursePrice", 0),
+                json.optLong("vatAmount", 0),
+                json.optLong("totalAmount", 0),
+                json.optString("transactionId", ""),
+                json.optString("courseStart", null),
+                json.optString("courseEnd", null),
+                json.optString("instructorName", null)
+        );
+        return build(result);
+    }
 }

@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biztonságos fizetés | SkillBook</title>
+    <link rel="icon" type="image/x-icon" href="fav.png">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <style>
+        :root {
+            --bg-1: #f5f3ff;
+            --bg-2: #e9d5ff;
+            --card: rgba(255,255,255,0.85);
+            --card-2: rgba(255,255,255,0.7);
+            --border: rgba(139,92,246,0.2);
+            --text: #1e1b4b;
+            --muted: rgba(30,27,75,0.65);
+            --accent: #7c3aed;
+            --accent-2: #059669;
+            --shadow: 0 10px 40px rgba(124,58,237,0.15);
+            --radius: 4px;
+        }
+
+        [data-theme="dark"] {
+            --bg-1: #0f172a;
+            --bg-2: #1e293b;
+            --card: rgba(30,41,59,0.85);
+            --card-2: rgba(30,41,59,0.7);
+            --border: rgba(139,92,246,0.3);
+            --text: #f1f5f9;
+            --muted: rgba(241,245,249,0.65);
+            --accent: #7c3aed;
+            --accent-2: #059669;
+            --shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(135deg, #e9d5ff 0%, #d1fae5 50%, #ddd6fe 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -120px -140px auto auto;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.25), transparent 62%);
+            filter: blur(55px);
+            opacity: .55;
+            z-index: -1;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at 35% 35%, rgba(124,58,237,0.15), transparent 62%);
+            opacity: .3;
+        }
+
+        @keyframes floatGlow {
+            0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
+            50%      { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
+        }
+
+        /* ═══════════════════════════════════════════════
+           HEADER — 1:1 másolat a pro.html-ből
+        ═══════════════════════════════════════════════ */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 26px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(30,41,59,0.9);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+            font-size: 1.4rem;
+            letter-spacing: .4px;
+            text-decoration: none;
+        }
+        .logo span { color: var(--muted); font-weight: 600; }
+        .logo strong {
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
+
+        /* Hamburger */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+        .menu-toggle:hover {
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(255,255,255,.22);
+        }
+        .menu-toggle span {
+            width: 20px;
+            height: 2px;
+            background: var(--text);
+            border-radius: 4px;
+            transition: all .3s ease;
+        }
+        [data-theme="dark"] .menu-toggle { background: rgba(51,65,85,0.6); }
+        [data-theme="dark"] .menu-toggle:hover { background: rgba(51,65,85,0.9); }
+        [data-theme="dark"] .menu-toggle span { background: #f1f5f9; }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+
+        @media (max-width: 991px) {
+            .menu-toggle { display: flex; }
+            nav {
+                position: absolute;
+                top: 100%; right: 0; left: 0;
+                background: rgba(0,0,0,0.92);
+                backdrop-filter: blur(14px);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px 26px;
+                gap: 8px;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                transition: all .3s ease;
+            }
+            nav.active { max-height: 500px; opacity: 1; }
+            nav a, nav button {
+                color: white;
+                border-color: rgba(255,255,255,0.3);
+                background: rgba(255,255,255,0.15);
+            }
+            nav a:hover, nav button:hover {
+                background: rgba(255,255,255,0.25);
+                border-color: rgba(255,255,255,0.5);
+            }
+            .user-menu-trigger {
+                background: rgba(255,255,255,0.15);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: white;
+            }
+            .user-name { color: white; }
+            .dropdown-arrow { color: white; }
+        }
+
+        nav a, nav button {
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,0.6);
+            transition: transform .18s ease, background .18s ease, border-color .18s ease;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        nav a:hover, nav button:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.9);
+            border-color: rgba(255,255,255,.22);
+        }
+
+        [data-theme="dark"] nav a,
+        [data-theme="dark"] nav button {
+            background: rgba(51,65,85,0.6);
+            color: #f1f5f9;
+        }
+        [data-theme="dark"] nav a:hover,
+        [data-theme="dark"] nav button:hover {
+            background: rgba(51,65,85,0.9);
+            color: #f1f5f9;
+        }
+
+        .auth-links { display: flex; gap: 10px; }
+        .auth-links.hidden { display: none; }
+
+        .user-menu-container { position: relative; display: none; }
+        .user-menu-container.visible { display: block; }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.18s;
+            width: 100%;
+            justify-content: center;
+        }
+        .user-menu-trigger:hover { background: rgba(255,255,255,0.08); }
+
+        @media (max-width: 991px) {
+            .user-menu-trigger {
+                background: rgba(255,255,255,0.6);
+                border: 1px solid rgba(255,255,255,.12);
+                padding: 10px 14px;
+            }
+        }
+
+        [data-theme="dark"] .user-menu-trigger:hover { background: rgba(51,65,85,0.6); }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-name { font-size: 15px; font-weight: 600; color: var(--text); }
+        [data-theme="dark"] .user-name { color: #f1f5f9; }
+
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: transform 0.18s ease;
+        }
+        [data-theme="dark"] .dropdown-arrow { color: #f1f5f9; }
+        .user-menu-trigger.active .dropdown-arrow { transform: rotate(180deg); }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%; right: 0;
+            margin-top: 8px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            min-width: 180px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: all 0.18s ease;
+            z-index: 100;
+        }
+        .user-dropdown.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        @media (max-width: 991px) {
+            .user-dropdown {
+                position: relative;
+                left: 0; right: auto;
+                margin-top: 8px;
+                width: 100%;
+                background: rgba(255,255,255,0.8);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 4px 12px rgba(0,0,0,.2);
+            }
+            .user-dropdown.visible { display: block; }
+            .user-dropdown:not(.visible) { display: none; }
+        }
+
+        [data-theme="dark"] .user-dropdown { background: rgba(30,41,59,0.98); }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            color: var(--text);
+            text-decoration: none;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        .dropdown-item:hover { background: rgba(255,255,255,0.08); }
+        [data-theme="dark"] .dropdown-item { color: #f1f5f9; }
+        [data-theme="dark"] .dropdown-item:hover { background: rgba(124,58,237,0.25); }
+
+        .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+        .logout { color: #ff6b6b !important; }
+        .logout:hover { background: rgba(255,107,107,0.15) !important; }
+
+
+        /* ═══════════════════════════════════════════════
+           OLDAL TARTALOM
+        ═══════════════════════════════════════════════ */
+
+        .page-wrap {
+            flex: 1;
+            width: min(1100px, calc(100% - 40px));
+            margin: 40px auto 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 820px) {
+            .page-wrap { grid-template-columns: 1fr; margin-top: 28px; }
+        }
+
+        /* Kártya alap */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            animation: slideUp 0.4s ease both;
+        }
+        .left-panel  { animation-delay: 0.05s; }
+        .right-panel { animation-delay: 0.14s; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        [data-theme="dark"] .panel { background: rgba(30,41,59,0.85); }
+
+        /* Section label */
+        .sec-label {
+            font-size: 0.71rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sec-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Panel cím */
+        .panel-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .panel-sub {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Tanfolyam összefoglaló */
+        .course-box {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .course-box { background: rgba(30,41,59,0.7); }
+
+        .course-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        }
+
+        .cb-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .cb-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(5,150,105,0.12));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+        .cb-info h3 {
+            font-size: 0.97rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        [data-theme="dark"] .cb-info h3 { color: #f1f5f9; }
+
+        .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag {
+            font-size: 0.71rem;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(124,58,237,0.1);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .detail-list { display: flex; flex-direction: column; gap: 9px; }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.87rem;
+        }
+        .d-label {
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .d-label i { color: var(--accent); font-size: 0.95rem; }
+        .d-value { font-weight: 600; color: var(--text); }
+        [data-theme="dark"] .d-value { color: #f1f5f9; }
+
+        /* Árkalkuláció */
+        .price-box {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        [data-theme="dark"] .price-box { background: rgba(30,41,59,0.7); }
+
+        .pr-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 0.87rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        [data-theme="dark"] .pr-row { color: #f1f5f9; }
+        .pr-row:last-child { border-bottom: none; }
+        .pr-label { color: var(--muted); }
+
+        .pr-row.total {
+            background: linear-gradient(135deg, rgba(124,58,237,0.07), rgba(5,150,105,0.04));
+            padding: 15px 16px;
+        }
+        .pr-row.total .pr-label { font-weight: 700; font-size: 0.92rem; color: var(--text); }
+        [data-theme="dark"] .pr-row.total .pr-label { color: #f1f5f9; }
+        .pr-row.total .pr-val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Trust badges */
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .trust-badge {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        [data-theme="dark"] .trust-badge { background: rgba(30,41,59,0.7); }
+        .trust-badge i { font-size: 1.25rem; color: var(--accent-2); }
+        .trust-badge span { font-size: 0.71rem; color: var(--muted); line-height: 1.3; }
+
+        /* ─── 3D Kártya vizualizáció ─── */
+        .card-visual {
+            height: 175px;
+            background: linear-gradient(135deg, #3b1f8c 0%, #1a4a3a 100%);
+            border-radius: 18px;
+            padding: 20px 22px;
+            margin-bottom: 22px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 16px 44px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .card-visual::before {
+            content: '';
+            position: absolute;
+            top: -55px; right: -55px;
+            width: 190px; height: 190px;
+            border-radius: 50%;
+            background: rgba(124,58,237,0.22);
+            filter: blur(38px);
+        }
+        .card-visual::after {
+            content: '';
+            position: absolute;
+            bottom: -65px; left: -25px;
+            width: 170px; height: 170px;
+            border-radius: 50%;
+            background: rgba(5,150,105,0.18);
+            filter: blur(38px);
+        }
+        .cv-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative; z-index: 1;
+        }
+        .cv-chip {
+            width: 38px; height: 28px;
+            background: linear-gradient(135deg, #f5c842, #d97706);
+            border-radius: 6px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.22);
+            position: relative;
+        }
+        .cv-chip::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 3px;
+        }
+        .cv-brand { display: flex; align-items: center; }
+        .cv-brand .c1 { width: 28px; height: 28px; border-radius: 50%; background: #eb001b; opacity: 0.9; margin-right: -9px; }
+        .cv-brand .c2 { width: 28px; height: 28px; border-radius: 50%; background: #f79e1b; opacity: 0.85; }
+        .cv-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 0.18em;
+            color: rgba(255,255,255,0.88);
+            margin-bottom: 16px;
+            position: relative; z-index: 1;
+        }
+        .cv-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative; z-index: 1;
+        }
+        .cvf-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 2px;
+        }
+        .cvf-value {
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.84);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ─── Form mezők ─── */
+        .fsec-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+            margin-top: 20px;
+        }
+        .fsec-title:first-of-type { margin-top: 0; }
+
+        .form-group { margin-bottom: 13px; }
+        .form-group label {
+            display: block;
+            font-size: 0.79rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .iw { position: relative; }
+        .iw i {
+            position: absolute;
+            left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.98rem;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .iw input {
+            width: 100%;
+            padding: 12px 13px 12px 36px;
+            background: var(--card-2);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.92rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .iw input.mono { font-family: 'Courier New', monospace; letter-spacing: 0.07em; }
+        .iw input::placeholder { color: var(--muted); opacity: 0.5; }
+        .iw input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+        }
+
+        [data-theme="dark"] .iw input {
+            background: rgba(15,23,42,0.8);
+            color: #f1f5f9;
+            border-color: rgba(139,92,246,0.4);
+        }
+        [data-theme="dark"] .iw input::placeholder { color: rgba(241,245,249,0.35); opacity: 1; }
+        [data-theme="dark"] .iw input:focus { background: rgba(15,23,42,0.95); }
+
+        .input-row { display: flex; gap: 11px; }
+        .input-row .form-group { flex: 1; }
+
+        /* Pay gomb — a pro.html cta-button stílusával */
+        .pay-btn {
+            width: 100%;
+            margin-top: 6px;
+            padding: 15px 32px;
+            background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.85));
+            color: var(--text);
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 12px 40px rgba(96,165,250,.32);
+            transition: all .22s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pay-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 50px rgba(96,165,250,.42);
+        }
+        .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        [data-theme="dark"] .pay-btn { color: #f1f5f9; }
+
+        .btn-amt {
+            background: rgba(255,255,255,0.22);
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.84rem;
+        }
+
+        .secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-top: 11px;
+            text-align: center;
+        }
+
+        .accepted-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .accepted-row > span { font-size: 0.74rem; color: var(--muted); }
+        .card-logos { display: flex; gap: 7px; flex-wrap: wrap; }
+        .card-logo {
+            padding: 4px 9px;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.69rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+        [data-theme="dark"] .card-logo { background: rgba(30,41,59,0.7); }
+
+        /* ─── Processing overlay ─── */
+        .processing-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11,13,20,0.72);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .processing-overlay.visible { display: flex; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid rgba(124,58,237,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .processing-text { font-size: 0.97rem; color: rgba(241,245,249,0.85); }
+
+        /* ─── Success screen ─── */
+        .success-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #e9d5ff 0%, #d1fae5 50%, #ddd6fe 100%);
+            background-attachment: fixed;
+            z-index: 190;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 0.35s ease;
+        }
+        .success-screen.visible { display: flex; }
+
+        [data-theme="dark"] .success-screen {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .success-icon {
+            width: 84px; height: 84px;
+            border-radius: 50%;
+            background: rgba(5,150,105,0.12);
+            border: 2px solid var(--accent-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: var(--accent-2);
+            margin-bottom: 26px;
+            animation: popIn 0.45s cubic-bezier(.34,1.6,.64,1) 0.1s both;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+
+        .success-screen h2 {
+            font-size: 1.95rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        [data-theme="dark"] .success-screen h2 { color: #f1f5f9; }
+        .success-screen p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            max-width: 380px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .success-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 26px;
+            margin-bottom: 26px;
+            min-width: min(340px, 90vw);
+            box-shadow: var(--shadow);
+        }
+        [data-theme="dark"] .success-box { background: rgba(30,41,59,0.85); }
+
+        .s-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            font-size: 0.86rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        [data-theme="dark"] .s-row { color: #f1f5f9; }
+        .s-row:last-child { border-bottom: none; }
+        .s-row .sl { color: var(--muted); }
+        .s-row .sv { font-weight: 700; }
+
+        .go-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(167,139,250,.85));
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.93rem;
+            box-shadow: 0 12px 40px rgba(96,165,250,.32);
+            transition: all .22s ease;
+        }
+        .go-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 50px rgba(96,165,250,.42); }
+        [data-theme="dark"] .go-btn { color: #f1f5f9; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px 26px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        [data-theme="dark"] footer {
+            background: rgba(30,41,59,0.9);
+            color: #f1f5f9;
+        }
+        footer a { color: var(--muted); text-decoration: none; }
+        footer a:hover { color: var(--accent); }
+        [data-theme="dark"] footer a { color: rgba(241,245,249,0.6); }
+    </style>
+</head>
+<body>
+
+    <!-- Processing overlay -->
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="spinner"></div>
+        <div class="processing-text">Tranzakció feldolgozása…</div>
+    </div>
+
+    <!-- Success screen -->
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon">✓</div>
+        <h2>Sikeres fizetés!</h2>
+        <p>Gratulálunk! A tanfolyamot sikeresen megvásároltad. Hamarosan visszaigazoló e-mailt kapsz.</p>
+        <div class="success-box">
+            <div class="s-row"><span class="sl">Tranzakció azonosító</span><span class="sv" id="sTxId">—</span></div>
+            <div class="s-row"><span class="sl">Tanfolyam</span><span class="sv" id="sCourseName">—</span></div>
+            <div class="s-row"><span class="sl">Összeg</span><span class="sv" id="sAmount">—</span></div>
+            <div class="s-row"><span class="sl">Dátum</span><span class="sv" id="sDate">—</span></div>
+        </div>
+        <a href="courses.html" class="go-btn">
+            <i class='bx bx-book-open'></i>
+            Tanfolyamaim megtekintése
+        </a>
+    </div>
+
+    <!-- ══ HEADER — ugyanaz mint a pro.html ══ -->
+    <header>
+        <div class="header-left">
+            <a class="logo" href="pro.html">
+                <span>Skill</span><strong>Book</strong>
+            </a>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Menü">
+            <span></span><span></span><span></span>
+        </button>
+
+        <nav id="mainNav">
+            <a href="pro.html">Kezdőlap</a>
+            <a href="courses.html">Tanfolyamok</a>
+            <a href="my-courses.html" id="myCoursesNav" style="display: none;">Tanfolyamaim</a>
+            <a href="kapcsolat.html">Kapcsolat</a>
+            <a href="chat.html" id="chatLink" style="display: none;">Csevegés</a>
+
+            <div id="authLinks" class="auth-links">
+                <a href="bejelentkezes.html">Bejelentkezés</a>
+                <a href="regisztracio.html">Regisztráció</a>
+            </div>
+
+            <div class="user-menu-container" id="userMenuContainer">
+                <button class="user-menu-trigger" id="userMenuTrigger">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">?</div>
+                        <span class="user-name" id="userName">Vendég</span>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="fiok.html" class="dropdown-item">Fiókom</a>
+                    <a href="beallitasok.html" class="dropdown-item">Beállítások</a>
+                    <a href="admin.html" class="dropdown-item" id="adminLink" style="display:none;">⚙️ Admin panel</a>
+                    <div class="dropdown-divider"></div>
+                    <button id="logoutBtn" class="dropdown-item logout">Kijelentkezés</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- TARTALOM -->
+    <div class="page-wrap">
+
+        <!-- BAL: Rendelés összefoglaló -->
+        <div class="left-panel panel">
+            <div class="sec-label"><i class='bx bx-receipt'></i> Rendelés összefoglaló</div>
+
+            <h1 class="panel-title">Fizetés megerősítése</h1>
+            <p class="panel-sub">Ellenőrizd a rendelés adatait, majd add meg a fizetési adataidat a biztonságos vásárláshoz.</p>
+
+            <div class="course-box">
+                <div class="cb-header">
+                    <div class="cb-icon">📚</div>
+                    <div class="cb-info">
+                        <h3 id="sumName">Tanfolyam neve…</h3>
+                        <div class="tags">
+                            <span class="tag">Online</span>
+                            <span class="tag" id="sumDuration">—</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-list">
+                    <div class="detail-row">
+                        <span class="d-label"><i class='bx bx-calendar'></i> Kezdés dátuma</span>
+                        <span class="d-value" id="sumStart">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="d-label"><i class='bx bx-flag'></i> Befejezés</span>
+                        <span class="d-value" id="sumEnd">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="d-label"><i class='bx bx-group'></i> Max. létszám</span>
+                        <span class="d-value" id="sumParticipants">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="d-label"><i class='bx bx-user-circle'></i> Oktató</span>
+                        <span class="d-value" id="sumInstructor">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="price-box">
+                <div class="pr-row">
+                    <span class="pr-label">Tanfolyam díja</span>
+                    <span id="priceLine">—</span>
+                </div>
+                <div class="pr-row">
+                    <span class="pr-label">ÁFA (27%)</span>
+                    <span id="vatLine">—</span>
+                </div>
+                <div class="pr-row total">
+                    <span class="pr-label">Fizetendő összeg</span>
+                    <span class="pr-val" id="totalLine">—</span>
+                </div>
+            </div>
+
+            <div class="trust-grid">
+                <div class="trust-badge">
+                    <i class='bx bx-shield-quarter'></i>
+                    <span>Biztonságos titkosítás</span>
+                </div>
+                <div class="trust-badge">
+                    <i class='bx bx-undo'></i>
+                    <span>14 napos visszatérítés</span>
+                </div>
+                <div class="trust-badge">
+                    <i class='bx bx-headphone'></i>
+                    <span>24/7 ügyfélszolgálat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- JOBB: Fizetési form -->
+        <div class="right-panel panel">
+            <div class="sec-label"><i class='bx bx-credit-card'></i> Fizetési adatok</div>
+
+            <!-- 3D kártya -->
+            <div class="card-visual">
+                <div class="cv-top">
+                    <div class="cv-chip"></div>
+                    <div class="cv-brand"><div class="c1"></div><div class="c2"></div></div>
+                </div>
+                <div class="cv-number" id="cvNumber">•••• &nbsp;•••• &nbsp;•••• &nbsp;••••</div>
+                <div class="cv-bottom">
+                    <div>
+                        <div class="cvf-label">Kártya tulajdonosa</div>
+                        <div class="cvf-value" id="cvName">TELJES NÉV</div>
+                    </div>
+                    <div>
+                        <div class="cvf-label">Lejárat</div>
+                        <div class="cvf-value" id="cvExp">MM/ÉÉ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fsec-title">Kártyatulajdonos adatai</div>
+
+            <div class="form-group">
+                <label>Kártyán szereplő teljes név</label>
+                <div class="iw">
+                    <i class='bx bx-user'></i>
+                    <input type="text" id="fName" placeholder="Kovács János" autocomplete="cc-name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>E-mail cím (visszaigazoláshoz)</label>
+                <div class="iw">
+                    <i class='bx bx-envelope'></i>
+                    <input type="email" id="fEmail" placeholder="email@pelda.hu" autocomplete="email">
+                </div>
+            </div>
+
+            <div class="fsec-title">Kártya adatai</div>
+
+            <div class="form-group">
+                <label>Kártyaszám</label>
+                <div class="iw">
+                    <i class='bx bx-credit-card'></i>
+                    <input type="text" id="fNumber" class="mono" placeholder="1234  5678  9012  3456" maxlength="19" autocomplete="cc-number" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="form-group">
+                    <label>Lejárati dátum</label>
+                    <div class="iw">
+                        <i class='bx bx-calendar'></i>
+                        <input type="text" id="fExpiry" class="mono" placeholder="HH/ÉÉ" maxlength="5" autocomplete="cc-exp" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>CVV / CVC</label>
+                    <div class="iw">
+                        <i class='bx bx-lock'></i>
+                        <input type="text" id="fCvv" class="mono" placeholder="•••" maxlength="3" autocomplete="cc-csc" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+
+            <button class="pay-btn" id="payBtn">
+                <i class='bx bx-lock-alt'></i>
+                Biztonságos fizetés
+                <span class="btn-amt" id="btnAmt">— Ft</span>
+            </button>
+
+            <div class="secure-note">
+                <i class='bx bx-shield-quarter'></i>
+                Adataid 256-bit SSL titkosítással védve vannak. Kártya adatait nem tároljuk.
+            </div>
+
+            <div class="accepted-row">
+                <span>Elfogadott:</span>
+                <div class="card-logos">
+                    <div class="card-logo">VISA</div>
+                    <div class="card-logo">Mastercard</div>
+                    <div class="card-logo">Maestro</div>
+                    <div class="card-logo">AMEX</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        2025 | SkillBook &nbsp;·&nbsp;
+        <a href="#">Adatvédelem</a> &nbsp;·&nbsp;
+        <a href="#">ÁSZF</a>
+    </footer>
+
+<script>
+    const API_BASE_URL = '/SkillBook/api';
+
+    // Téma — ugyanolyan mint a pro.html
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+
+    function authHeaders() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    }
+
+    // Hamburger menü
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('nav');
+    if (menuToggle && nav) {
+        menuToggle.addEventListener('click', () => nav.classList.toggle('active'));
+    }
+
+    // Dropdown
+    const userTrigger = document.getElementById('userMenuTrigger');
+    const userDropdown = document.getElementById('userDropdown');
+    if (userTrigger && userDropdown) {
+        userTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('visible');
+            userTrigger.classList.toggle('active');
+        });
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth >= 992) {
+                if (!userTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('visible');
+                    userTrigger.classList.remove('active');
+                }
+            }
+        });
+    }
+
+    // Auth check
+    async function checkAuth() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const userMenuContainer = document.getElementById('userMenuContainer');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const authLinks = document.getElementById('authLinks');
+        const chatLink = document.getElementById('chatLink');
+
+        if (token && userStr) {
+            try {
+                const res = await fetch(API_BASE_URL + '/Users/me', { headers: authHeaders() });
+                if (!res.ok) throw new Error();
+                const result = await res.json();
+                if (result.statusCode !== 200 || !result.data) throw new Error();
+                const user = result.data;
+
+                userName.textContent = user.name || user.email || 'Felhasználó';
+
+                if (user.profilePicture && user.profilePicture.trim() !== '') {
+                    const imageUrl = user.profilePicture.startsWith('http')
+                        ? user.profilePicture
+                        : `${window.location.origin}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`;
+                    userAvatar.style.backgroundImage = `url(${imageUrl})`;
+                    userAvatar.style.backgroundSize = 'cover';
+                    userAvatar.style.backgroundPosition = 'center';
+                    userAvatar.style.backgroundRepeat = 'no-repeat';
+                    userAvatar.textContent = '';
+                } else {
+                    userAvatar.textContent = (user.name || user.email || '?')[0].toUpperCase();
+                    userAvatar.style.backgroundImage = '';
+                }
+
+                userMenuContainer.classList.add('visible');
+                authLinks.classList.add('hidden');
+                if (chatLink && (user.role === 'student' || user.role === 'instructor' || user.role === 'admin')) {
+                    chatLink.style.display = 'inline-flex';
+                }
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink && user.role === 'admin') adminLink.style.display = 'block';
+
+                localStorage.setItem('user', JSON.stringify(user));
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+            } catch (err) {
+                localStorage.removeItem('token'); localStorage.removeItem('user');
+                sessionStorage.removeItem('token'); sessionStorage.removeItem('user');
+                if (userMenuContainer) userMenuContainer.classList.remove('visible');
+                if (authLinks) authLinks.classList.remove('hidden');
+                if (chatLink) chatLink.style.display = 'none';
+            }
+        } else {
+            if (userMenuContainer) userMenuContainer.classList.remove('visible');
+            if (authLinks) authLinks.classList.remove('hidden');
+            if (chatLink) chatLink.style.display = 'none';
+        }
+    }
+
+    // Kijelentkezés
+    document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.removeItem('token'); localStorage.removeItem('user');
+        sessionStorage.removeItem('token'); sessionStorage.removeItem('user');
+        alert('Sikeresen kijelentkeztél!');
+        window.location.href = 'pro.html';
+    });
+
+    // ── URL paraméterek ──
+    const p = new URLSearchParams(window.location.search);
+    const courseId    = parseInt(p.get('id') || p.get('courseId') || '0');
+    const courseName  = p.get('name')         || 'Tanfolyam';
+    const coursePrice = parseInt(p.get('price') || '0');
+    const courseStart = p.get('start')        || '';
+    const courseEnd   = p.get('end')          || '';
+    const courseMaxP  = p.get('participants') || '';
+    const courseInstr = p.get('instructor')   || '—';
+
+    function formatHU(n) { return new Intl.NumberFormat('hu-HU').format(n) + ' Ft'; }
+    function fmtDate(s) {
+        if (!s) return '—';
+        try { return new Date(s).toLocaleDateString('hu-HU'); } catch { return s; }
+    }
+
+    // Összefoglaló feltöltése
+    document.getElementById('sumName').textContent        = courseName;
+    document.getElementById('sumStart').textContent       = fmtDate(courseStart);
+    document.getElementById('sumEnd').textContent         = fmtDate(courseEnd);
+    document.getElementById('sumParticipants').textContent = courseMaxP ? courseMaxP + ' fő' : '—';
+    document.getElementById('sumInstructor').textContent  = courseInstr;
+
+    if (courseStart && courseEnd) {
+        const w = Math.ceil((new Date(courseEnd) - new Date(courseStart)) / (1000*60*60*24*7));
+        document.getElementById('sumDuration').textContent = w > 0 ? w + ' hetes' : 'Rövid tanfolyam';
+    } else {
+        document.getElementById('sumDuration').textContent = '—';
+    }
+
+    const vat   = Math.round(coursePrice * 0.27);
+    const total = coursePrice + vat;
+    document.getElementById('priceLine').textContent = formatHU(coursePrice);
+    document.getElementById('vatLine').textContent   = formatHU(vat);
+    document.getElementById('totalLine').textContent = formatHU(total);
+    document.getElementById('btnAmt').textContent    = formatHU(total);
+
+    // Élő kártyavizualizáció
+    document.getElementById('fNumber').addEventListener('input', function() {
+        let v = this.value.replace(/\D/g,'').slice(0,16);
+        this.value = v.replace(/(.{4})/g,'$1 ').trim();
+        const d = v.padEnd(16,'•');
+        document.getElementById('cvNumber').innerHTML =
+            d.slice(0,4)+'&nbsp;&nbsp;'+d.slice(4,8)+'&nbsp;&nbsp;'+d.slice(8,12)+'&nbsp;&nbsp;'+d.slice(12);
+    });
+    document.getElementById('fName').addEventListener('input', function() {
+        document.getElementById('cvName').textContent = this.value.toUpperCase() || 'TELJES NÉV';
+    });
+    document.getElementById('fExpiry').addEventListener('input', function() {
+        let v = this.value.replace(/\D/g,'').slice(0,4);
+        if (v.length >= 3) v = v.slice(0,2)+'/'+v.slice(2);
+        this.value = v;
+        document.getElementById('cvExp').textContent = v || 'MM/ÉÉ';
+    });
+
+    // ── Fizetés gomb – valós enroll + számla email logika ──
+    document.getElementById('payBtn').addEventListener('click', async function() {
+        // Bejelentkezés ellenőrzés
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+            alert('A tanfolyam megvásárlásához be kell jelentkezned!');
+            window.location.href = 'bejelentkezes.html';
+            return;
+        }
+
+        // Kártya adatok alap-validáció
+        const fName   = document.getElementById('fName').value.trim();
+        const fEmail  = document.getElementById('fEmail').value.trim();
+        const fNumber = document.getElementById('fNumber').value.replace(/\s/g,'');
+        const fExpiry = document.getElementById('fExpiry').value.trim();
+        const fCvv    = document.getElementById('fCvv').value.trim();
+
+        if (!fName || !fEmail || fNumber.length < 16 || !fExpiry || fCvv.length < 3) {
+            alert('Kérjük, töltsd ki az összes fizetési mezőt!');
+            return;
+        }
+
+        this.disabled = true;
+        document.getElementById('processingOverlay').classList.add('visible');
+
+        try {
+        // 1. URL-ből már kinyertük a course_id-t (külső scope)
+            const sessionIdParam = new URLSearchParams(window.location.search).get('sessionId')
+                                    ? parseInt(new URLSearchParams(window.location.search).get('sessionId')) : null;
+
+            if (!courseId) {
+                throw new Error('Hiányzó tanfolyam azonosító!');
+            }
+
+            // 2. Enrollments/enroll API hívás
+            const enrollBody = { courseId };
+            if (sessionIdParam) enrollBody.sessionId = sessionIdParam;
+
+            const enrollRes = await fetch(API_BASE_URL + '/Enrollments/enroll', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(enrollBody)
+            });
+
+            const enrollData = await enrollRes.json();
+
+            // 409 = már beiratkozott → nem hiba, folytatjuk
+            if (!enrollRes.ok && enrollRes.status !== 409) {
+                throw new Error(enrollData.message || 'Beiratkozási hiba');
+            }
+
+            // 3. Számla email küldés a backenden keresztül
+            const txId = 'SB-' + Date.now().toString(36).toUpperCase().slice(-8);
+            await fetch(API_BASE_URL + '/Enrollments/sendInvoice', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    courseId,
+                    courseName,
+                    coursePrice,
+                    vatAmount:   Math.round(coursePrice * 0.27),
+                    totalAmount: coursePrice + Math.round(coursePrice * 0.27),
+                    transactionId: txId,
+                    courseStart: courseStart || '',
+                    courseEnd:   courseEnd   || '',
+                    instructorName: courseInstr || ''
+                })
+            }).catch(() => {}); // email hiba ne blokkolja a flow-t
+
+            // 4. Success megjelenítése
+            document.getElementById('processingOverlay').classList.remove('visible');
+
+            document.getElementById('sTxId').textContent       = txId;
+            document.getElementById('sCourseName').textContent = courseName;
+            document.getElementById('sAmount').textContent     = formatHU(total);
+            document.getElementById('sDate').textContent       = new Date().toLocaleDateString('hu-HU', {
+                year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit'
+            });
+            document.getElementById('successScreen').classList.add('visible');
+
+        } catch(err) {
+            document.getElementById('processingOverlay').classList.remove('visible');
+            this.disabled = false;
+            alert('Hiba történt: ' + err.message);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await checkAuth();
+    });
+</script>
+</body>
+</html>
