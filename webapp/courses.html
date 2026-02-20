@@ -6,7 +6,7 @@
   <title>Tanfolyamok | SkillBook</title>
   <link rel="icon" type="image/x-icon" href="fav.png">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-
+  <link rel="icon" type="image/x-icon" href="fav.png">
   <style>
     :root {
       --bg-1: #f5f3ff;
@@ -714,6 +714,207 @@
       }
     }
 
+    /* ══════════════════════════════════════════════════════════════════════
+       SAJÁT BEIRATKOZOTT TANFOLYAMOK SZEKCIÓ
+    ══════════════════════════════════════════════════════════════════════ */
+    .enrolled-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .enrolled-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .enrolled-header-left i {
+      font-size: 1.6rem;
+      color: var(--accent);
+    }
+    .enrolled-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .enrolled-count {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 4px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border-radius: 20px;
+    }
+    .enrolled-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .enrolled-card {
+      background: var(--card);
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(124,58,237,0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .enrolled-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(124,58,237,0.25);
+    }
+    .enrolled-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 0.71rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      z-index: 2;
+    }
+    .enrolled-card-header {
+      height: 110px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .enrolled-card-header::before {
+      content: '';
+      position: absolute;
+      top: -30%; right: -10%;
+      width: 160%; height: 160%;
+      background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    }
+    .enrolled-card-header.has-image {
+      background-size: cover;
+      background-position: center;
+    }
+    .enrolled-card-header.has-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.4));
+    }
+    .enrolled-card-body {
+      padding: 16px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .enrolled-card-body h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .enrolled-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 14px;
+      flex: 1;
+    }
+    .enrolled-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .enrolled-meta-row i {
+      color: var(--accent);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .enrolled-progress-wrap {
+      margin-top: auto;
+    }
+    .enrolled-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .enrolled-progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .enrolled-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+    .enrolled-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .enrolled-status {
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .enrolled-status.registered {
+      background: rgba(5,150,105,0.12);
+      color: var(--accent-2);
+      border: 1px solid rgba(5,150,105,0.25);
+    }
+    .enrolled-status.canceled {
+      background: rgba(220,38,38,0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220,38,38,0.2);
+    }
+    .enrolled-details-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .enrolled-details-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+    [data-theme="dark"] .enrolled-card { border-color: rgba(124,58,237,0.6); }
+    [data-theme="dark"] .enrolled-card-body h3 { color: #f1f5f9; }
+
+    @media (max-width: 768px) {
+      .enrolled-grid { grid-template-columns: 1fr; }
+      .enrolled-header h2 { font-size: 1.25rem; }
+    }
+
     /* Filter Panel Styles */
     .filter-panel {
       background: var(--card);
@@ -1104,6 +1305,21 @@
     </header>
 
   <main>
+
+    <!-- ══ SAJÁT TANFOLYAMAIM – csak bejelentkezett usernek jelenik meg ══ -->
+    <div id="myEnrolledSection" style="display:none; margin-bottom: 40px;">
+      <div class="enrolled-header">
+        <div class="enrolled-header-left">
+          <i class='bx bx-book-bookmark'></i>
+          <h2>Beiratkozott tanfolyamaim</h2>
+        </div>
+        <span class="enrolled-count" id="enrolledCount"></span>
+      </div>
+      <div id="enrolledCoursesContainer" class="enrolled-grid">
+        <div class="loading-container"><div class="loading-spinner"></div></div>
+      </div>
+    </div>
+
     <div class="page-header">
       <h1>Elérhető tanfolyamok</h1>
       <p>Válassz a széles tanfolyam kínálatunkból és kezdd el a tanulást még ma!</p>
@@ -1678,10 +1894,139 @@
     document.addEventListener('DOMContentLoaded', async function(){
         await checkAuth();
         await checkMyCoursesNav();
+        await loadEnrolledCourses();   // ← Saját beiratkozott tanfolyamok
         await loadCourses();
         await loadCategories();
         checkInstructorRole();
     });
+
+    // ════════════════════════════════════════════════════════════════════════
+    // SAJÁT BEIRATKOZOTT TANFOLYAMOK BETÖLTÉSE
+    // ════════════════════════════════════════════════════════════════════════
+    async function loadEnrolledCourses() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return; // nem bejelentkezett → szekció rejtve marad
+
+        const section   = document.getElementById('myEnrolledSection');
+        const container = document.getElementById('enrolledCoursesContainer');
+        if (!section || !container) return;
+
+        try {
+            const res  = await fetch(API_BASE_URL + '/Enrollments/getMyEnrollments', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) return; // auth hiba → szekció rejtve
+
+            const data        = await res.json();
+            const enrollments = Array.isArray(data.data) ? data.data : [];
+
+            // Csak aktív beiratkozások (status !== 'canceled')
+            const active = enrollments.filter(e => e.status !== 'canceled');
+
+            if (active.length === 0) return; // nincs beiratkozás → szekció rejtve
+
+            // Szekció megjelenítése
+            section.style.display = 'block';
+            document.getElementById('enrolledCount').textContent = active.length + ' tanfolyam';
+
+            container.innerHTML = '';
+
+            active.forEach(enrollment => {
+                const courseId   = enrollment.course_id;
+                const title      = enrollment.course_title || 'Tanfolyam';
+                const progress   = enrollment.progress || 0;
+                const status     = enrollment.status   || 'registered';
+                const enrollDate = enrollment.created_at || '';
+
+                // Fejléc kép – közvetlenül az enrollment objektumból
+                const rawHdr = enrollment.header_image || enrollment.headerImage || '';
+                const hasHdr = rawHdr && rawHdr !== 'null' && rawHdr.trim() !== '';
+                const hdrUrl = hasHdr
+                    ? (rawHdr.startsWith('http') ? rawHdr : window.location.origin + rawHdr)
+                    : '';
+
+                // Tanfolyam kezdő dátuma
+                let dateStr = '';
+                if (enrollment.start_date && enrollment.start_date !== '') {
+                    try {
+                        const sd = new Date(enrollment.start_date);
+                        dateStr = sd.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+                    } catch(e) {}
+                }
+
+                // Beiratkozás dátuma
+                let enrollStr = '';
+                if (enrollDate) {
+                    try {
+                        enrollStr = new Date(enrollDate).toLocaleDateString('hu-HU', {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                        });
+                    } catch(e) {}
+                }
+
+                // Oktató neve – közvetlenül az enrollment objektumból
+                const instructorName = enrollment.instructor_name || '';
+
+                const statusLabel = status === 'canceled' ? 'Lemondott'  : 'Beiratkozott';
+                const statusClass = status === 'canceled' ? 'canceled' : 'registered';
+
+                const card = document.createElement('div');
+                card.className = 'enrolled-card';
+
+                const headerStyle = hasHdr
+                    ? `style="background-image:url('${hdrUrl}')" class="enrolled-card-header has-image"`
+                    : `class="enrolled-card-header"`;
+
+                card.innerHTML = `
+                    <div class="enrolled-badge"><i class='bx bx-check-circle'></i> Beiratkozott</div>
+                    <div ${headerStyle}></div>
+                    <div class="enrolled-card-body">
+                        <h3>${escapeHtml(title)}</h3>
+                        <div class="enrolled-meta">
+                            ${dateStr ? `<div class="enrolled-meta-row"><i class='bx bx-calendar'></i><span>${dateStr}</span></div>` : ''}
+                            ${enrollStr ? `<div class="enrolled-meta-row"><i class='bx bx-check'></i><span>Beiratkozott: ${enrollStr}</span></div>` : ''}
+                            ${instructorName ? `<div class="enrolled-meta-row"><i class='bx bx-user'></i><span>${escapeHtml(instructorName)}</span></div>` : ''}
+                        </div>
+                        <div class="enrolled-progress-wrap">
+                            <div class="enrolled-progress-label">
+                                <span>Haladás</span>
+                                <span>${progress}%</span>
+                            </div>
+                            <div class="enrolled-progress-bar">
+                                <div class="enrolled-progress-fill" style="width:${progress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="enrolled-footer">
+                        <span class="enrolled-status ${statusClass}">${statusLabel}</span>
+                        <button class="enrolled-details-btn" onclick="window.location.href='course-details.html?id=${courseId}'">
+                            <i class='bx bx-detail'></i> Részletek
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+        } catch(err) {
+            console.warn('Beiratkozott tanfolyamok betöltési hiba:', err);
+            // Csendesen elbukunk – a szekció rejtve marad
+        }
+    }
+
+    // HTML escape helper a courses.html-ben
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
+    }
 
     // ════════════════════════════════════════════════════════════════════════
     // INSTRUCTOR TANFOLYAM LÉTREHOZÁS
