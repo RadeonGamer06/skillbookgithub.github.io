@@ -105,7 +105,7 @@
       transform: translateY(-50%); 
       color: var(--muted); 
       font-size: 20px; 
-      margin-top: 12px; /* Kompenzáció a label miatt */
+      margin-top: 12px;
     }
 
     input[type="text"],
@@ -358,7 +358,6 @@
       messageBox.className = 'message-box ' + type;
       messageBox.style.display = 'block';
       
-      // Automatikus eltüntetés 6.5 másodperc után
       setTimeout(() => {
         messageBox.style.display = 'none';
       }, 6500);
@@ -375,7 +374,6 @@
       const accountType    = document.getElementById('accountType').value;
       const termsAccepted  = document.getElementById('termsAccepted').checked;
 
-      // Validáció
       if (!fullName || fullName.length < 2) {
         showMessage('Add meg a teljes neved!', 'error');
         return;
@@ -407,7 +405,6 @@
         return;
       }
 
-      // Elküldés
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
       submitBtn.textContent = '';
@@ -438,7 +435,6 @@
         } else {
           let msg = data.message || 'Hiba történt a regisztráció során';
           
-          // Felhasználóbarát hibaüzenetek
           if (msg.toLowerCase().includes('duplicate') || msg.toLowerCase().includes('unique')) {
             if (msg.toLowerCase().includes('email')) {
               msg = 'Ez az email cím már foglalt!';

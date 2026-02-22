@@ -304,7 +304,6 @@
         [data-theme="dark"] .menu-toggle:hover { background: rgba(51,65,85,0.9); }
         [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
 
-    /* ── MAIN ── */
     main {
       flex: 1; width: 100%; max-width: 1400px;
       margin: 0 auto; padding: 40px 24px;
@@ -334,14 +333,12 @@
     .btn-new-course:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.45); }
     .btn-new-course i { font-size: 1.2rem; }
 
-    /* ── COURSES GRID ── */
     #myCoursesContainer {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 28px;
     }
 
-    /* ── COURSE CARD ── */
     .course-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -358,7 +355,6 @@
     }
     .course-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(124,58,237,0.25); border-color: var(--accent); }
 
-    /* Fejléc kép */
     .course-header {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       height: 150px; position: relative; overflow: hidden;
@@ -378,7 +374,6 @@
       50% { opacity: 0.8; transform: scale(1.1); }
     }
 
-    /* Dátum badge */
     .course-header-date {
       position: absolute; bottom: 10px; right: 14px; z-index: 1;
       display: flex; align-items: center; gap: 5px;
@@ -388,7 +383,6 @@
     }
     .course-header-date i { font-size: 13px; }
 
-    /* Profilkép sáv */
     .course-icon-row {
       position: relative; height: 36px;
       background: var(--card); flex-shrink: 0;
@@ -406,7 +400,6 @@
     .course-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .course-icon i { font-size: 26px; color: white; }
 
-    /* Kártya tartalom */
     .course-content { padding: 8px 24px 16px; flex: 1; display: flex; flex-direction: column; }
     .course-content h3 { margin: 0 0 10px; font-size: 1.25rem; color: var(--text); line-height: 1.3; }
     .course-description {
@@ -415,7 +408,6 @@
       margin-bottom: 12px;
     }
 
-    /* Kártya info sor */
     .course-info-row {
       display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;
     }
@@ -426,7 +418,6 @@
     }
     .course-badge.green { background: rgba(5,150,105,0.1); color: var(--accent-2); border-color: rgba(5,150,105,0.2); }
 
-    /* Lábléc */
     .course-footer {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 24px 20px;
@@ -451,7 +442,6 @@
     .btn-action.upload:hover { background: var(--accent-2); color: white; border-color: var(--accent-2); }
     .btn-action.delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
 
-    /* ── EMPTY STATE ── */
     .empty-state {
       text-align: center; padding: 80px 20px; color: var(--muted);
       grid-column: 1 / -1;
@@ -459,7 +449,6 @@
     .empty-state i { font-size: 80px; margin-bottom: 20px; opacity: 0.4; display: block; }
     .empty-state p { font-size: 1.1rem; margin: 0 0 24px; }
 
-    /* ── LOADING ── */
     .loading-container {
       display: flex; justify-content: center; align-items: center;
       min-height: 300px; grid-column: 1 / -1;
@@ -471,7 +460,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── MODAL ── */
     .modal {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -514,7 +502,6 @@
 
     .modal-body { padding: 24px; }
 
-    /* Szekciók az edit modalban */
     .form-section {
       border: 1px solid var(--border); border-radius: 10px;
       padding: 18px; margin-bottom: 20px;
@@ -552,7 +539,6 @@
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-    /* Fejléckép preview */
     .header-image-preview {
       width: 100%; height: 120px; border-radius: 8px;
       object-fit: cover; display: none; margin-bottom: 10px;
@@ -576,8 +562,6 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
     .btn-secondary { background: var(--card-2); color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: var(--card); border-color: var(--accent); }
-
-    /* ── MESSAGE BOX ── */
     .message-box {
       position: fixed; top: 20px; right: 20px;
       padding: 14px 18px; border-radius: 8px;
@@ -594,7 +578,6 @@
     .message-box.error { background: rgba(220,38,38,0.9); color: white; border-color: rgba(220,38,38,0.5); }
     .message-box.info { background: rgba(59,130,246,0.9); color: white; border-color: rgba(59,130,246,0.5); }
 
-    /* ── FOOTER ── */
     footer {
       text-align: center; padding: 22px 14px; color: var(--muted);
       border-top: 1px solid var(--border);
@@ -603,7 +586,7 @@
     }
     [data-theme="dark"] footer { background: rgba(30,41,59,0.8); }
 
-    /* ── RESPONSIVE ── */
+
     @media (max-width: 991px) {
       #myCoursesContainer { grid-template-columns: 1fr; }
       .page-header h1 { font-size: 1.6rem; }
@@ -662,7 +645,6 @@
         </nav>
     </header>
 
-<!-- ── MAIN ── -->
 <main>
   <div class="page-header">
     <div class="page-header-text">
@@ -680,11 +662,8 @@
   </div>
 </main>
 
-<footer>2025 | SkillBook</footer>
+<footer>2026 | SkillBook</footer>
 
-<!-- ════════════════════════════════════════════════════════════
-     LÉTREHOZÁS MODAL
-═════════════════════════════════════════════════════════════ -->
 <div id="createCourseModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -762,9 +741,6 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     SZERKESZTÉS MODAL
-═════════════════════════════════════════════════════════════ -->
 <div id="editCourseModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -844,9 +820,6 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     ANYAG FELTÖLTÉS MODAL
-═════════════════════════════════════════════════════════════ -->
 <div id="uploadMaterialModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -876,19 +849,16 @@
 <script>
 const API_BASE_URL = `${window.location.origin}/SkillBook/api`;
 
-// ── TÉMA ────────────────────────────────────────────────────────────────────
 (function() {
     if (localStorage.getItem('theme') === 'dark')
         document.documentElement.setAttribute('data-theme', 'dark');
 })();
 
-// ── AUTH HEADER ──────────────────────────────────────────────────────────────
 function authHeaders() {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 }
 
-// ── ÜZENET ───────────────────────────────────────────────────────────────────
 function showMessage(msg, type = 'info') {
     const box = document.getElementById('messageBox');
     if (!box) return;
@@ -898,14 +868,12 @@ function showMessage(msg, type = 'info') {
     setTimeout(() => { box.style.display = 'none'; }, 4500);
 }
 
-// ── HAMBURGER ────────────────────────────────────────────────────────────────
 const menuToggle = document.querySelector('.menu-toggle');
 const nav = document.querySelector('nav');
 if (menuToggle && nav) {
     menuToggle.addEventListener('click', () => { nav.classList.toggle('active'); });
 }
 
-// ── USER DROPDOWN ────────────────────────────────────────────────────────────
 const userTrigger = document.getElementById('userMenuTrigger');
 const userDropdown = document.getElementById('userDropdown');
 if (userTrigger && userDropdown) {
@@ -924,7 +892,6 @@ if (userTrigger && userDropdown) {
     });
 }
 
-// ── KIJELENTKEZÉS ────────────────────────────────────────────────────────────
 document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     localStorage.removeItem('token'); localStorage.removeItem('user');
@@ -933,7 +900,6 @@ document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
     window.location.href = 'pro.html';
 });
 
-// ── AUTH CHECK ───────────────────────────────────────────────────────────────
 async function checkAuth() {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
@@ -982,7 +948,6 @@ async function checkAuth() {
     }
 }
 
-// ── INSTRUCTOR ELLENŐRZÉS ────────────────────────────────────────────────────
 function checkIfInstructor() {
     try {
         const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
@@ -996,7 +961,6 @@ function checkIfInstructor() {
     }
 }
 
-// ── KATEGÓRIÁK BETÖLTÉSE ─────────────────────────────────────────────────────
 let categoriesCache = [];
 async function loadCategories() {
     if (categoriesCache.length > 0) return categoriesCache;
@@ -1024,7 +988,6 @@ function populateCategorySelect(selectId, selectedId = null) {
     });
 }
 
-// ── TANFOLYAMOK BETÖLTÉSE ────────────────────────────────────────────────────
 async function loadMyCourses() {
     const container = document.getElementById('myCoursesContainer');
     container.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div></div>';
@@ -1055,7 +1018,6 @@ async function loadMyCourses() {
     }
 }
 
-// ── KÁRTYA RENDERELÉS ─────────────────────────────────────────────────────────
 function displayMyCourses(courses) {
     const container = document.getElementById('myCoursesContainer');
     container.innerHTML = '';
@@ -1080,22 +1042,18 @@ function displayMyCourses(courses) {
         const description = course.description || 'Nincs leírás megadva.';
         const price = course.price ? parseInt(course.price) : 0;
         const courseId = course.id;
-
-        // ── Fejléckép URL ──
         const rawHeader = course.header_image || course.headerImage;
         const hasHeaderImage = rawHeader && rawHeader !== 'null' && rawHeader.trim() !== '';
         const headerBgUrl = hasHeaderImage
             ? (rawHeader.startsWith('http') ? rawHeader : window.location.origin + rawHeader)
             : '';
 
-        // ── Tanár profilkép URL ──
         const rawPic = course.instructor_profile_picture || course.instructorProfilePicture;
         const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
         const picUrl = hasPic
             ? (rawPic.startsWith('http') ? rawPic : window.location.origin + rawPic)
             : '';
 
-        // ── Dátum badge ──
         let dateBadge = '';
         if (course.start_date || course.startDate) {
             const d = new Date(course.start_date || course.startDate);
@@ -1103,7 +1061,6 @@ function displayMyCourses(courses) {
             dateBadge = `<div class="course-header-date"><i class='bx bx-calendar'></i><span>${str}</span></div>`;
         }
 
-        // ── Infó badge-ek ──
         let badges = '';
         if (course.max_participants || course.maxParticipants) {
             badges += `<span class="course-badge"><i class='bx bx-group'></i> ${course.max_participants || course.maxParticipants} fő</span>`;
@@ -1152,7 +1109,6 @@ function displayMyCourses(courses) {
     });
 }
 
-// ── LÉTREHOZÁS MODAL ──────────────────────────────────────────────────────────
 async function openCreateModal() {
     await loadCategories();
     populateCategorySelect('newCategory');
@@ -1185,7 +1141,6 @@ async function handleCreateCourse(event) {
 
         if (res.ok && result.statusCode === 201) {
             const courseId = result.courseId;
-            // Fejléckép feltöltés ha van
             const imgFile = document.getElementById('newHeaderImage').files[0];
             if (imgFile && courseId) {
                 await uploadHeaderImage(courseId, imgFile);
@@ -1201,7 +1156,6 @@ async function handleCreateCourse(event) {
     }
 }
 
-// ── SZERKESZTÉS MODAL ─────────────────────────────────────────────────────────
 async function openEditModal(courseId) {
     await loadCategories();
 
@@ -1218,16 +1172,13 @@ async function openEditModal(courseId) {
         document.getElementById('editPrice').value = c.price || 0;
         document.getElementById('editMaxParticipants').value = c.max_participants || c.maxParticipants || 20;
 
-        // Dátumok: ISO-ból csak a yyyy-MM-dd részt vesszük
         const toDateInput = v => v ? v.substring(0, 10) : '';
         document.getElementById('editStartDate').value = toDateInput(c.start_date || c.startDate);
         document.getElementById('editEndDate').value = toDateInput(c.end_date || c.endDate);
 
-        // Kategória
         const catId = c.category_id || c.categoryId;
         populateCategorySelect('editCategory', catId);
 
-        // Fejléckép preview
         const rawHeader = c.header_image || c.headerImage;
         const preview = document.getElementById('editHeaderPreview');
         if (rawHeader && rawHeader !== 'null') {
@@ -1274,7 +1225,6 @@ async function handleEditCourse(event) {
         const result = await res.json();
 
         if (res.ok) {
-            // Fejléckép feltöltés ha választottak új képet
             const imgFile = document.getElementById('editHeaderImage').files[0];
             if (imgFile) {
                 await uploadHeaderImage(courseId, imgFile);
@@ -1290,7 +1240,6 @@ async function handleEditCourse(event) {
     }
 }
 
-// ── FEJLÉCKÉP FELTÖLTÉS HELPER ────────────────────────────────────────────────
 async function uploadHeaderImage(courseId, file) {
     const formData = new FormData();
     formData.append('headerImage', file);
@@ -1306,7 +1255,6 @@ async function uploadHeaderImage(courseId, file) {
     }
 }
 
-// ── TÖRLÉS ───────────────────────────────────────────────────────────────────
 async function confirmDelete(courseId) {
     if (!confirm('Biztosan törölni szeretnéd ezt a tanfolyamot? Ez visszafordíthatatlan!')) return;
     try {
@@ -1325,7 +1273,6 @@ async function confirmDelete(courseId) {
     }
 }
 
-// ── ANYAG FELTÖLTÉS ───────────────────────────────────────────────────────────
 function openUploadModal(courseId) {
     document.getElementById('uploadCourseId').value = courseId;
     document.getElementById('uploadMaterialModal').style.display = 'flex';
@@ -1364,14 +1311,12 @@ async function handleUploadMaterial(event) {
     }
 }
 
-// ── MODAL BACKDROP KLIKK ──────────────────────────────────────────────────────
 window.onclick = function(e) {
     if (e.target.id === 'createCourseModal') closeCreateModal();
     if (e.target.id === 'editCourseModal') closeEditModal();
     if (e.target.id === 'uploadMaterialModal') closeUploadModal();
 };
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
     checkIfInstructor();

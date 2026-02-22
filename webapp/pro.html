@@ -20,61 +20,6 @@
             --radius: 4px;
         }
 
-        
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
         * { box-sizing: border-box; }
 
         body {
@@ -140,7 +85,6 @@
             color: transparent;
         }
 
-        /* Hamburger menü gomb */
         .menu-toggle {
             display: none;
             flex-direction: column;
@@ -644,7 +588,6 @@
             }
         }
 
-        /* Dark Mode - Backgrounds AND Text Colors */
         [data-theme="dark"] body {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             background-attachment: fixed;
@@ -988,7 +931,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features">
         <h2 class="section-title">Miért válassz minket?</h2>
         
@@ -1019,7 +961,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
     <section class="about">
         <div class="about-image">
             <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80" alt="Tanterem">
@@ -1032,7 +973,6 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
     <section class="stats">
         <div class="stat-item">
             <div class="stat-number">5000+</div>
@@ -1052,7 +992,6 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
         <h2>Készen állsz az indulásra?</h2>
         <p>Csatlakozz több ezer tanulóhoz és kezdd el fejlődésedet még ma!</p>
@@ -1060,13 +999,12 @@
     </section>
 
     <footer>
-        2025 | SkillBook
+        2026 | SkillBook
     </footer>
 
 <script>
     const API_BASE_URL = '/SkillBook/api';
 
-    // Apply saved theme immediately
     (function() {
         const theme = localStorage.getItem('theme');
         if (theme === 'dark') {
@@ -1074,7 +1012,6 @@
         }
     })();
 
-    // Segédfüggvény az auth header-hez
     function authHeaders() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         return {
@@ -1083,7 +1020,6 @@
         };
     }
 
-    // Hamburger menü toggle
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
 
@@ -1093,7 +1029,6 @@
         });
     }
 
-    // Ellenőrzi, hogy van-e legalább egy saját kurzusa az oktatónak
     async function checkMyCoursesNav() {
         const link = document.getElementById('myCoursesNav');
         if (!link) return;
@@ -1138,7 +1073,6 @@
 
         if (token && userStr) {
             try {
-                // Friss adatokat kérünk a backendtől (profilkép miatt is)
                 const res = await fetch(API_BASE_URL + '/Users/me', {
                     headers: authHeaders()
                 });
@@ -1155,13 +1089,10 @@
 
                 const user = result.data;
 
-                // Név frissítése
                 userName.textContent = user.name || user.email || 'Felhasználó';
 
-                // Avatar / profilkép logika
                 if (user.profilePicture && user.profilePicture.trim() !== '') {
-                    // Van feltöltött kép → background-ként használjuk
-                    // Teljes URL előállítása, ha relatív (ezt állítsd a sajátodra, ha kell)
+                    
                     const imageUrl = user.profilePicture.startsWith('http') 
                         ? user.profilePicture 
                         : `${window.location.origin}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`;
@@ -1170,15 +1101,13 @@
                     userAvatar.style.backgroundSize = 'cover';
                     userAvatar.style.backgroundPosition = 'center';
                     userAvatar.style.backgroundRepeat = 'no-repeat';
-                    userAvatar.textContent = ''; // inicial betű eltüntetése
+                    userAvatar.textContent = '';
                 } else {
-                    // Nincs kép → marad az inicial
                     const initial = (user.name || user.email || '?')[0].toUpperCase();
                     userAvatar.textContent = initial;
-                    userAvatar.style.backgroundImage = ''; // biztosan töröljük, ha előtte volt kép
+                    userAvatar.style.backgroundImage = '';
                 }
 
-                // Láthatóságok
                 userMenuContainer.classList.add('visible');
                 authLinks.classList.add('hidden');
 
@@ -1186,19 +1115,16 @@
                     chatLink.style.display = 'inline-flex';
                 }
 
-                // Admin link megjelenítése
                 const adminLink = document.getElementById('adminLink');
                 if (adminLink && user.role === 'admin') {
                     adminLink.style.display = 'block';
                 }
 
-                // Frissítjük a localStorage-t is, hogy más oldalakon is friss legyen
                 localStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.setItem('user', JSON.stringify(user));
 
             } catch (err) {
                 console.error('checkAuth hiba:', err);
-                // Ha valamiért nem sikerült lekérni → kijelentkeztetjük
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 sessionStorage.removeItem('token');
@@ -1220,7 +1146,6 @@
         if (chatLink) chatLink.style.display = 'none';
     }
 
-    // User dropdown toggle
     const userTrigger = document.getElementById('userMenuTrigger');
     const userDropdown = document.getElementById('userDropdown');
 
@@ -1241,7 +1166,6 @@
         });
     }
 
-    // Kijelentkezés
     document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.removeItem('token');
@@ -1253,7 +1177,6 @@
         window.location.href = 'pro.html';
     });
 
-    // Inicializálás
     document.addEventListener('DOMContentLoaded', async function(){
         await checkAuth();
         await checkMyCoursesNav();

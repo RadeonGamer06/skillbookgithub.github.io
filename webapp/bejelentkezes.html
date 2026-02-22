@@ -144,13 +144,11 @@
         const data = await res.json().catch(() => ({}));
 
         if (res.ok && data.token) {
-          // MODOSÍTÁS: Mindig localStorage-ba mentünk a chat.html és pro.html átjárhatóságáért
           localStorage.setItem('token', data.token);
           if (data.user) {
               localStorage.setItem('user', JSON.stringify(data.user));
           }
           
-          // Takarítás
           sessionStorage.removeItem('token');
           sessionStorage.removeItem('user');
 

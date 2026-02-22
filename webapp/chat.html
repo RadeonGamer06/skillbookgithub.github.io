@@ -31,7 +31,6 @@
             overflow: hidden;
         }
 
-        /* Header styles */
         header {
             position: sticky;
             top: 0;
@@ -176,7 +175,6 @@
             .dropdown-arrow { color: white; }
         }
 
-        /* ════════ CHAT LAYOUT ════════ */
         .chat-container {
             display: grid;
             grid-template-columns: 340px 1fr;
@@ -185,7 +183,6 @@
             background: var(--bg-1);
         }
 
-        /* ════════ SIDEBAR ════════ */
         .sidebar {
             border-right: 1px solid var(--border);
             display: flex;
@@ -215,7 +212,6 @@
         }
         .search-container input:focus { border-color: var(--accent); }
 
-        /* Szűrő gombok */
         .filter-row {
             display: flex;
             gap: 6px;
@@ -298,7 +294,6 @@
             font-size: 0.85rem;
         }
 
-        /* ════════ CHAT MAIN ════════ */
         .chat-main {
             display: flex;
             flex-direction: column;
@@ -409,7 +404,6 @@
         .send-btn:hover { opacity: 0.88; }
         .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Dark Mode */
         [data-theme="dark"] body { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); background-attachment: fixed; color: #f1f5f9; }
         [data-theme="dark"] header { background: rgba(30,41,59,0.9); }
         [data-theme="dark"] nav a, [data-theme="dark"] nav button { background: rgba(51,65,85,0.6); color: #f1f5f9; }
@@ -441,39 +435,23 @@
         [data-theme="dark"] .filter-btn:hover { background: rgba(51,65,85,0.9); }
         [data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: rgba(241,245,249,0.45); }
         [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
-
-        /* ── Chat oldal hiányzó szövegszínek sötét módban ── */
-
-        /* Felhasználónevek a sidebar listában */
         [data-theme="dark"] .user-item-name { color: #f1f5f9; }
-
-        /* Sidebar avatar betű */
         [data-theme="dark"] .chat-user-avatar {
             color: #f1f5f9;
             background: rgba(71,85,105,0.7);
         }
 
-        /* Chat fejléc partner neve */
         [data-theme="dark"] .chat-header-name { color: #f1f5f9; }
 
-        /* Chat fejléc avatar betű */
         [data-theme="dark"] .chat-header-avatar {
             color: #f1f5f9;
             background: rgba(71,85,105,0.8);
         }
-
-        /* Üzenetek időbélyege */
         [data-theme="dark"] .message.received .msg-time { color: rgba(241,245,249,0.5); }
         [data-theme="dark"] .message.sent    .msg-time { color: rgba(255,255,255,0.6); }
-
-        /* Dátum elválasztó (Ma / Tegnap) */
         [data-theme="dark"] .date-sep { color: rgba(241,245,249,0.45); }
-
-        /* Üres állapot / üdvözlő szöveg */
         [data-theme="dark"] .chat-placeholder { color: rgba(241,245,249,0.45); }
         [data-theme="dark"] .chat-placeholder p { color: rgba(241,245,249,0.45); }
-
-        /* Role badge-ek sötét alapon */
         [data-theme="dark"] .role-tag.role-student    { background: rgba(5,150,105,0.2);   color: #34d399; }
         [data-theme="dark"] .role-tag.role-instructor { background: rgba(139,92,246,0.2);  color: #a78bfa; }
         [data-theme="dark"] .role-tag.role-admin      { background: rgba(239,68,68,0.2);   color: #f87171; }
@@ -521,7 +499,6 @@
 
 <div class="chat-container">
 
-    <!-- ════════ SIDEBAR ════════ -->
     <div class="sidebar">
         <div class="search-container">
             <input type="text" id="userSearch" placeholder="Keresés név vagy email alapján...">
@@ -533,13 +510,11 @@
         </div>
 
         <div class="user-lists" id="userLists">
-            <!-- Korábbi beszélgetések -->
             <div id="recentSection" style="display:none;">
                 <div class="list-section-title">Korábbi beszélgetések</div>
                 <div id="recentChats"></div>
             </div>
 
-            <!-- Összes többi felhasználó -->
             <div id="allSection">
                 <div class="list-section-title">Összes felhasználó</div>
                 <div id="allUsersList">
@@ -549,7 +524,6 @@
         </div>
     </div>
 
-    <!-- ════════ CHAT FŐTERÜLET ════════ -->
     <div class="chat-main">
         <div class="chat-header" id="chatHeader">
             <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
@@ -576,32 +550,20 @@
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════════
-// KONFIGURÁCIÓ - igazítsd a projekt nevéhez!
-// ════════════════════════════════════════════════════════════════════
 const API = '/SkillBook/api';
 
-// ════════════════════════════════════════════════════════════════════
-// ÁLLAPOT
-// ════════════════════════════════════════════════════════════════════
 let myId           = null;   // bejelentkezett user ID-ja
 let allUsers       = [];     // /api/chat/users válasza (mind)
-let activeFilter   = 'all';  // 'all' | 'student' | 'instructor'
+let activeFilter   = 'all';  // 'all' 'student' 'instructor'
 let selectedId     = null;   // kiválasztott partner ID
 let selectedUser   = null;   // kiválasztott partner adatai
 let pollTimer      = null;   // üzenet polling időzítő
 
-// ════════════════════════════════════════════════════════════════════
-// TÉMA (azonnal alkalmazza, villanás nélkül)
-// ════════════════════════════════════════════════════════════════════
 (function(){
     if (localStorage.getItem('theme') === 'dark')
         document.documentElement.setAttribute('data-theme','dark');
 })();
 
-// ════════════════════════════════════════════════════════════════════
-// TOKEN SEGÉDLET
-// ════════════════════════════════════════════════════════════════════
 function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
 }
@@ -609,16 +571,10 @@ function authHdr() {
     return { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' };
 }
 
-// ════════════════════════════════════════════════════════════════════
-// HAMBURGER MENÜ
-// ════════════════════════════════════════════════════════════════════
 document.getElementById('menuToggle')?.addEventListener('click', () =>
     document.getElementById('mainNav')?.classList.toggle('active')
 );
 
-// ════════════════════════════════════════════════════════════════════
-// USER DROPDOWN
-// ════════════════════════════════════════════════════════════════════
 const trigger  = document.getElementById('userMenuTrigger');
 const dropdown = document.getElementById('userDropdown');
 trigger?.addEventListener('click', e => {
@@ -629,15 +585,11 @@ document.addEventListener('click', e => {
     if (trigger && !trigger.contains(e.target)) dropdown?.classList.remove('visible');
 });
 
-// KIJELENTKEZÉS
 document.getElementById('logoutBtnNav')?.addEventListener('click', () => {
     ['token','user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     window.location.href = 'pro.html';
 });
 
-// ════════════════════════════════════════════════════════════════════
-// AUTH ELLENŐRZÉS ÉS FEJLÉC FRISSÍTÉS
-// ════════════════════════════════════════════════════════════════════
 async function initAuth() {
     if (!getToken()) { window.location.href = 'bejelentkezes.html'; return false; }
     try {
@@ -648,7 +600,6 @@ async function initAuth() {
         const user = json.data;
         myId = user.id;
 
-        // Header felhasználói menü
         document.getElementById('userName').textContent = user.name || user.email || 'Felhasználó';
         const av = document.getElementById('userAvatar');
         if (user.profilePicture) {
@@ -662,7 +613,6 @@ async function initAuth() {
         document.getElementById('userMenuContainer').classList.add('visible');
         document.getElementById('authLinks').classList.add('hidden');
 
-        // Tanfolyamaim link (csak oktatónak, ha van kurzusa)
         if (user.role === 'instructor') checkMyCoursesNav(user.id);
 
         return true;
@@ -681,12 +631,9 @@ async function checkMyCoursesNav(instructorId) {
         const link = document.getElementById('myCoursesNav');
         if (link) link.style.display =
             courses.some(c => String(c.instructor_id) === String(instructorId)) ? 'inline-flex' : 'none';
-    } catch { /* csendes */ }
+    } catch {}
 }
 
-// ════════════════════════════════════════════════════════════════════
-// FELHASZNÁLÓK BETÖLTÉSE  →  GET /api/chat/users
-// ════════════════════════════════════════════════════════════════════
 async function loadUsers() {
     try {
         const res  = await fetch(API + '/chat/users', { headers: authHdr() });
@@ -700,13 +647,9 @@ async function loadUsers() {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SIDEBAR RENDERELÉS (szűrő + keresés figyelembevételével)
-// ════════════════════════════════════════════════════════════════════
 function renderSidebar() {
     const searchVal = document.getElementById('userSearch').value.trim().toLowerCase();
 
-    // Szűrés: role + keresőszó
     const filtered = allUsers.filter(u => {
         const roleOk   = activeFilter === 'all' || u.role === activeFilter;
         const searchOk = !searchVal ||
@@ -715,12 +658,10 @@ function renderSidebar() {
         return roleOk && searchOk;
     });
 
-    // Akikkel volt már beszélgetés (hasConversation = true) → "Korábbi" szekció
     const recent = filtered.filter(u => u.hasConversation)
         .sort((a,b) => (b.lastMessageAt || '').localeCompare(a.lastMessageAt || ''));
     const others = filtered.filter(u => !u.hasConversation);
 
-    // ── Korábbi beszélgetések ──
     const recentSection = document.getElementById('recentSection');
     const recentDiv     = document.getElementById('recentChats');
     if (recent.length > 0) {
@@ -731,7 +672,6 @@ function renderSidebar() {
         recentDiv.innerHTML = '';
     }
 
-    // ── Összes többi felhasználó ──
     const allDiv = document.getElementById('allUsersList');
     if (others.length > 0) {
         allDiv.innerHTML = others.map(u => userItemHtml(u, false)).join('');
@@ -766,19 +706,14 @@ function userItemHtml(u, showPreview) {
         </div>`;
 }
 
-// ════════════════════════════════════════════════════════════════════
-// PARTNER KIVÁLASZTÁSA
-// ════════════════════════════════════════════════════════════════════
 function selectPartner(partnerId) {
     selectedId   = partnerId;
     selectedUser = allUsers.find(u => u.id === partnerId) || { id: partnerId, name: 'Felhasználó' };
 
-    // Aktív kiemelés frissítése a DOM-ban
     document.querySelectorAll('.user-item').forEach(el => {
         el.classList.toggle('active', Number(el.dataset.uid) === partnerId);
     });
 
-    // Fejléc frissítése
     const nameEl   = document.getElementById('chatPartnerName');
     const roleEl   = document.getElementById('chatPartnerRole');
     const avatarEl = document.getElementById('chatHeaderAvatar');
@@ -794,20 +729,15 @@ function selectPartner(partnerId) {
         avatarEl.textContent = (selectedUser.name || '?')[0].toUpperCase();
     }
 
-    // Input engedélyezése
     document.getElementById('messageInput').disabled = false;
     document.getElementById('sendBtn').disabled      = false;
     document.getElementById('messageInput').focus();
 
-    // Üzenetek azonnal + polling
     loadMessages();
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(loadMessages, 3000);
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ÜZENETEK LEKÉRÉSE  →  GET /api/chat/messages?partnerId=X
-// ════════════════════════════════════════════════════════════════════
 async function loadMessages() {
     if (!selectedId) return;
     try {
@@ -853,9 +783,6 @@ function renderMessages(messages) {
     if (atBottom) container.scrollTop = container.scrollHeight;
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ÜZENET KÜLDÉSE  →  POST /api/chat/send
-// ════════════════════════════════════════════════════════════════════
 async function sendMessage() {
     const input   = document.getElementById('messageInput');
     const content = input.value.trim();
@@ -873,7 +800,6 @@ async function sendMessage() {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || res.status);
 
-        // Ha az üzenet elküldése sikerült, az adott user kerüljön a recent-be
         const u = allUsers.find(u => u.id === selectedId);
         if (u) {
             u.hasConversation    = true;
@@ -894,16 +820,12 @@ async function sendMessage() {
     }
 }
 
-// Küldés: gombkattintás
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-// Küldés: Enter billentyű
+
 document.getElementById('messageInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 
-// ════════════════════════════════════════════════════════════════════
-// SZŰRŐ GOMBOK
-// ════════════════════════════════════════════════════════════════════
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -913,18 +835,12 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     });
 });
 
-// ════════════════════════════════════════════════════════════════════
-// KERESÉS
-// ════════════════════════════════════════════════════════════════════
 let searchTimer;
 document.getElementById('userSearch').addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(renderSidebar, 220);
 });
 
-// ════════════════════════════════════════════════════════════════════
-// SEGÉDFÜGGVÉNYEK
-// ════════════════════════════════════════════════════════════════════
 function esc(str) {
     return String(str ?? '')
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -938,7 +854,7 @@ function buildImgUrl(path) {
 
 function timeStr(raw) {
     if (!raw) return '';
-    // Java LocalDateTime.toString() → "2025-04-20T14:35:22.123" – replace T with space
+    // Java LocalDateTime.toString() – replace T with space
     const d = new Date(String(raw).replace('T',' '));
     if (isNaN(d)) return '';
     return d.toLocaleTimeString('hu-HU', { hour:'2-digit', minute:'2-digit' });
@@ -955,9 +871,6 @@ function dayLabel(raw) {
     return d.toLocaleDateString('hu-HU', { year:'numeric', month:'long', day:'numeric' });
 }
 
-// ════════════════════════════════════════════════════════════════════
-// INICIALIZÁLÁS
-// ════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
     const ok = await initAuth();
     if (ok) await loadUsers();

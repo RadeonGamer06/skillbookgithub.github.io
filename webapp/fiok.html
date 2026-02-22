@@ -233,17 +233,15 @@
         <div class="profile-card">
             <h1>Fiókom</h1>
 
-            <!-- ÚJ: PROFILKÉP MÓDOSÍTÁS -->
             <div class="form-group" style="text-align:center; margin-bottom:25px;">
                 <label>Profilkép</label>
                 <div id="currentAvatar" style="width:120px;height:120px;margin:15px auto; border-radius:50%; overflow:hidden; background:#333; border:3px solid #60a5fa;">
-                    <!-- Itt jelenik meg a kép vagy kezdőbetű -->
+
                 </div>
                 <input type="file" id="newProfilePicture" accept="image/*">
                 <button type="button" id="uploadAvatarBtn" class="btn btn-primary" style="margin-top:10px;">Profilkép feltöltése</button>
             </div>
 
-            <!-- Felhasználó adatok megjelenítése -->
             <p id="userName"><strong>Név:</strong> Betöltés...</p>
             <p id="userEmail"><strong>Email:</strong> Betöltés...</p>
             <p id="userRole"><strong>Szerepkör:</strong> Betöltés...</p>
@@ -279,7 +277,6 @@
     <div id="messageBox" class="message-box"></div>
 
     <script>
-        // Apply saved theme immediately
         (function() {
             const theme = localStorage.getItem('theme');
             if (theme === 'dark') {
@@ -290,7 +287,6 @@
         const API_BASE_URL = `/SkillBook/api/Users`;
         const tokenStorage = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-        // Üzenet megjelenítése
         function showMessage(message, isError = false) {
             const box = document.getElementById('messageBox');
             box.textContent = message;
@@ -299,7 +295,6 @@
             setTimeout(() => box.style.display = 'none', 5000);
         }
 
-        // Auth ellenőrzés
         async function checkAuth() {
             if (!tokenStorage) {
                 window.location.href = 'bejelentkezes.html';
@@ -313,7 +308,6 @@
             }
         }
 
-        // Felhasználó adatok betöltése
         async function loadUserData() {
             try {
                 const res = await fetch(API_BASE_URL + '/me', {
@@ -325,12 +319,11 @@
                     document.getElementById('userName').innerHTML = `<strong>Név:</strong> ${user.name}`;
                     document.getElementById('userEmail').innerHTML = `<strong>Email:</strong> ${user.email}`;
                     document.getElementById('userRole').innerHTML = `<strong>Szerepkör:</strong> ${user.role}`;
-                    // Ha van profilePicture a válaszban, tedd bele az avatarba
                     const avatar = document.getElementById('currentAvatar');
                     if (user.profilePicture) {
                         avatar.innerHTML = `<img src="${user.profilePicture}" alt="Profilkép" style="width:100%; height:100%; object-fit:cover;">`;
                     } else {
-                        avatar.innerHTML = user.name.charAt(0).toUpperCase();  // Kezdőbetű
+                        avatar.innerHTML = user.name.charAt(0).toUpperCase();
                     }
                 }
             } catch (err) {
@@ -338,7 +331,6 @@
             }
         }
 
-        // Profil frissítése (jelenlegi form)
         document.getElementById('updateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -374,7 +366,7 @@
                     showMessage('Adatok sikeresen frissítve!', false);
                     document.getElementById('newPassword').value = '';
                     document.getElementById('currentPassword').value = '';
-                    loadUserData();  // Újratöltés
+                    loadUserData();
                 } else {
                     showMessage(result.message || 'Hiba történt a mentés során', true);
                 }
@@ -384,7 +376,6 @@
             }
         });
 
-        // ÚJ: PROFILKÉP FELTÖLTÉS
         document.getElementById('uploadAvatarBtn').addEventListener('click', async () => {
             const fileInput = document.getElementById('newProfilePicture');
             const file = fileInput.files[0];
@@ -420,7 +411,6 @@
             }
         });
 
-        // Fiók törlése
         document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
             if (!confirm('Biztosan törölni szeretnéd a fiókodat? Ez a művelet VISSZAVONHATATLAN!')) {
                 return;
@@ -449,7 +439,6 @@
             }
         });
 
-        // Betöltéskor
         document.addEventListener('DOMContentLoaded', () => {
             console.log('API Base URL:', API_BASE_URL);
             checkAuth();
@@ -460,7 +449,7 @@
     </script>
 
     <footer style="width: 100%; text-align: center; padding: 22px 14px; color: var(--muted); border-top: 1px solid var(--border); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); margin-top: auto; transition: background 0.3s ease;">
-        2025 | SkillBook
+        2026 | SkillBook
     </footer>
 
     <style>

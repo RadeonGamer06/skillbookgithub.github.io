@@ -78,9 +78,6 @@
             50%      { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
         }
 
-        /* ═══════════════════════════════════════════════
-           HEADER — 1:1 másolat a pro.html-ből
-        ═══════════════════════════════════════════════ */
         header {
             position: sticky;
             top: 0;
@@ -124,7 +121,6 @@
 
         [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
 
-        /* Hamburger */
         .menu-toggle {
             display: none;
             flex-direction: column;
@@ -349,11 +345,6 @@
         .logout { color: #ff6b6b !important; }
         .logout:hover { background: rgba(255,107,107,0.15) !important; }
 
-
-        /* ═══════════════════════════════════════════════
-           OLDAL TARTALOM
-        ═══════════════════════════════════════════════ */
-
         .page-wrap {
             flex: 1;
             width: min(1100px, calc(100% - 40px));
@@ -368,7 +359,6 @@
             .page-wrap { grid-template-columns: 1fr; margin-top: 28px; }
         }
 
-        /* Kártya alap */
         .panel {
             background: var(--card);
             border: 1px solid var(--border);
@@ -388,7 +378,6 @@
 
         [data-theme="dark"] .panel { background: rgba(30,41,59,0.85); }
 
-        /* Section label */
         .sec-label {
             font-size: 0.71rem;
             font-weight: 700;
@@ -407,7 +396,6 @@
             background: var(--border);
         }
 
-        /* Panel cím */
         .panel-title {
             font-size: 1.85rem;
             font-weight: 800;
@@ -426,7 +414,6 @@
             line-height: 1.5;
         }
 
-        /* Tanfolyam összefoglaló */
         .course-box {
             background: var(--card-2);
             border: 1px solid var(--border);
@@ -500,7 +487,6 @@
         .d-value { font-weight: 600; color: var(--text); }
         [data-theme="dark"] .d-value { color: #f1f5f9; }
 
-        /* Árkalkuláció */
         .price-box {
             background: var(--card-2);
             border: 1px solid var(--border);
@@ -538,7 +524,6 @@
             color: transparent;
         }
 
-        /* Trust badges */
         .trust-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -559,7 +544,6 @@
         .trust-badge i { font-size: 1.25rem; color: var(--accent-2); }
         .trust-badge span { font-size: 0.71rem; color: var(--muted); line-height: 1.3; }
 
-        /* ─── 3D Kártya vizualizáció ─── */
         .card-visual {
             height: 175px;
             background: linear-gradient(135deg, #3b1f8c 0%, #1a4a3a 100%);
@@ -640,7 +624,6 @@
             font-family: 'Courier New', monospace;
         }
 
-        /* ─── Form mezők ─── */
         .fsec-title {
             font-size: 0.72rem;
             font-weight: 700;
@@ -703,7 +686,6 @@
         .input-row { display: flex; gap: 11px; }
         .input-row .form-group { flex: 1; }
 
-        /* Pay gomb — a pro.html cta-button stílusával */
         .pay-btn {
             width: 100%;
             margin-top: 6px;
@@ -770,7 +752,6 @@
         }
         [data-theme="dark"] .card-logo { background: rgba(30,41,59,0.7); }
 
-        /* ─── Processing overlay ─── */
         .processing-overlay {
             display: none;
             position: fixed;
@@ -794,7 +775,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .processing-text { font-size: 0.97rem; color: rgba(241,245,249,0.85); }
 
-        /* ─── Success screen ─── */
         .success-screen {
             display: none;
             position: fixed;
@@ -892,7 +872,6 @@
         .go-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 50px rgba(96,165,250,.42); }
         [data-theme="dark"] .go-btn { color: #f1f5f9; }
 
-        /* Footer */
         footer {
             text-align: center;
             padding: 32px 26px;
@@ -910,14 +889,11 @@
     </style>
 </head>
 <body>
-
-    <!-- Processing overlay -->
     <div class="processing-overlay" id="processingOverlay">
         <div class="spinner"></div>
         <div class="processing-text">Tranzakció feldolgozása…</div>
     </div>
 
-    <!-- Success screen -->
     <div class="success-screen" id="successScreen">
         <div class="success-icon">✓</div>
         <h2>Sikeres fizetés!</h2>
@@ -934,7 +910,6 @@
         </a>
     </div>
 
-    <!-- ══ HEADER — ugyanaz mint a pro.html ══ -->
     <header>
         <div class="header-left">
             <a class="logo" href="pro.html">
@@ -977,10 +952,8 @@
         </nav>
     </header>
 
-    <!-- TARTALOM -->
     <div class="page-wrap">
 
-        <!-- BAL: Rendelés összefoglaló -->
         <div class="left-panel panel">
             <div class="sec-label"><i class='bx bx-receipt'></i> Rendelés összefoglaló</div>
 
@@ -1049,7 +1022,6 @@
             </div>
         </div>
 
-        <!-- JOBB: Fizetési form -->
         <div class="right-panel panel">
             <div class="sec-label"><i class='bx bx-credit-card'></i> Fizetési adatok</div>
 
@@ -1141,7 +1113,7 @@
     </div>
 
     <footer>
-        2025 | SkillBook &nbsp;·&nbsp;
+        2026 | SkillBook &nbsp;·&nbsp;
         <a href="#">Adatvédelem</a> &nbsp;·&nbsp;
         <a href="#">ÁSZF</a>
     </footer>
@@ -1149,7 +1121,6 @@
 <script>
     const API_BASE_URL = '/SkillBook/api';
 
-    // Téma — ugyanolyan mint a pro.html
     (function() {
         const theme = localStorage.getItem('theme');
         if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
@@ -1160,14 +1131,12 @@
         return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
     }
 
-    // Hamburger menü
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
     if (menuToggle && nav) {
         menuToggle.addEventListener('click', () => nav.classList.toggle('active'));
     }
 
-    // Dropdown
     const userTrigger = document.getElementById('userMenuTrigger');
     const userDropdown = document.getElementById('userDropdown');
     if (userTrigger && userDropdown) {
@@ -1186,7 +1155,6 @@
         });
     }
 
-    // Auth check
     async function checkAuth() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
@@ -1245,7 +1213,6 @@
         }
     }
 
-    // Kijelentkezés
     document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.removeItem('token'); localStorage.removeItem('user');
@@ -1254,7 +1221,6 @@
         window.location.href = 'pro.html';
     });
 
-    // ── URL paraméterek ──
     const p = new URLSearchParams(window.location.search);
     const courseId    = parseInt(p.get('id') || p.get('courseId') || '0');
     const courseName  = p.get('name')         || 'Tanfolyam';
@@ -1270,7 +1236,6 @@
         try { return new Date(s).toLocaleDateString('hu-HU'); } catch { return s; }
     }
 
-    // Összefoglaló feltöltése
     document.getElementById('sumName').textContent        = courseName;
     document.getElementById('sumStart').textContent       = fmtDate(courseStart);
     document.getElementById('sumEnd').textContent         = fmtDate(courseEnd);
@@ -1291,7 +1256,6 @@
     document.getElementById('totalLine').textContent = formatHU(total);
     document.getElementById('btnAmt').textContent    = formatHU(total);
 
-    // Élő kártyavizualizáció
     document.getElementById('fNumber').addEventListener('input', function() {
         let v = this.value.replace(/\D/g,'').slice(0,16);
         this.value = v.replace(/(.{4})/g,'$1 ').trim();
@@ -1309,7 +1273,6 @@
         document.getElementById('cvExp').textContent = v || 'MM/ÉÉ';
     });
 
-    // ── Fizetés gomb – valós enroll + számla email logika ──
     document.getElementById('payBtn').addEventListener('click', async function() {
         // Bejelentkezés ellenőrzés
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -1319,7 +1282,6 @@
             return;
         }
 
-        // Kártya adatok alap-validáció
         const fName   = document.getElementById('fName').value.trim();
         const fEmail  = document.getElementById('fEmail').value.trim();
         const fNumber = document.getElementById('fNumber').value.replace(/\s/g,'');
@@ -1335,7 +1297,6 @@
         document.getElementById('processingOverlay').classList.add('visible');
 
         try {
-        // 1. URL-ből már kinyertük a course_id-t (külső scope)
             const sessionIdParam = new URLSearchParams(window.location.search).get('sessionId')
                                     ? parseInt(new URLSearchParams(window.location.search).get('sessionId')) : null;
 
@@ -1343,7 +1304,6 @@
                 throw new Error('Hiányzó tanfolyam azonosító!');
             }
 
-            // 2. Enrollments/enroll API hívás
             const enrollBody = { courseId };
             if (sessionIdParam) enrollBody.sessionId = sessionIdParam;
 
@@ -1358,12 +1318,10 @@
 
             const enrollData = await enrollRes.json();
 
-            // 409 = már beiratkozott → nem hiba, folytatjuk
             if (!enrollRes.ok && enrollRes.status !== 409) {
                 throw new Error(enrollData.message || 'Beiratkozási hiba');
             }
 
-            // 3. Számla email küldés a backenden keresztül
             const txId = 'SB-' + Date.now().toString(36).toUpperCase().slice(-8);
             await fetch(API_BASE_URL + '/Enrollments/sendInvoice', {
                 method: 'POST',
@@ -1382,9 +1340,8 @@
                     courseEnd:   courseEnd   || '',
                     instructorName: courseInstr || ''
                 })
-            }).catch(() => {}); // email hiba ne blokkolja a flow-t
+            }).catch(() => {});
 
-            // 4. Success megjelenítése
             document.getElementById('processingOverlay').classList.remove('visible');
 
             document.getElementById('sTxId').textContent       = txId;
