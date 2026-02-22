@@ -8,8 +8,6 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.enterprise.context.ApplicationScoped;
@@ -17,15 +15,11 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class EmailService {
     
-    // Gmail SMTP beállítások
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static final String EMAIL_FROM = "skillbookweb@gmail.com";
     private static final String PASSWORD = "chzpsbshqezoeuvx";
 
-    /**
-     * Kapcsolati űrlap email küldése
-     */
     public boolean sendContactEmail(String senderName, String senderEmail, String subject, String messageText) {
         try {
             Properties props = buildSmtpProps();
@@ -94,7 +88,6 @@ public class EmailService {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_FROM, "SkillBook Biztonság"));
             
-            // Ha email cím változott, MINDKÉT címre küldjünk
             if (emailChanged) {
                 message.setRecipients(Message.RecipientType.TO, 
                     InternetAddress.parse(oldEmail + "," + newEmail));
@@ -281,7 +274,6 @@ public class EmailService {
         }
     }
 
-    // ─── SMTP HELPER-EK ─────────────────────────────────────────────────────
     private Properties buildSmtpProps() {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -301,9 +293,6 @@ public class EmailService {
         });
     }
 
-    // ========================================
-    // HTML SABLONOK
-    // ========================================
 
     /**
      * Kapcsolati email HTML sablon
@@ -692,11 +681,6 @@ private String buildForgotPasswordEmailHTML(String userName, String tempPassword
            "</body>\n" +
            "</html>";
 }
-
-
-    // ════════════════════════════════════════════════════════════════════════
-    // SZÁMLA EMAIL – tanfolyam vásárlás után
-    // ════════════════════════════════════════════════════════════════════════
 
     /**
      * Számla / vásárlás visszaigazoló email küldése.

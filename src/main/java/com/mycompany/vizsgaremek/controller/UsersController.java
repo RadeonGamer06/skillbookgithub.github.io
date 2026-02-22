@@ -13,7 +13,6 @@ import javax.ws.rs.core.*;
 
 import java.io.InputStream;
 import java.util.List;
-import org.apache.commons.fileupload.FileUploadException;
 
 @Path("Users")
 public class UsersController {
@@ -21,9 +20,6 @@ public class UsersController {
     @Inject
     private UsersService usersService;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // EGYSZERŰ REGISZTRÁCIÓ - PROFILKÉP NÉLKÜL
-    // ════════════════════════════════════════════════════════════════════════
     @POST
     @Path("createUser")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -228,8 +224,8 @@ public Response updateProfilePicture(@Context HttpServletRequest request) {
 
         DiskFileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(50L * 1024 * 1024);      // teljes kérés max 50 MB
-        upload.setFileSizeMax(50L * 1024 * 1024);  // egyetlen fájl max 50 MB
+        upload.setSizeMax(50L * 1024 * 1024);      //max 50 Mb
+        upload.setFileSizeMax(50L * 1024 * 1024);
 
         List<FileItem> items = upload.parseRequest(request);
 

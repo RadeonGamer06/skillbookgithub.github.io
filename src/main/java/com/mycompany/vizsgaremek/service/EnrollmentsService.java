@@ -184,16 +184,6 @@ public class EnrollmentsService {
         }
         return resp;
     }
-    
-// ══ PATCH: Ezt a metódust add hozzá az EnrollmentsService osztályhoz ══
-// Importok kellenek az osztály tetejére (ha még nincsenek):
-//   import com.mycompany.vizsgaremek.model.Users;
-//   import javax.inject.Inject;
-//   (az EmailService már injektálva van, lásd alább)
-
-// Az osztályon belül szükséges az EmailService injektálása (ha még nincs):
-//   @Inject
-//   private EmailService emailService;
 
     /**
      * Számla email küldése a bejelentkezett felhasználónak tanfolyam vásárlás után.
@@ -208,7 +198,6 @@ public class EnrollmentsService {
                                         String instructorName) {
         JSONObject resp = new JSONObject();
         try {
-            // User adatok lekérése az emailhez
             Users user = em.find(Users.class, userId);
             if (user == null) {
                 resp.put("statusCode", 404);

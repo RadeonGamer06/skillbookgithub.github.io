@@ -2,7 +2,6 @@ package com.mycompany.vizsgaremek.service;
 
 import com.mycompany.vizsgaremek.model.Users;
 import com.mycompany.vizsgaremek.security.JwtUtil;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,15 +25,9 @@ public class UsersService {
     @Inject
     private EmailService emailService;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // PROFILKÉP UPLOAD KONFIGURÁCIÓ - JAVÍTOTT VERZIÓ
-    // ════════════════════════════════════════════════════════════════════════
-
-    // ✅ JAVÍTÁS: WAR-on kívülre mentjük, hogy ne törlődjön minden deploy-nál!
     private static final String UPLOAD_DIR = 
         "C:\\Users\\Bagoly Donát\\Desktop\\SkillBook\\server\\wildfly-preview-26.1.1.Final\\standalone\\data\\uploads\\profile_pictures";
     
-    // ✅ URL prefix ami a böngészőben használható (új REST endpoint-on keresztül)
     private static final String URL_PREFIX = "/SkillBook/api/Uploads/profile_pictures/";
 
    
@@ -47,14 +40,12 @@ public class UsersService {
             System.out.println("   Email: " + email);
             System.out.println("   Role: " + role);
 
-            // Jelszó hashelése
             String hashedPw = BCrypt.hashpw(password, BCrypt.gensalt(12));
             
             if (role == null || role.trim().isEmpty()) {
                 role = "student";
             }
 
-            // User létrehozása DB-ben
             StoredProcedureQuery query = em.createStoredProcedureQuery("createUser");
             query.registerStoredProcedureParameter("nameIN", String.class, ParameterMode.IN);
             query.registerStoredProcedureParameter("emailIN", String.class, ParameterMode.IN);
@@ -70,7 +61,6 @@ public class UsersService {
 
             System.out.println("✅ User sikeresen létrehozva");
 
-            // Üdvözlő email küldése (opcionális)
             try {
                 emailService.sendWelcomeEmail(name, email);
                 System.out.println("✅ Üdvözlő email elküldve");
@@ -104,9 +94,6 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // PROFILKÉP FELTÖLTÉS/FRISSÍTÉS - JAVÍTOTT verzió
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject updateProfilePicture(Integer userId, InputStream fileInputStream, String fileName) {
         JSONObject resp = new JSONObject();
 
@@ -115,7 +102,6 @@ public class UsersService {
             System.out.println("   User ID: " + userId);
             System.out.println("   Fájlnév: " + fileName);
 
-            // User ellenőrzése
             Users user = em.find(Users.class, userId);
             if (user == null) {
                 resp.put("statusCode", 404);
@@ -123,14 +109,12 @@ public class UsersService {
                 return resp;
             }
 
-            // Input validáció
             if (fileInputStream == null || fileName == null) {
                 resp.put("statusCode", 400);
                 resp.put("message", "Hiányzó fájl");
                 return resp;
             }
 
-            // Fájl mentése
             String profilePicUrl = saveProfilePicture(fileInputStream, fileName, userId);
 
             if (profilePicUrl == null) {
@@ -139,7 +123,6 @@ public class UsersService {
                 return resp;
             }
 
-            // DB frissítése
             try {
                 StoredProcedureQuery picQuery = em.createStoredProcedureQuery("updateProfilePicture");
                 picQuery.registerStoredProcedureParameter("userIdIN", Integer.class, ParameterMode.IN);
@@ -150,7 +133,6 @@ public class UsersService {
                 
                 System.out.println("✅ Profilkép sikeresen frissítve: " + profilePicUrl);
 
-                // ── EMAIL ÉRTESÍTŐ profilkép változásról ────────────────
                 try {
                     emailService.sendProfilePictureChangeEmail(user.getName(), user.getEmail());
                     System.out.println("✅ Profilkép módosítási email elküldve");
@@ -194,13 +176,9 @@ public class UsersService {
 
         return resp;
     }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // HELPER: PROFILKÉP FÁJL MENTÉSE - JAVÍTOTT verzió
-    // ════════════════════════════════════════════════════════════════════════
+    
     private String saveProfilePicture(InputStream fileInputStream, String fileName, Integer userId) {
         try {
-            // Könyvtár létrehozása ha nem létezik
             File uploadDir = new File(UPLOAD_DIR);
             if (!uploadDir.exists()) {
                 boolean created = uploadDir.mkdirs();
@@ -211,23 +189,19 @@ public class UsersService {
                 System.out.println("✅ Könyvtár létrehozva: " + UPLOAD_DIR);
             }
 
-            // Fájlkiterjesztés kiolvasása
             String extension = "";
             int dotIndex = fileName.lastIndexOf('.');
             if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
-                extension = fileName.substring(dotIndex); // pl. ".jpg"
+                extension = fileName.substring(dotIndex);
             }
 
-            // Egyedi fájlnév generálása
             String uniqueFileName = "profile_" + userId + "_" + UUID.randomUUID().toString() + extension;
             File targetFile = new File(uploadDir, uniqueFileName);
 
-            // Fájl mentése
             Files.copy(fileInputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             
             System.out.println("✅ Fájl mentve: " + targetFile.getAbsolutePath());
 
-            // Visszaadjuk a böngésző számára elérhető URL-t
             return URL_PREFIX + uniqueFileName;
 
         } catch (Exception e) {
@@ -236,9 +210,6 @@ public class UsersService {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // UPDATE USER
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject updateUser(int id, String name, String email, String role) {
         JSONObject resp = new JSONObject();
 
@@ -280,9 +251,6 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DELETE USER
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject deleteUser(int userId) {
         JSONObject resp = new JSONObject();
 
@@ -294,7 +262,6 @@ public class UsersService {
                 return resp;
             }
 
-            // Adatok elmentése email küldéshez (törlés előtt!)
             String userName  = user.getName();
             String userEmail = user.getEmail();
 
@@ -303,7 +270,6 @@ public class UsersService {
             query.setParameter("userIdIN", userId);
             query.execute();
 
-            // ── EMAIL ÉRTESÍTŐ fiók törlésről ───────────────────────────
             try {
                 emailService.sendAccountDeletedEmail(userName, userEmail);
                 System.out.println("✅ Fiók törlési email elküldve: " + userEmail);
@@ -324,9 +290,6 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // GET USER BY ID
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getUserById(int id) {
         JSONObject resp = new JSONObject();
 
@@ -341,7 +304,6 @@ public class UsersService {
                 userJson.put("role", user.getRole());
                 userJson.put("createdAt", user.getCreatedAt());
                 
-                // ✅ JAVÍTÁS: Profilkép URL hozzáadása ha létezik
                 if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
                     userJson.put("profilePicture", user.getProfilePicture());
                 }
@@ -362,9 +324,6 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // LOGIN
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject login(String email, String password) {
         JSONObject resp = new JSONObject();
 
@@ -390,7 +349,6 @@ public class UsersService {
             userJson.put("name", user.getName());
             userJson.put("role", user.getRole());
             
-            // ✅ JAVÍTÁS: Profilkép URL hozzáadása ha létezik
             if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
                 userJson.put("profilePicture", user.getProfilePicture());
             }
@@ -411,16 +369,10 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // GET CURRENT USER (me endpoint)
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getCurrentUser(Integer userId) {
         return getUserById(userId.intValue());
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // UPDATE PROFILE
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject updateProfile(
             Integer userId, String name, String email,
             String currentPassword, String newPassword) {
@@ -441,7 +393,6 @@ public class UsersService {
                 return resp;
             }
 
-            // Régi értékek elmentése az email értesítőhöz
             String oldName  = user.getName();
             String oldEmail = user.getEmail();
 
@@ -473,14 +424,11 @@ public class UsersService {
                 passwordChanged = true;
             }
 
-            // ── EMAIL ÉRTESÍTŐK ──────────────────────────────────────────
             boolean nameChanged  = !newNameValue.equals(oldName);
             boolean emailChanged = !newEmailValue.equals(oldEmail);
 
-            // Csak akkor küldünk emailt, ha tényleg változott valami
             if (nameChanged || emailChanged || passwordChanged) {
                 try {
-                    // Összesítő értesítő (a régi, vagy ha email változott, mindkét címre)
                     emailService.sendProfileChangeEmail(
                         newNameValue, emailChanged ? oldEmail : newEmailValue,
                         nameChanged,  oldName,  newNameValue,
@@ -488,14 +436,12 @@ public class UsersService {
                         passwordChanged
                     );
 
-                    // Ha email változott: megerősítő az ÚJ email címre is
                     if (emailChanged) {
                         emailService.sendEmailChangeConfirmation(newNameValue, newEmailValue, oldEmail);
                     }
 
                     System.out.println("✅ Profil módosítási email(ek) elküldve");
                 } catch (Exception emailEx) {
-                    // Email hiba nem akasztja meg a sikeres mentést
                     System.err.println("⚠️ Profil email hiba (nem blokkoló): " + emailEx.getMessage());
                 }
             }
@@ -513,16 +459,10 @@ public class UsersService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DELETE CURRENT USER
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject deleteCurrentUser(int userId) {
         return deleteUser(userId);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // FORGOT PASSWORD
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject forgotPassword(String email) {
         JSONObject resp = new JSONObject();
 
@@ -581,9 +521,6 @@ public class UsersService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // HELPER: Fájl lekérése (később használjuk a UploadController-ben)
-    // ════════════════════════════════════════════════════════════════════════
     public static File getProfilePictureFile(String filename) {
         return new File(UPLOAD_DIR, filename);
     }

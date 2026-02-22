@@ -50,8 +50,7 @@
             0%,100% { transform: translate3d(0,0,0) rotate(0deg); }
             50%     { transform: translate3d(-20px, 16px, 0) rotate(10deg); }
         }
-
-        /* ── Access Denied ── */
+        
         #accessDenied {
             display: none;
             position: fixed;
@@ -82,7 +81,6 @@
         }
         #accessDenied a:hover { transform: translateY(-2px); box-shadow: 0 16px 50px rgba(96,165,250,.42); }
 
-        /* ── Sidebar ── */
         .sidebar {
             position: fixed;
             top: 0;
@@ -182,7 +180,6 @@
             color: var(--text);
         }
 
-        /* ── Main layout ── */
         .main {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
@@ -190,7 +187,6 @@
             flex-direction: column;
         }
 
-        /* ── Topbar ── */
         .topbar {
             position: sticky;
             top: 0;
@@ -243,7 +239,6 @@
         }
         .mobile-toggle:hover { background: rgba(255,255,255,0.95); }
 
-        /* ── Panels ── */
         .panel {
             display: none;
             padding: 30px 26px;
@@ -251,7 +246,6 @@
         }
         .panel.active { display: block; }
 
-        /* ── Stats Row ── */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -287,7 +281,6 @@
             margin-top: 4px;
         }
 
-        /* ── Section header ── */
         .section-hd {
             display: flex;
             align-items: center;
@@ -312,7 +305,6 @@
             flex-wrap: wrap;
         }
 
-        /* ── Table wrap ── */
         .table-wrap {
             background: var(--card);
             border: 1px solid var(--border);
@@ -353,7 +345,6 @@
         .td-mono { font-family: monospace; font-size: 0.82rem; color: var(--muted); }
         .td-truncate { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ── Badges ── */
         .role-badge, .status-badge, .score-badge {
             display: inline-block;
             padding: 3px 10px;
@@ -368,7 +359,6 @@
         .status-badge.canceled { background: rgba(239,68,68,0.15); color: #ef4444; }
         .score-badge { background: rgba(124,58,237,0.12); color: var(--accent); }
 
-        /* ── Loading ── */
         .loading {
             padding: 40px;
             text-align: center;
@@ -396,7 +386,6 @@
             font-style: italic;
         }
 
-        /* ── Buttons ── */
         .btn-add {
             padding: 8px 16px;
             background: linear-gradient(135deg, var(--accent), #6d28d9);
@@ -441,7 +430,6 @@
 
         .actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
-        /* ── Search box ── */
         .search-box {
             display: flex;
             align-items: center;
@@ -475,7 +463,6 @@
             cursor: pointer;
         }
 
-        /* ── Mini stat badges ── */
         .mini-stat {
             background: var(--card);
             border: 1px solid var(--border);
@@ -486,8 +473,7 @@
             color: var(--muted);
         }
         .mini-stat b { color: var(--text); }
-
-        /* ── Modals ── */
+        
         .modal-overlay {
             display: none;
             position: fixed;
@@ -615,7 +601,6 @@
             font-family: monospace;
         }
 
-        /* ── Toast ── */
         .toast-container {
             position: fixed;
             bottom: 24px;
@@ -645,7 +630,6 @@
         @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
 
-        /* ── Responsive ── */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -678,7 +662,6 @@
 </head>
 <body>
 
-<!-- Access denied overlay -->
 <div id="accessDenied">
     <div class="lock">🔒</div>
     <h1>Hozzáférés megtagadva</h1>
@@ -686,7 +669,6 @@
     <a href="pro.html">← Vissza a főoldalra</a>
 </div>
 
-<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="brand">SkillBook</div>
@@ -729,16 +711,6 @@
             <span class="nav-icon">💬</span> Üzenetek
         </button>
 
-        <div class="nav-section-label">Kvízek</div>
-        <button class="nav-item" data-panel="quizzes">
-            <span class="nav-icon">🧩</span> Kvízek
-        </button>
-        <button class="nav-item" data-panel="quiz_questions">
-            <span class="nav-icon">❓</span> Kérdések
-        </button>
-        <button class="nav-item" data-panel="quiz_results">
-            <span class="nav-icon">🏆</span> Eredmények
-        </button>
     </nav>
 
     <div class="sidebar-footer">
@@ -746,7 +718,6 @@
     </div>
 </aside>
 
-<!-- Main -->
 <div class="main" id="mainContent">
     <div class="topbar">
         <button class="mobile-toggle" id="mobileToggle">☰</button>
@@ -757,7 +728,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="panel active" id="panel-dashboard">
         <div class="stats-row" id="statsRow">
             <div class="stat-card"><div class="val" id="st-users">—</div><div class="lbl">Felhasználók</div></div>
@@ -774,7 +744,6 @@
         </div>
     </div>
 
-    <!-- USERS -->
     <div class="panel" id="panel-users">
         <div class="section-hd">
             <h2>👥 Felhasználók</h2>
@@ -794,7 +763,6 @@
         </div>
     </div>
 
-    <!-- CATEGORIES -->
     <div class="panel" id="panel-categories">
         <div class="section-hd">
             <h2>🏷️ Kategóriák</h2>
@@ -807,7 +775,6 @@
         </div>
     </div>
 
-    <!-- COURSES -->
     <div class="panel" id="panel-courses">
         <div class="section-hd">
             <h2>📚 Tanfolyamok</h2>
@@ -820,7 +787,6 @@
         </div>
     </div>
 
-    <!-- COURSE MATERIALS -->
     <div class="panel" id="panel-course_materials">
         <div class="section-hd">
             <h2>📎 Tananyagok</h2>
@@ -833,7 +799,6 @@
         </div>
     </div>
 
-    <!-- COURSE SESSIONS -->
     <div class="panel" id="panel-course_sessions">
         <div class="section-hd">
             <h2>📅 Tanfolyam időpontok</h2>
@@ -843,7 +808,6 @@
         </div>
     </div>
 
-    <!-- ENROLLMENTS -->
     <div class="panel" id="panel-enrollments">
         <div class="section-hd">
             <h2>📝 Beiratkozások</h2>
@@ -856,7 +820,6 @@
         </div>
     </div>
 
-    <!-- REVIEWS -->
     <div class="panel" id="panel-reviews">
         <div class="section-hd">
             <h2>⭐ Értékelések</h2>
@@ -869,7 +832,6 @@
         </div>
     </div>
 
-    <!-- MESSAGES -->
     <div class="panel" id="panel-messages">
         <div class="section-hd">
             <h2>💬 Üzenetek</h2>
@@ -882,53 +844,7 @@
         </div>
     </div>
 
-    <!-- QUIZZES -->
-    <div class="panel" id="panel-quizzes">
-        <div class="section-hd">
-            <h2>🧩 Kvízek</h2>
-            <div class="section-hd-right">
-                <div class="search-box"><span>🔍</span><input type="text" id="searchQuizzes" placeholder="Keresés..."></div>
-                <button class="btn-add" onclick="openAddQuiz()">+ Új kvíz</button>
-            </div>
-        </div>
-        <div class="table-scroll table-wrap" id="quizzesTable">
-            <div class="loading"><span class="spinner"></span> Betöltés...</div>
-        </div>
-    </div>
 
-    <!-- QUIZ QUESTIONS -->
-    <div class="panel" id="panel-quiz_questions">
-        <div class="section-hd">
-            <h2>❓ Kvíz kérdések</h2>
-            <div class="section-hd-right">
-                <div class="search-box"><span>🔍</span><input type="text" id="searchQuestions" placeholder="Keresés..."></div>
-                <button class="btn-add" onclick="openAddQuestion()">+ Új kérdés</button>
-            </div>
-        </div>
-        <div class="table-scroll table-wrap" id="questionsTable">
-            <div class="loading"><span class="spinner"></span> Betöltés...</div>
-        </div>
-    </div>
-
-    <!-- QUIZ RESULTS -->
-    <div class="panel" id="panel-quiz_results">
-        <div class="section-hd">
-            <h2>🏆 Kvíz eredmények</h2>
-            <div class="section-hd-right">
-                <div class="search-box"><span>🔍</span><input type="text" id="searchResults" placeholder="Keresés..."></div>
-            </div>
-        </div>
-        <div class="table-scroll table-wrap" id="quizResultsTable">
-            <div class="loading"><span class="spinner"></span> Betöltés...</div>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     MODALS
-══════════════════════════════════════════════════════ -->
-
-<!-- Edit User Modal -->
 <div class="modal-overlay" id="userModal">
     <div class="modal">
         <h3>Felhasználó szerkesztése <span id="userModalId"></span></h3>
@@ -949,7 +865,7 @@
     </div>
 </div>
 
-<!-- Edit Course Modal -->
+
 <div class="modal-overlay" id="courseModal">
     <div class="modal">
         <h3>Tanfolyam szerkesztése <span id="courseModalId"></span></h3>
@@ -970,7 +886,7 @@
     </div>
 </div>
 
-<!-- Edit Category Modal -->
+
 <div class="modal-overlay" id="categoryModal">
     <div class="modal">
         <h3 id="categoryModalTitle">Kategória <span id="categoryModalId"></span></h3>
@@ -983,7 +899,7 @@
     </div>
 </div>
 
-<!-- Edit Enrollment Modal -->
+
 <div class="modal-overlay" id="enrollmentModal">
     <div class="modal">
         <h3>Beiratkozás szerkesztése <span id="enrollmentModalId"></span></h3>
@@ -1001,7 +917,7 @@
     </div>
 </div>
 
-<!-- Edit Review Modal -->
+
 <div class="modal-overlay" id="reviewModal">
     <div class="modal">
         <h3>Értékelés szerkesztése <span id="reviewModalId"></span></h3>
@@ -1023,7 +939,7 @@
     </div>
 </div>
 
-<!-- Edit Session Modal -->
+
 <div class="modal-overlay" id="sessionModal">
     <div class="modal">
         <h3>Időpont szerkesztése <span id="sessionModalId"></span></h3>
@@ -1042,52 +958,6 @@
     </div>
 </div>
 
-<!-- Quiz Modal -->
-<div class="modal-overlay" id="quizModal">
-    <div class="modal">
-        <h3 id="quizModalTitle">Kvíz <span id="quizModalId"></span></h3>
-        <div class="form-group">
-            <label>Tanfolyam</label>
-            <select id="edit-quiz-course"></select>
-        </div>
-        <div class="form-group"><label>Cím</label><input type="text" id="edit-quiz-title" placeholder="Kvíz neve"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal('quizModal')">Mégse</button>
-            <button class="btn-save" onclick="saveQuiz()">💾 Mentés</button>
-        </div>
-    </div>
-</div>
-
-<!-- Quiz Question Modal -->
-<div class="modal-overlay" id="questionModal">
-    <div class="modal">
-        <h3 id="questionModalTitle">Kérdés <span id="questionModalId"></span></h3>
-        <div class="form-group">
-            <label>Kvíz</label>
-            <select id="edit-question-quiz"></select>
-        </div>
-        <div class="form-group"><label>Kérdés</label><textarea id="edit-question-text" placeholder="A kérdés szövege..."></textarea></div>
-        <div class="form-group"><label>Helyes válasz</label><input type="text" id="edit-question-answer" placeholder="Helyes válasz"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal('questionModal')">Mégse</button>
-            <button class="btn-save" onclick="saveQuestion()">💾 Mentés</button>
-        </div>
-    </div>
-</div>
-
-<!-- Quiz Result Modal -->
-<div class="modal-overlay" id="quizResultModal">
-    <div class="modal">
-        <h3>Eredmény szerkesztése <span id="quizResultModalId"></span></h3>
-        <div class="form-group"><label>Pontszám (%)</label><input type="number" id="edit-result-score" min="0" max="100" step="0.01" placeholder="0.00"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal('quizResultModal')">Mégse</button>
-            <button class="btn-save" onclick="saveQuizResult()">💾 Mentés</button>
-        </div>
-    </div>
-</div>
-
-<!-- Confirm Delete Modal -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal confirm-modal">
         <h3>🗑️ Törlés megerősítése</h3>
@@ -1100,13 +970,11 @@
     </div>
 </div>
 
-<!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
     const API = '/SkillBook/api';
 
-    // ── Auth helpers ──
     function token() {
         return localStorage.getItem('token') || sessionStorage.getItem('token');
     }
@@ -1114,7 +982,6 @@
         return { 'Authorization': `Bearer ${token()}`, 'Content-Type': 'application/json' };
     }
 
-    // ── Toast ──
     function toast(msg, type = 'success') {
         const c = document.getElementById('toastContainer');
         const t = document.createElement('div');
@@ -1124,14 +991,12 @@
         setTimeout(() => t.remove(), 3500);
     }
 
-    // ── Modal helpers ──
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     document.querySelectorAll('.modal-overlay').forEach(o => {
         o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
     });
 
-    // ── Navigation ──
     document.querySelectorAll('.nav-item[data-panel]').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1148,7 +1013,6 @@
         document.getElementById('sidebar').classList.toggle('open');
     });
 
-    // ── State ──
     let allUsers = [], allCourses = [], allCategories = [],
         allEnrollments = [], allReviews = [], allMessages = [],
         allMaterials = [], allSessions = [], allQuizzes = [],
@@ -1159,7 +1023,6 @@
         editingQuizId = null, editingQuestionId = null, editingResultId = null;
     let isAddingCategory = false, isAddingQuiz = false, isAddingQuestion = false;
 
-    // ── Auth check ──
     async function checkAdmin() {
         const tok = token();
         if (!tok) { showDenied(); return; }
@@ -1173,7 +1036,7 @@
     }
     function showDenied() { document.getElementById('accessDenied').classList.add('visible'); }
 
-    // ── Load panel dispatcher ──
+
     function loadPanel(name) {
         switch(name) {
             case 'dashboard':       loadDashboard(); break;
@@ -1191,9 +1054,6 @@
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // DASHBOARD
-    // ──────────────────────────────────────────────────────────────────
     async function loadDashboard() {
         try {
             const [uR, cR, catR, eR, revR, mR, qR, matR] = await Promise.all([
@@ -1247,9 +1107,6 @@
         }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // USERS
-    // ──────────────────────────────────────────────────────────────────
     async function loadUsers() {
         const el = document.getElementById('usersTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1264,7 +1121,6 @@
     function renderUsers(list) {
         const el = document.getElementById('usersTable');
 
-        // Mini stats
         const statsEl = document.getElementById('userStats');
         if (statsEl) {
             const counts = { student: 0, instructor: 0, admin: 0 };
@@ -1369,9 +1225,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // COURSES
-    // ──────────────────────────────────────────────────────────────────
     async function loadCourses() {
         const el = document.getElementById('coursesTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1448,9 +1301,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // CATEGORIES
-    // ──────────────────────────────────────────────────────────────────
     async function loadCategories() {
         const el = document.getElementById('categoriesTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1525,9 +1375,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // ENROLLMENTS
-    // ──────────────────────────────────────────────────────────────────
     async function loadEnrollments() {
         const el = document.getElementById('enrollmentsTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1590,9 +1437,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // REVIEWS
-    // ──────────────────────────────────────────────────────────────────
     async function loadReviews() {
         const el = document.getElementById('reviewsTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1660,9 +1504,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // MESSAGES
-    // ──────────────────────────────────────────────────────────────────
     async function loadMessages() {
         const el = document.getElementById('messagesTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1702,9 +1543,6 @@
         ));
     });
 
-    // ──────────────────────────────────────────────────────────────────
-    // COURSE MATERIALS
-    // ──────────────────────────────────────────────────────────────────
     async function loadMaterials() {
         const el = document.getElementById('materialsTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1745,9 +1583,6 @@
         ));
     });
 
-    // ──────────────────────────────────────────────────────────────────
-    // COURSE SESSIONS
-    // ──────────────────────────────────────────────────────────────────
     async function loadSessions() {
         const el = document.getElementById('sessionsTable');
         el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
@@ -1807,250 +1642,6 @@
         } catch { toast('Hálózati hiba', 'error'); }
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // QUIZZES
-    // ──────────────────────────────────────────────────────────────────
-    async function loadQuizzes() {
-        const el = document.getElementById('quizzesTable');
-        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
-        try {
-            const r = await fetch(`${API}/Quizzes/getAllQuizzes`, { headers: authHdr() });
-            const d = await r.json();
-            allQuizzes = Array.isArray(d?.data) ? d.data : [];
-            renderQuizzes(allQuizzes);
-        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
-    }
-
-    function renderQuizzes(list) {
-        const el = document.getElementById('quizzesTable');
-        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs kvíz</div>'; return; }
-        el.innerHTML = `<table>
-            <thead><tr><th>#</th><th>Cím</th><th>Tanfolyam</th><th>Műveletek</th></tr></thead>
-            <tbody>${list.map(q => `
-                <tr>
-                    <td class="td-mono">${q.id}</td>
-                    <td class="td-name">${esc(q.title || '–')}</td>
-                    <td class="td-truncate">${esc(q.course_title || q.course_id || '–')}</td>
-                    <td class="actions">
-                        <button class="btn-edit" onclick="editQuiz(${q.id})">✏️ Szerk.</button>
-                        <button class="btn-del"  onclick="confirmDelete('quiz', ${q.id}, '${esc(q.title)}')">🗑️</button>
-                    </td>
-                </tr>`).join('')}
-            </tbody>
-        </table>`;
-    }
-
-    document.getElementById('searchQuizzes')?.addEventListener('input', function() {
-        const q = this.value.toLowerCase();
-        renderQuizzes(allQuizzes.filter(x =>
-            (x.title||'').toLowerCase().includes(q) ||
-            (x.course_title||'').toLowerCase().includes(q)
-        ));
-    });
-
-    async function openAddQuiz() {
-        isAddingQuiz = true;
-        editingQuizId = null;
-        await populateCourseSelect('edit-quiz-course');
-        document.getElementById('quizModalTitle').textContent = 'Új kvíz';
-        document.getElementById('quizModalId').textContent = '';
-        document.getElementById('edit-quiz-title').value = '';
-        openModal('quizModal');
-    }
-
-    async function editQuiz(id) {
-        const q = allQuizzes.find(x => x.id === id);
-        if (!q) return;
-        isAddingQuiz = false;
-        editingQuizId = id;
-        await populateCourseSelect('edit-quiz-course');
-        document.getElementById('quizModalTitle').textContent = 'Kvíz szerkesztése';
-        document.getElementById('quizModalId').textContent = `#${id}`;
-        document.getElementById('edit-quiz-course').value = q.course_id || '';
-        document.getElementById('edit-quiz-title').value = q.title || '';
-        openModal('quizModal');
-    }
-
-    async function saveQuiz() {
-        const body = {
-            course_id: parseInt(document.getElementById('edit-quiz-course').value),
-            title: document.getElementById('edit-quiz-title').value
-        };
-        try {
-            let r;
-            if (isAddingQuiz) {
-                r = await fetch(`${API}/Quizzes/createQuiz`, {
-                    method: 'POST', headers: authHdr(), body: JSON.stringify(body)
-                });
-            } else {
-                r = await fetch(`${API}/Quizzes/updateQuiz/${editingQuizId}`, {
-                    method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
-                });
-            }
-            const d = await r.json();
-            if (r.ok) { toast(isAddingQuiz ? 'Kvíz létrehozva!' : 'Kvíz mentve!'); closeModal('quizModal'); loadQuizzes(); }
-            else toast(d.message || 'Hiba', 'error');
-        } catch { toast('Hálózati hiba', 'error'); }
-    }
-
-    // ──────────────────────────────────────────────────────────────────
-    // QUIZ QUESTIONS
-    // ──────────────────────────────────────────────────────────────────
-    async function loadQuestions() {
-        const el = document.getElementById('questionsTable');
-        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
-        try {
-            const r = await fetch(`${API}/Quizzes/getAllQuestions`, { headers: authHdr() });
-            const d = await r.json();
-            allQuestions = Array.isArray(d?.data) ? d.data : [];
-            renderQuestions(allQuestions);
-        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
-    }
-
-    function renderQuestions(list) {
-        const el = document.getElementById('questionsTable');
-        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs kérdés</div>'; return; }
-        el.innerHTML = `<table>
-            <thead><tr><th>#</th><th>Kvíz</th><th>Kérdés</th><th>Helyes válasz</th><th>Műveletek</th></tr></thead>
-            <tbody>${list.map(q => `
-                <tr>
-                    <td class="td-mono">${q.id}</td>
-                    <td><span class="badge-blue role-badge">${esc(q.quiz_title || q.quiz_id || '–')}</span></td>
-                    <td class="td-truncate">${esc(q.question || '–')}</td>
-                    <td class="td-mono" style="color:#6ee7b7">${esc(q.correct_answer || '–')}</td>
-                    <td class="actions">
-                        <button class="btn-edit" onclick="editQuestion(${q.id})">✏️ Szerk.</button>
-                        <button class="btn-del"  onclick="confirmDelete('question', ${q.id}, 'kérdés #${q.id}')">🗑️</button>
-                    </td>
-                </tr>`).join('')}
-            </tbody>
-        </table>`;
-    }
-
-    document.getElementById('searchQuestions')?.addEventListener('input', function() {
-        const q = this.value.toLowerCase();
-        renderQuestions(allQuestions.filter(x =>
-            (x.question||'').toLowerCase().includes(q) ||
-            (x.quiz_title||'').toLowerCase().includes(q) ||
-            (x.correct_answer||'').toLowerCase().includes(q)
-        ));
-    });
-
-    async function openAddQuestion() {
-        isAddingQuestion = true;
-        editingQuestionId = null;
-        await populateQuizSelect('edit-question-quiz');
-        document.getElementById('questionModalTitle').textContent = 'Új kérdés';
-        document.getElementById('questionModalId').textContent = '';
-        document.getElementById('edit-question-text').value = '';
-        document.getElementById('edit-question-answer').value = '';
-        openModal('questionModal');
-    }
-
-    async function editQuestion(id) {
-        const q = allQuestions.find(x => x.id === id);
-        if (!q) return;
-        isAddingQuestion = false;
-        editingQuestionId = id;
-        await populateQuizSelect('edit-question-quiz');
-        document.getElementById('questionModalTitle').textContent = 'Kérdés szerkesztése';
-        document.getElementById('questionModalId').textContent = `#${id}`;
-        document.getElementById('edit-question-quiz').value = q.quiz_id || '';
-        document.getElementById('edit-question-text').value = q.question || '';
-        document.getElementById('edit-question-answer').value = q.correct_answer || '';
-        openModal('questionModal');
-    }
-
-    async function saveQuestion() {
-        const body = {
-            quiz_id: parseInt(document.getElementById('edit-question-quiz').value),
-            question: document.getElementById('edit-question-text').value,
-            correct_answer: document.getElementById('edit-question-answer').value
-        };
-        try {
-            let r;
-            if (isAddingQuestion) {
-                r = await fetch(`${API}/Quizzes/createQuestion`, {
-                    method: 'POST', headers: authHdr(), body: JSON.stringify(body)
-                });
-            } else {
-                r = await fetch(`${API}/Quizzes/updateQuestion/${editingQuestionId}`, {
-                    method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
-                });
-            }
-            const d = await r.json();
-            if (r.ok) { toast(isAddingQuestion ? 'Kérdés létrehozva!' : 'Kérdés mentve!'); closeModal('questionModal'); loadQuestions(); }
-            else toast(d.message || 'Hiba', 'error');
-        } catch { toast('Hálózati hiba', 'error'); }
-    }
-
-    // ──────────────────────────────────────────────────────────────────
-    // QUIZ RESULTS
-    // ──────────────────────────────────────────────────────────────────
-    async function loadQuizResults() {
-        const el = document.getElementById('quizResultsTable');
-        el.innerHTML = '<div class="loading"><span class="spinner"></span> Betöltés...</div>';
-        try {
-            const r = await fetch(`${API}/Quizzes/getAllResults`, { headers: authHdr() });
-            const d = await r.json();
-            allQuizResults = Array.isArray(d?.data) ? d.data : [];
-            renderQuizResults(allQuizResults);
-        } catch(e) { el.innerHTML = `<div class="empty-state">Hiba: ${e.message}</div>`; }
-    }
-
-    function renderQuizResults(list) {
-        const el = document.getElementById('quizResultsTable');
-        if (!list.length) { el.innerHTML = '<div class="empty-state">Nincs eredmény</div>'; return; }
-        el.innerHTML = `<table>
-            <thead><tr><th>#</th><th>Tanuló</th><th>Kvíz</th><th>Pontszám</th><th>Teljesítve</th><th>Műveletek</th></tr></thead>
-            <tbody>${list.map(r => `
-                <tr>
-                    <td class="td-mono">${r.id}</td>
-                    <td>${esc(r.student_name || r.user_id || '–')}</td>
-                    <td class="td-truncate">${esc(r.quiz_title || r.quiz_id || '–')}</td>
-                    <td><span class="score-badge">${r.score != null ? r.score + '%' : '–'}</span></td>
-                    <td class="td-mono">${fmtDate(r.completed_at)}</td>
-                    <td class="actions">
-                        <button class="btn-edit" onclick="editQuizResult(${r.id})">✏️ Szerk.</button>
-                        <button class="btn-del"  onclick="confirmDelete('quiz_result', ${r.id}, '#${r.id}')">🗑️</button>
-                    </td>
-                </tr>`).join('')}
-            </tbody>
-        </table>`;
-    }
-
-    document.getElementById('searchResults')?.addEventListener('input', function() {
-        const q = this.value.toLowerCase();
-        renderQuizResults(allQuizResults.filter(r =>
-            (r.student_name||'').toLowerCase().includes(q) ||
-            (r.quiz_title||'').toLowerCase().includes(q)
-        ));
-    });
-
-    function editQuizResult(id) {
-        const r = allQuizResults.find(x => x.id === id);
-        if (!r) return;
-        editingResultId = id;
-        document.getElementById('quizResultModalId').textContent = `#${id}`;
-        document.getElementById('edit-result-score').value = r.score ?? '';
-        openModal('quizResultModal');
-    }
-
-    async function saveQuizResult() {
-        const body = { score: parseFloat(document.getElementById('edit-result-score').value) };
-        try {
-            const r = await fetch(`${API}/Quizzes/updateResult/${editingResultId}`, {
-                method: 'PUT', headers: authHdr(), body: JSON.stringify(body)
-            });
-            const d = await r.json();
-            if (r.ok) { toast('Eredmény mentve!'); closeModal('quizResultModal'); loadQuizResults(); }
-            else toast(d.message || 'Hiba', 'error');
-        } catch { toast('Hálózati hiba', 'error'); }
-    }
-
-    // ──────────────────────────────────────────────────────────────────
-    // DELETE (unified)
-    // ──────────────────────────────────────────────────────────────────
     let pendingDelete = null;
 
     function confirmDelete(type, id, label) {
@@ -2094,9 +1685,6 @@
         pendingDelete = null;
     });
 
-    // ──────────────────────────────────────────────────────────────────
-    // HELPERS – populate selects
-    // ──────────────────────────────────────────────────────────────────
     async function populateCourseSelect(selectId) {
         if (!allCourses.length) {
             const r = await fetch(`${API}/Courses/getAllCourses`);
@@ -2117,7 +1705,6 @@
         sel.innerHTML = allQuizzes.map(q => `<option value="${q.id}">${esc(q.title)}</option>`).join('');
     }
 
-    // ── Helpers ──
     function esc(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
@@ -2132,7 +1719,6 @@
         catch { return d; }
     }
 
-    // ── Init ──
     checkAdmin();
 </script>
 </body>

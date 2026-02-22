@@ -22,7 +22,6 @@ public class ReviewsService {
         JSONObject resp = new JSONObject();
 
         try {
-            // Ellenőrzés: létezik-e már értékelés ettől a usertől erre a tanfolyamra
             Query checkQuery = em.createNativeQuery(
                 "SELECT COUNT(*) FROM course_reviews WHERE user_id = :userId AND course_id = :courseId");
             checkQuery.setParameter("userId", userId);
@@ -36,7 +35,6 @@ public class ReviewsService {
                 return resp;
             }
 
-            // Értékelés mentése
             Query insertQuery = em.createNativeQuery(
                 "INSERT INTO course_reviews (user_id, course_id, rating, comment, created_at) " +
                 "VALUES (:userId, :courseId, :rating, :comment, NOW())");
@@ -161,7 +159,6 @@ public class ReviewsService {
         JSONObject resp = new JSONObject();
 
         try {
-            // Ellenőrzés: a user sajátja-e az értékelés
             Query checkQuery = em.createNativeQuery(
                 "SELECT user_id FROM course_reviews WHERE id = :reviewId");
             checkQuery.setParameter("reviewId", reviewId);
@@ -182,7 +179,6 @@ public class ReviewsService {
                 return resp;
             }
 
-            // Törlés
             Query deleteQuery = em.createNativeQuery(
                 "DELETE FROM course_reviews WHERE id = :reviewId");
             deleteQuery.setParameter("reviewId", reviewId);
@@ -245,7 +241,6 @@ public class ReviewsService {
                                         Integer requestingUserId) {
         JSONObject resp = new JSONObject();
         try {
-            // Admin ellenőrzés
             Query adminCheck = em.createNativeQuery("SELECT role FROM users WHERE id = :uid");
             adminCheck.setParameter("uid", requestingUserId);
             List<?> roles = adminCheck.getResultList();
@@ -255,7 +250,6 @@ public class ReviewsService {
                 return resp;
             }
 
-            // Létezik-e?
             Query checkQuery = em.createNativeQuery(
                 "SELECT COUNT(*) FROM course_reviews WHERE id = :id");
             checkQuery.setParameter("id", reviewId);
@@ -266,7 +260,6 @@ public class ReviewsService {
                 return resp;
             }
 
-            // Frissítés
             if (rating != null && comment != null) {
                 em.createNativeQuery(
                     "UPDATE course_reviews SET rating = :rating, comment = :comment WHERE id = :id")

@@ -21,7 +21,7 @@ public class CourseReviews implements Serializable {
     private Users userId;
 
     @Column(nullable = false)
-    private Integer rating; // 1-5
+    private Integer rating;
 
     @Column(columnDefinition = "TEXT")
     private String comment;
@@ -30,7 +30,6 @@ public class CourseReviews implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
 
-    // Konstruktorok, getterek, setterek
     public CourseReviews() {}
 
     public Integer getId() { return id; }

@@ -15,10 +15,6 @@ import javax.ws.rs.core.Response;
 @Path("Auth")
 public class AuthController {
 
-    /**
-     * Token validálása és felhasználó információk visszaadása
-     * POST /api/Auth/validate
-     */
     @POST
     @Path("validate")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -82,11 +78,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Token frissítése (refresh)
-     * POST /api/Auth/refresh
-     * Header: Authorization: Bearer <token>
-     */
     @POST
     @Path("refresh")
     @Produces(MediaType.APPLICATION_JSON)
@@ -111,10 +102,8 @@ public class AuthController {
             try {
                 claims = JwtUtil.validate(token);
             } catch (ExpiredJwtException e) {
-                // Lejárt token esetén is kiolvassuk az adatokat
                 claims = e.getClaims();
 
-                // Grace period: max 24 óra elteltével már nem engedélyezzük a refresh-t
                 long gracePeriodMs = 24 * 60 * 60 * 1000L; // 1 nap
                 if (claims.getExpiration().getTime() + gracePeriodMs < System.currentTimeMillis()) {
                     JSONObject error = new JSONObject();
@@ -169,10 +158,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Token információk lekérdezése (debug célra)
-     * GET /api/Auth/info
-     */
     @GET
     @Path("info")
     @Produces(MediaType.APPLICATION_JSON)

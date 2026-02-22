@@ -15,7 +15,6 @@ public class EnrollmentsController {
     @Inject
     private EnrollmentsService enrollmentsService;
 
-    // GET /api/Enrollments/getAllEnrollments  — admin
     @GET
     @Path("getAllEnrollments")
     public Response getAllEnrollments(@Context HttpServletRequest request) {
@@ -25,7 +24,6 @@ public class EnrollmentsController {
         return build(result);
     }
 
-    // GET /api/Enrollments/getMyEnrollments
     @GET
     @Path("getMyEnrollments")
     public Response getMyEnrollments(@Context HttpServletRequest request) {
@@ -35,8 +33,6 @@ public class EnrollmentsController {
         return build(result);
     }
 
-    // POST /api/Enrollments/enroll
-    // Body: { "courseId": 5, "sessionId": null }
     @POST
     @Path("enroll")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -51,8 +47,6 @@ public class EnrollmentsController {
         return build(result);
     }
 
-    // PUT /api/Enrollments/updateEnrollment/{id}
-    // Body: { "status": "canceled" }
     @PUT
     @Path("updateEnrollment/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -67,7 +61,6 @@ public class EnrollmentsController {
         return build(result);
     }
 
-    // DELETE /api/Enrollments/deleteEnrollment/{id}
     @DELETE
     @Path("deleteEnrollment/{id}")
     public Response deleteEnrollment(@PathParam("id") int id,

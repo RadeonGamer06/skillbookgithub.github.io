@@ -17,9 +17,6 @@ public class CourseMaterialsService {
     @PersistenceContext(unitName = "SkillBook")
     private EntityManager em;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // GET ALL (admin)
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getAllMaterials() {
         JSONObject resp = new JSONObject();
         JSONArray arr = new JSONArray();
@@ -55,9 +52,6 @@ public class CourseMaterialsService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // GET BY COURSE
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getMaterialsByCourse(Integer courseId) {
         JSONObject resp = new JSONObject();
         JSONArray arr = new JSONArray();
@@ -88,9 +82,6 @@ public class CourseMaterialsService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DELETE
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject deleteMaterial(Integer materialId) {
         JSONObject resp = new JSONObject();
         try {

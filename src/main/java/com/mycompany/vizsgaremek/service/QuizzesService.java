@@ -18,10 +18,6 @@ public class QuizzesService {
     @PersistenceContext(unitName = "SkillBook")
     private EntityManager em;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // QUIZZES
-    // ════════════════════════════════════════════════════════════════════════
-
     public JSONObject getAllQuizzes() {
         JSONObject resp = new JSONObject();
         JSONArray arr = new JSONArray();
@@ -99,7 +95,6 @@ public class QuizzesService {
                 resp.put("message", "Kvíz nem található");
                 return resp;
             }
-            // cascade: delete results then questions
             em.createNativeQuery("DELETE FROM quiz_results WHERE quiz_id = :qid")
               .setParameter("qid", quizId).executeUpdate();
             em.createNativeQuery("DELETE FROM quiz_questions WHERE quiz_id = :qid")
@@ -115,10 +110,6 @@ public class QuizzesService {
         }
         return resp;
     }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // QUIZ QUESTIONS
-    // ════════════════════════════════════════════════════════════════════════
 
     public JSONObject getAllQuestions() {
         JSONObject resp = new JSONObject();
@@ -238,10 +229,6 @@ public class QuizzesService {
         }
         return resp;
     }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // QUIZ RESULTS
-    // ════════════════════════════════════════════════════════════════════════
 
     public JSONObject getAllResults() {
         JSONObject resp = new JSONObject();

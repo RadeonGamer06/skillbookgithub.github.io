@@ -8,11 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
-/**
- * Admin Reviews végpontok — kiegészíti a meglévő ReviewsController-t.
- * GET  /api/Reviews/getAllReviews      → összes értékelés (admin)
- * PUT  /api/Reviews/updateReview/{id} → értékelés szerkesztése (admin)
- */
 @Path("Reviews")
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminReviewsController {
@@ -20,7 +15,6 @@ public class AdminReviewsController {
     @Inject
     private ReviewsService reviewsService;
 
-    // GET /api/Reviews/getAllReviews  — admin
     @GET
     @Path("getAllReviews")
     public Response getAllReviews(@Context HttpServletRequest request) {
@@ -29,9 +23,7 @@ public class AdminReviewsController {
         JSONObject result = reviewsService.getAllReviews();
         return build(result);
     }
-
-    // PUT /api/Reviews/updateReview/{id}
-    // Body: { "rating": 4, "comment": "..." }
+    
     @PUT
     @Path("updateReview/{id}")
     @Consumes(MediaType.APPLICATION_JSON)

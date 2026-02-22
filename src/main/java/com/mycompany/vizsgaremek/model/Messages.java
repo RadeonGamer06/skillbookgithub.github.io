@@ -11,12 +11,10 @@ public class Messages {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // sender_id FK → users.id
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id", nullable = false)
     private Users sender;
 
-    // receiver_id FK → users.id
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "receiver_id", nullable = false)
     private Users receiver;
@@ -24,7 +22,6 @@ public class Messages {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    // Az adatbázisban "sentAt" az oszlop neve (DATETIME DEFAULT CURRENT_TIMESTAMP)
     @Column(name = "sentAt")
     private LocalDateTime sentAt;
 
@@ -39,9 +36,6 @@ public class Messages {
         this.sentAt   = LocalDateTime.now();
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // GETTEREK
-    // ════════════════════════════════════════════════════════════════
     public int getId()              { return id; }
     public Users getSender()        { return sender; }
     public Users getReceiver()      { return receiver; }

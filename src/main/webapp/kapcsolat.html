@@ -22,61 +22,6 @@
             --radius: 4px;
         }
 
-        
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
-        
-
         * { box-sizing: border-box; }
 
         body {
@@ -206,8 +151,6 @@
             display: none;
         }
 
-        /* ── USER MENU ──────────────────────────────────────── */
-
         .user-menu-container {
             position: relative;
             display: none;
@@ -315,10 +258,6 @@
             background: rgba(255,107,107,0.15) !important;
         }
 
-        /* ══════════════════════════════════════════════════
-           CONTACT PAGE STYLES
-           ══════════════════════════════════════════════════ */
-
         .contact-hero {
             width: min(1200px, calc(100% - 40px));
             margin: 60px auto 40px;
@@ -363,7 +302,6 @@
             gap: 60px;
         }
 
-        /* Contact Info Cards */
         .contact-info {
             display: flex;
             flex-direction: column;
@@ -425,7 +363,6 @@
             text-decoration: underline;
         }
 
-        /* Contact Form */
         .contact-form {
             padding: 40px;
             border-radius: 4px;
@@ -511,7 +448,6 @@
             transform: none;
         }
 
-        /* Message Box */
         .message-box {
             position: fixed;
             top: 20px;
@@ -675,7 +611,6 @@
             }
         }
 
-        /* Dark Mode - Backgrounds AND Text Colors */
         [data-theme="dark"] body {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             background-attachment: fixed;
@@ -962,8 +897,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Message Box -->
     <div id="messageBox" class="message-box"></div>
 
     <header>
@@ -990,7 +923,6 @@
                 <a href="regisztracio.html">Regisztráció</a>
             </div>
 
-            <!-- User menü konténer -->
             <div class="user-menu-container" id="userMenuContainer">
                 <button class="user-menu-trigger" id="userMenuTrigger">
                     <div class="user-info">
@@ -1011,15 +943,12 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="contact-hero">
         <h1>Lépj kapcsolatba velünk!</h1>
         <p>Kérdésed van? Segítségre van szükséged? Állunk rendelkezésedre! Írj nekünk bátran, kollégáink hamarosan válaszolnak.</p>
     </section>
 
-    <!-- Contact Container -->
     <div class="contact-container">
-        <!-- Contact Info -->
         <div class="contact-info">
             <div class="info-card">
                 <div class="info-card-header">
@@ -1067,7 +996,6 @@
             </div>
         </div>
 
-        <!-- Contact Form -->
         <div class="contact-form">
             <h2>Küldd el üzeneted</h2>
             <form id="contactForm">
@@ -1096,11 +1024,9 @@
         </div>
     </div>
 
-    <!-- Map Section -->
     <section class="map-section">
         <h2>Találd meg irodánkat</h2>
         <div class="map-container">
-            <!-- Google Maps iframe - cseréld le a saját címedre -->
             <iframe 
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2695.268642866302!2d19.05108431549087!3d47.49770397917662!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4741dc14f3c06e63%3A0xefd3b501c2a89de6!2sBudapest!5e0!3m2!1shu!2shu!4v1234567890123!5m2!1shu!2shu" 
                 allowfullscreen="" 
@@ -1111,14 +1037,13 @@
     </section>
 
     <footer>
-        2025 | SkillBook
+        2026 | SkillBook
     </footer>
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
         const API_BASE_URL = '/SkillBook/api';
 
-    // Apply saved theme immediately
     (function() {
         const theme = localStorage.getItem('theme');
         if (theme === 'dark') {
@@ -1126,7 +1051,6 @@
         }
     })();
 
-    // Segédfüggvény az auth header-hez
     function authHeaders() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         return {
@@ -1135,7 +1059,6 @@
         };
     }
 
-    // Hamburger menü toggle
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
 
@@ -1145,7 +1068,6 @@
         });
     }
 
-    // Ellenőrzi, hogy van-e legalább egy saját kurzusa az oktatónak
     async function checkMyCoursesNav() {
         const link = document.getElementById('myCoursesNav');
         if (!link) return;
@@ -1190,7 +1112,6 @@
 
         if (token && userStr) {
             try {
-                // Friss adatokat kérünk a backendtől (profilkép miatt is)
                 const res = await fetch(API_BASE_URL + '/Users/me', {
                     headers: authHeaders()
                 });
@@ -1207,12 +1128,10 @@
 
                 const user = result.data;
 
-                // Név frissítése
                 userName.textContent = user.name || user.email || 'Felhasználó';
 
-                // Avatar / profilkép logika
                 if (user.profilePicture && user.profilePicture.trim() !== '') {
-                    // Van feltöltött kép
+
                     const imageUrl = user.profilePicture.startsWith('http') 
                         ? user.profilePicture 
                         : `${window.location.origin}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture}`;
@@ -1223,13 +1142,12 @@
                     userAvatar.style.backgroundRepeat = 'no-repeat';
                     userAvatar.textContent = '';
                 } else {
-                    // Nincs kép → inicial
+
                     const initial = (user.name || user.email || '?')[0].toUpperCase();
                     userAvatar.textContent = initial;
                     userAvatar.style.backgroundImage = '';
                 }
 
-                // Láthatóságok
                 userMenuContainer.classList.add('visible');
                 authLinks.classList.add('hidden');
 
@@ -1237,7 +1155,6 @@
                     chatLink.style.display = 'inline-flex';
                 }
 
-                // Frissítjük a localStorage-t is
                 localStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.setItem('user', JSON.stringify(user));
 
@@ -1264,7 +1181,6 @@
         if (chatLink) chatLink.style.display = 'none';
     }
 
-    // User dropdown toggle
     const userTrigger = document.getElementById('userMenuTrigger');
     const userDropdown = document.getElementById('userDropdown');
 
@@ -1285,7 +1201,6 @@
         });
     }
 
-    // Kijelentkezés
     document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.removeItem('token');
@@ -1297,9 +1212,6 @@
         window.location.href = 'pro.html';
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    // KAPCSOLATI ŰRLAP KEZELÉSE
-    // ═══════════════════════════════════════════════════════════════
     const contactForm = document.getElementById('contactForm');
     
     if (contactForm) {
@@ -1309,7 +1221,6 @@
             const submitBtn = contactForm.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
             
-            // Form adatok összegyűjtése
             const formData = {
                 name: document.getElementById('name').value.trim(),
                 email: document.getElementById('email').value.trim(),
@@ -1317,20 +1228,17 @@
                 message: document.getElementById('message').value.trim()
             };
             
-            // Validáció
             if (!formData.name || !formData.email || !formData.subject || !formData.message) {
                 alert('Kérlek töltsd ki az összes mezőt!');
                 return;
             }
             
-            // Email formátum ellenőrzése
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(formData.email)) {
                 alert('Kérlek adj meg egy érvényes email címet!');
                 return;
             }
-            
-            // Gomb letiltása küldés közben
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Küldés...';
             
@@ -1347,7 +1255,7 @@
                 
                 if (response.ok && result.statusCode === 200) {
                     alert(result.message || 'Üzeneted sikeresen elküldve! Hamarosan válaszolunk.');
-                    contactForm.reset(); // Űrlap törlése
+                    contactForm.reset();
                 } else {
                     alert(result.message || 'Hiba történt az üzenet küldése során.');
                 }
@@ -1356,14 +1264,12 @@
                 console.error('Kapcsolati űrlap hiba:', error);
                 alert('Hálózati hiba történt. Kérlek próbáld újra később!');
             } finally {
-                // Gomb visszaállítása
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
         });
     }
 
-    // Inicializálás
     document.addEventListener('DOMContentLoaded', async function(){
         await checkAuth();
         await checkMyCoursesNav();

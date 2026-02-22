@@ -42,7 +42,7 @@ public class Enrollments implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "progress")
-    private Integer progress = 0; // 0-100%
+    private Integer progress = 0;
     @Column(name = "id")
     private Integer id;
     @Size(max = 10)
@@ -139,7 +139,6 @@ public class Enrollments implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Enrollments)) {
             return false;
         }

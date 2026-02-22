@@ -15,13 +15,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 
-// ════════════════════════════════════════════════════════════════════
-// FONTOS: @Path "chat" (perjel nélkül), hogy a JwtAuthFilter
-// "chat/..." prefix-szel megtalálja és a userId attribute-ot beállítsa
-// ════════════════════════════════════════════════════════════════════
 @Path("chat")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,11 +28,6 @@ public class MessagesController {
     @Inject
     private MessagesService messagesService;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 1. ÖSSZES FELHASZNÁLÓ LEKÉRÉSE (chat sidebar - "Összes felhasználó")
-    //    GET /api/chat/users
-    //    Visszaadja az összes usert (saját magán kívül) + utolsó üzenet infó
-    // ════════════════════════════════════════════════════════════════════════
     @GET
     @Path("users")
     public Response getChatUsers(@Context HttpServletRequest request) {
@@ -49,7 +39,6 @@ public class MessagesController {
                         .build();
             }
 
-            // Összes többi felhasználó
             List<Users> users = em.createQuery(
                     "SELECT u FROM Users u WHERE u.id != :id ORDER BY u.name ASC",
                     Users.class)
@@ -58,7 +47,6 @@ public class MessagesController {
 
             JSONArray arr = new JSONArray();
             for (Users partner : users) {
-                // Utolsó üzenet lekérése
                 List<Messages> chat = messagesService.getChat(myId, partner.getId());
                 Messages last = chat.isEmpty() ? null : chat.get(chat.size() - 1);
 
@@ -95,10 +83,6 @@ public class MessagesController {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 2. KONKRÉT CHAT ÜZENETEK LEKÉRÉSE KÉT USER KÖZÖTT
-    //    GET /api/chat/messages?partnerId=5
-    // ════════════════════════════════════════════════════════════════════════
     @GET
     @Path("messages")
     public Response getMessages(
@@ -139,11 +123,6 @@ public class MessagesController {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 3. ÜZENET KÜLDÉSE
-    //    POST /api/chat/send
-    //    Body: { "receiverId": 5, "content": "Szia!" }
-    // ════════════════════════════════════════════════════════════════════════
     @POST
     @Path("send")
     @Transactional

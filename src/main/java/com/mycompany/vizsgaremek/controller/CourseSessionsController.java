@@ -15,7 +15,6 @@ public class CourseSessionsController {
     @Inject
     private CourseSessionsService sessionsService;
 
-    // GET /api/Sessions/getAllSessions
     @GET
     @Path("getAllSessions")
     public Response getAllSessions(@Context HttpServletRequest request) {
@@ -24,15 +23,12 @@ public class CourseSessionsController {
         return build(sessionsService.getAllSessions());
     }
 
-    // GET /api/Sessions/getByCourse/{courseId}
     @GET
     @Path("getByCourse/{courseId}")
     public Response getByCourse(@PathParam("courseId") int courseId) {
         return build(sessionsService.getSessionsByCourse(courseId));
     }
 
-    // POST /api/Sessions/createSession
-    // Body: { "courseId": 3, "startAt": "2026-03-01T10:00", "endAt": "2026-03-01T12:00" }
     @POST
     @Path("createSession")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -46,7 +42,6 @@ public class CourseSessionsController {
                 json.optString("endAt", null)));
     }
 
-    // PUT /api/Sessions/updateSession/{id}
     @PUT
     @Path("updateSession/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -63,7 +58,6 @@ public class CourseSessionsController {
                 json.optString("end_at", null)));
     }
 
-    // DELETE /api/Sessions/deleteSession/{id}
     @DELETE
     @Path("deleteSession/{id}")
     public Response deleteSession(@PathParam("id") int id,

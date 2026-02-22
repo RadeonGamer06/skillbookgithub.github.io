@@ -2,8 +2,6 @@ package com.mycompany.vizsgaremek.controller;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -12,11 +10,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.util.List;
 
-/**
- * Admin Messages végpontok.
- * GET    /api/Messages/getAllMessages    → összes üzenet (admin)
- * DELETE /api/Messages/deleteMessage/{id}
- */
 @Path("Messages")
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminMessagesController {
@@ -24,7 +17,6 @@ public class AdminMessagesController {
     @PersistenceContext(unitName = "SkillBook")
     private EntityManager em;
 
-    // GET /api/Messages/getAllMessages
     @GET
     @Path("getAllMessages")
     public Response getAllMessages(@Context HttpServletRequest request) {
@@ -63,7 +55,6 @@ public class AdminMessagesController {
         return Response.status(resp.getInt("statusCode")).entity(resp.toString()).build();
     }
 
-    // DELETE /api/Messages/deleteMessage/{id}
     @DELETE
     @Path("deleteMessage/{id}")
     public Response deleteMessage(@PathParam("id") int id,

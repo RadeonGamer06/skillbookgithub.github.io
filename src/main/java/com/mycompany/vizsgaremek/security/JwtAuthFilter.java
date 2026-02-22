@@ -18,9 +18,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
     @Context
     private HttpServletRequest servletRequest;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // FONTOS: NINCS kezdő perjel! A path így érkezik: "Users/login" stb.
-    // ════════════════════════════════════════════════════════════════════════
     private static final String[] PUBLIC_PREFIXES = {
             "Users/login",
             "Users/createUser",
@@ -37,7 +34,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        // CORS preflight → átengedjük
         if ("OPTIONS".equalsIgnoreCase(requestContext.getMethod())) {
             return;
         }
@@ -48,7 +44,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
 
         System.out.println("JWT FILTER PATH = " + path);
 
-        // Public endpointok ellenőrzése
         for (String prefix : PUBLIC_PREFIXES) {
             if (path.startsWith(prefix)) {
                 System.out.println("JWT FILTER: Public path, engedélyezve");
@@ -56,7 +51,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
             }
         }
 
-        // JWT token kötelező
         String authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("JWT FILTER: Nincs Bearer token");
@@ -85,10 +79,6 @@ public class JwtAuthFilter implements ContainerRequestFilter {
                 return;
             }
 
-            // ════════════════════════════════════════════════════════════
-            // userId beállítása a request attribute-ba → így éri el minden
-            // Controller a @Context HttpServletRequest request.getAttribute("userId")-vel
-            // ════════════════════════════════════════════════════════════
             if (servletRequest != null) {
                 servletRequest.setAttribute("userId", userId);
                 System.out.println("JWT FILTER: userId beállítva = " + userId);

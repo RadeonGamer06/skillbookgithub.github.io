@@ -15,7 +15,6 @@ public class CourseMaterialsController {
     @Inject
     private CourseMaterialsService materialsService;
 
-    // GET /api/Materials/getAllMaterials  — admin
     @GET
     @Path("getAllMaterials")
     public Response getAllMaterials(@Context HttpServletRequest request) {
@@ -24,14 +23,12 @@ public class CourseMaterialsController {
         return build(materialsService.getAllMaterials());
     }
 
-    // GET /api/Materials/getByCourse/{courseId}
     @GET
     @Path("getByCourse/{courseId}")
     public Response getByCourse(@PathParam("courseId") int courseId) {
         return build(materialsService.getMaterialsByCourse(courseId));
     }
 
-    // DELETE /api/Materials/deleteMaterial/{id}
     @DELETE
     @Path("deleteMaterial/{id}")
     public Response deleteMaterial(@PathParam("id") int id,

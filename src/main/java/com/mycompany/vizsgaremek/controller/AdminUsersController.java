@@ -8,16 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
-/**
- * Admin-only felhasználókezelő controller.
- * Alap path: /api/Admin/Users/...
- *
- * Végpontok:
- *   GET    /api/Admin/Users/getAllUsers          → összes felhasználó listája
- *   PUT    /api/Admin/Users/setRole/{id}         → rang beállítása (student/instructor/admin)
- *   PUT    /api/Admin/Users/updateUser/{id}      → név, email, rang együttes szerkesztése
- *   DELETE /api/Admin/Users/deleteUser/{id}      → felhasználó törlése (cascade)
- */
 @Path("Admin/Users")
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminUsersController {
@@ -25,9 +15,6 @@ public class AdminUsersController {
     @Inject
     private AdminUsersService adminUsersService;
 
-    // ════════════════════════════════════════════════════════════════════════
-    // GET ALL USERS
-    // ════════════════════════════════════════════════════════════════════════
     @GET
     @Path("getAllUsers")
     public Response getAllUsers(@Context HttpServletRequest request) {
@@ -37,11 +24,6 @@ public class AdminUsersController {
         return build(result);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // SET ROLE
-    // PUT /api/Admin/Users/setRole/{id}
-    // Body: { "role": "admin" }   ← student | instructor | admin
-    // ════════════════════════════════════════════════════════════════════════
     @PUT
     @Path("setRole/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -64,11 +46,6 @@ public class AdminUsersController {
         return build(result);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // UPDATE USER (name + email + role)
-    // PUT /api/Admin/Users/updateUser/{id}
-    // Body: { "name": "...", "email": "...", "role": "..." }
-    // ════════════════════════════════════════════════════════════════════════
     @PUT
     @Path("updateUser/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -87,10 +64,6 @@ public class AdminUsersController {
         return build(result);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DELETE USER
-    // DELETE /api/Admin/Users/deleteUser/{id}
-    // ════════════════════════════════════════════════════════════════════════
     @DELETE
     @Path("deleteUser/{id}")
     public Response deleteUser(@PathParam("id") int id,
@@ -101,7 +74,6 @@ public class AdminUsersController {
         return build(result);
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────
     private Response build(JSONObject r) {
         return Response.status(r.getInt("statusCode"))
                 .entity(r.toString())

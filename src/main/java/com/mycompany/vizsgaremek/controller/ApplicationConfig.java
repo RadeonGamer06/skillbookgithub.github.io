@@ -15,7 +15,6 @@ public class ApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new HashSet<>();
 
-        // ── Meglévő controllerek ──────────────────────────────────────────
         resources.add(UsersController.class);
         resources.add(AuthController.class);
         resources.add(CoursesController.class);
@@ -25,7 +24,6 @@ public class ApplicationConfig extends Application {
         resources.add(ReviewsController.class);       // user review CRUD
         resources.add(UploadsController.class);       // képek kiszolgálása
 
-        // ── Új controllerek ──────────────────────────────────────────────
         resources.add(AdminUsersController.class);       // GET getAllUsers, PUT setRole/updateUser, DELETE deleteUser
         resources.add(EnrollmentsController.class);      // beiratkozások CRUD
         resources.add(CourseSessionsController.class);   // tanfolyam időpontok CRUD
@@ -33,9 +31,6 @@ public class ApplicationConfig extends Application {
         resources.add(QuizzesController.class);          // kvízek + kérdések + eredmények CRUD
         resources.add(AdminReviewsController.class);     // getAllReviews + adminUpdateReview
         resources.add(AdminMessagesController.class);    // getAllMessages + deleteMessage
-        resources.add(AdminCategoriesController.class);  // createCategory + updateCategory + deleteCategory
-
-        // ── Security filters ─────────────────────────────────────────────
         resources.add(JwtAuthFilter.class);
         resources.add(CorsFilter.class);
 

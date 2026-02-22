@@ -122,7 +122,6 @@
       color: transparent;
     }
 
-    /* Hamburger menü gomb */
     .menu-toggle {
       display: none;
       flex-direction: column;
@@ -331,7 +330,6 @@
     .logout { color: #ef4444 !important; }
     .logout:hover { background: rgba(239,68,68,0.08) !important; }
 
-    /* Dark mode - header */
     [data-theme="dark"] header { background: rgba(30,41,59,0.9); }
     [data-theme="dark"] nav a,
     [data-theme="dark"] nav button { background: rgba(51,65,85,0.6); color: #f1f5f9; }
@@ -369,7 +367,6 @@
       background: rgba(96,165,250,0.1);
     }
 
-    /* Instructor Profile Card */
     .instructor-card {
       background: var(--card);
       padding: 24px;
@@ -427,7 +424,6 @@
       color: var(--accent);
     }
 
-    /* Course Details Card */
     .course-details {
       background: var(--card);
       padding: 28px;
@@ -481,7 +477,6 @@
       color: var(--muted);
     }
 
-    /* Reviews Section */
     .reviews-section {
       background: var(--card);
       padding: 28px;
@@ -528,7 +523,6 @@
       font-size: 0.9rem;
     }
 
-    /* Star Rating Input */
     .rating-input {
       display: flex;
       gap: 8px;
@@ -553,7 +547,6 @@
       color: var(--star-filled);
     }
 
-    /* Review Form */
     .review-form {
       background: var(--card-2);
       padding: 20px;
@@ -603,7 +596,6 @@
       transform: none;
     }
 
-    /* Review List */
     .reviews-list {
       display: flex;
       flex-direction: column;
@@ -774,7 +766,6 @@
       }
     }
 
-    /* Hamburger menü — pro.html-lel azonos */
     .menu-toggle {
       display: none;
       flex-direction: column;
@@ -817,7 +808,6 @@
       .dropdown-arrow { color: white !important; }
     }
 
-    /* Dark nav fixes */
     [data-theme="dark"] nav a,
     [data-theme="dark"] nav button { background: rgba(51,65,85,0.6); color: #f1f5f9; }
     [data-theme="dark"] nav a:hover,
@@ -830,7 +820,6 @@
     [data-theme="dark"] .dropdown-item:hover { background: rgba(124,58,237,0.25); }
     [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
 
-    /* ── COURSE HERO HEADER KÉP ── */
     .course-hero {
       width: 100%;
       height: 280px;
@@ -874,7 +863,6 @@
       padding-top: 100px;
     }
 
-    /* ── START COURSE BUTTON ── */
     .start-course-btn {
       display: inline-flex;
       align-items: center;
@@ -904,10 +892,8 @@
 
 <body>
 
-  <!-- Message Box -->
   <div id="messageBox" class="message-box"></div>
 
-  <!-- Header -->
   <header>
     <div class="header-left">
       <a class="logo" href="pro.html">
@@ -951,7 +937,6 @@
     </nav>
   </header>
 
-  <!-- Course Hero Header kép -->
   <div id="courseHero" class="course-hero"></div>
 
   <main>
@@ -961,20 +946,16 @@
       Vissza a tanfolyamokhoz
     </a>
 
-    <!-- Instructor Profile -->
     <div id="instructorCard" class="instructor-card hidden"></div>
 
-    <!-- Course Details -->
     <div id="courseDetails" class="course-details hidden"></div>
 
-    <!-- Reviews Section -->
     <div id="reviewsSection" class="reviews-section hidden">
       <div class="reviews-header">
         <h3>Értékelések és hozzászólások</h3>
         <div class="average-rating" id="averageRating"></div>
       </div>
 
-      <!-- Review Form -->
       <div class="review-form" id="reviewForm">
         <h4 style="margin-top: 0; color: var(--text);">Értékeld a tanfolyamot</h4>
         <div class="rating-input" id="ratingInput">
@@ -988,7 +969,6 @@
         <button id="submitReview">Értékelés beküldése</button>
       </div>
 
-      <!-- Reviews List -->
       <div class="reviews-list" id="reviewsList"></div>
     </div>
    </div>
@@ -1009,7 +989,6 @@
       setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
     }
 
-    // Apply saved theme immediately
     (function() {
         const theme = localStorage.getItem('theme');
         if (theme === 'dark') {
@@ -1017,7 +996,6 @@
         }
     })();
 
-    // Segédfüggvény az auth header-hez
     function authHeaders() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         return {
@@ -1026,14 +1004,12 @@
         };
     }
 
-    // Hamburger menü toggle
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
     if (menuToggle && nav) {
         menuToggle.addEventListener('click', () => { nav.classList.toggle('active'); });
     }
 
-    // Ellenőrzi, hogy van-e legalább egy saját kurzusa az oktatónak
     async function checkMyCoursesNav() {
         const link = document.getElementById('myCoursesNav');
         if (!link) return;
@@ -1127,7 +1103,6 @@
         currentUser = null;
     }
 
-    // User dropdown toggle
     const userTrigger = document.getElementById('userMenuTrigger');
     const userDropdown = document.getElementById('userDropdown');
     if (userTrigger && userDropdown) {
@@ -1146,7 +1121,6 @@
         });
     }
 
-    // Kijelentkezés
     document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
         e.preventDefault();
         localStorage.removeItem('token'); localStorage.removeItem('user');
@@ -1167,28 +1141,25 @@
         const res = await fetch(`${API_BASE_URL}/Courses/getCourseById/${courseId}`);
         const data = await res.json();
         
-        console.log('Course response:', data); // Debug
+        console.log('Course response:', data);
         
         if (res.ok && data.statusCode === 200) {
-          course = data.data || data.course; // Mindkét kulcsot támogatjuk
+          course = data.data || data.course;
           if (!course) {
             showMessage('Nem sikerült betölteni a tanfolyam adatait', 'error');
             return;
           }
           
-          // Ha az oktató adatai benne vannak a course objektumban, használjuk azokat
           if (course.instructor) {
             instructor = course.instructor;
             renderInstructorCard(instructor);
           } else {
-            // Fallback: külön lekérjük az oktató adatait
             await loadInstructor(course.instructor_id || course.instructorId);
           }
           
           renderCourseDetails(course);
           await loadReviews(courseId);
           
-          // Felfedés animáció
           setTimeout(() => {
             document.getElementById('instructorCard')?.classList.remove('hidden');
             document.getElementById('courseDetails')?.classList.remove('hidden');
@@ -1208,7 +1179,7 @@
         const res = await fetch(`${API_BASE_URL}/Users/getUserById/${instructorId}`);
         const data = await res.json();
         
-        console.log('Instructor response:', data); // Debug
+        console.log('Instructor response:', data);
         
         if (res.ok && data.statusCode === 200) {
           instructor = data.data;
@@ -1241,7 +1212,6 @@
     }
 
     function renderCourseDetails(course) {
-      // ── Hero header kép beállítása ──
       const hero = document.getElementById('courseHero');
       if (hero) {
         const rawHdr = course.headerImage || course.header_image;
@@ -1295,12 +1265,10 @@
     async function loadReviews(courseId) {
       console.log('🔄 loadReviews called with courseId:', courseId);
       try {
-        // Include auth headers in case the endpoint requires authentication
         const headers = {
           'Content-Type': 'application/json'
         };
         
-        // Add Authorization header if token exists
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
           headers['Authorization'] = 'Bearer ' + token;
@@ -1351,12 +1319,12 @@
       }
 
       container.innerHTML = reviews.map(review => {
-        // Mezőnév kompatibilitás: régi stored proc "reviewer_name", új "user_name"
         const displayName = review.user_name || review.reviewer_name || 'Névtelen';
         const displayEmail = review.user_email || '';
         const initial = getInitial(displayName || displayEmail);
 
-        // Profilkép kezelés
+
+
         const rawPic = review.user_profile_picture || review.profile_picture;
         const hasPic = rawPic && rawPic !== 'null' && rawPic.trim() !== '';
         let avatarHTML;
@@ -1444,7 +1412,6 @@
       return date.toLocaleDateString('hu-HU');
     }
 
-    // Star rating interactive
     const stars = document.querySelectorAll('#ratingInput .star');
     
     stars.forEach(star => {
@@ -1480,7 +1447,6 @@
       });
     }
 
-    // Submit review
     document.getElementById('submitReview').addEventListener('click', async function() {
       console.log('🚀 Submit review button clicked');
       

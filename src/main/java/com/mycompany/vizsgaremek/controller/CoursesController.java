@@ -145,7 +145,6 @@ public class CoursesController {
         }
 
         try {
-            // Ellenőrizzük, hogy multipart request-e
             if (!ServletFileUpload.isMultipartContent(request)) {
                 JSONObject err = new JSONObject();
                 err.put("statusCode", 400);
@@ -153,7 +152,7 @@ public class CoursesController {
                 return Response.status(400).entity(err.toString()).build();
             }
 
-            // FileUpload konfiguráció
+            //feloltes
             DiskFileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
             
@@ -163,7 +162,6 @@ public class CoursesController {
             InputStream fileStream = null;
             String fileName = null;
             
-            // Feldolgozzuk a form field-eket
             for (FileItem item : items) {
                 if (item.isFormField()) {
                     if ("title".equals(item.getFieldName())) {
@@ -233,7 +231,7 @@ public class CoursesController {
             DiskFileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setSizeMax(10L * 1024 * 1024);      // max 10 MB
-            upload.setFileSizeMax(10L * 1024 * 1024);  // max 10 MB
+            upload.setFileSizeMax(10L * 1024 * 1024);
             
             List<FileItem> items = upload.parseRequest(request);
             

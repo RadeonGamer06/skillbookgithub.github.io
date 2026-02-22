@@ -21,7 +21,6 @@ public class Categories implements Serializable {
     @Column(name = "slug")
     private String slug;
     
-    // Constructors
     public Categories() {
     }
     
@@ -29,7 +28,6 @@ public class Categories implements Serializable {
         this.id = id;
     }
     
-    // Getters and Setters
     public Integer getId() {
         return id;
     }

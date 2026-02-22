@@ -131,7 +131,6 @@ public class CourseSessionsService {
                 resp.put("message", "Időpont nem található");
                 return resp;
             }
-            // Remove enrollments pointing to this session first
             em.createNativeQuery("UPDATE enrollments SET session_id = NULL WHERE session_id = :sid")
               .setParameter("sid", sessionId).executeUpdate();
             em.remove(cs);

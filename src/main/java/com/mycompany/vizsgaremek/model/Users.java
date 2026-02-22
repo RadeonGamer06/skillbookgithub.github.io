@@ -54,7 +54,6 @@ public class Users implements Serializable {
     @Column(name = "name")
     private String name;
     
-    // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Size(max = 255)
     @Column(name = "email")
     private String email;
@@ -73,9 +72,6 @@ public class Users implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
     
-    // ════════════════════════════════════════════════════════════════════════
-    // ÚJ MEZŐ: PROFILKÉP
-    // ════════════════════════════════════════════════════════════════════════
     @Size(max = 500)
     @Column(name = "profile_picture")
     private String profilePicture;
@@ -149,9 +145,6 @@ public class Users implements Serializable {
         this.createdAt = createdAt;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // PROFILKÉP GETTER/SETTER
-    // ════════════════════════════════════════════════════════════════════════
     public String getProfilePicture() {
         return profilePicture;
     }
@@ -196,7 +189,6 @@ public class Users implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Users)) {
             return false;
         }

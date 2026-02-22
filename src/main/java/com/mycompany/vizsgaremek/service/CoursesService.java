@@ -33,9 +33,6 @@ public class CoursesService {
     @PersistenceContext(unitName = "SkillBook")
     private EntityManager em;
     
-    // ════════════════════════════════════════════════════════════════════════
-    // HELPER METHODS (változatlan)
-    // ════════════════════════════════════════════════════════════════════════
     private LocalDateTime parseFlexibleDate(String value, boolean isEnd) {
         if (value == null || value.trim().isEmpty() || "null".equalsIgnoreCase(value.trim())) {
             return null;
@@ -129,14 +126,10 @@ public class CoursesService {
         return readDateAsIso(c, "getEndDate");
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // CREATE COURSE
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject createCourse(String title, String description, Integer price, Integer instructorId,
             Integer categoryId, Integer maxParticipants, String startDate, String endDate) {
         JSONObject resp = new JSONObject();
         try {
-            // Natív SQL INSERT használata stored procedure helyett
             String sql = "INSERT INTO courses (title, description, price, instructor_id, category_id, max_participants, created_at) " +
                          "VALUES (:title, :description, :price, :instructorId, :categoryId, :maxParticipants, NOW())";
             
@@ -149,11 +142,9 @@ public class CoursesService {
             query.setParameter("maxParticipants", maxParticipants);
             query.executeUpdate();
             
-            // Az utoljára beszúrt ID lekérése
             BigInteger bigId = (BigInteger) em.createNativeQuery("SELECT LAST_INSERT_ID()").getSingleResult();
             Integer newCourseId = bigId.intValueExact();
             
-            // Dátumok beállítása ha meg vannak adva
             if ((startDate != null && !startDate.trim().isEmpty()) || (endDate != null && !endDate.trim().isEmpty())) {
                 Courses newCourse = em.find(Courses.class, newCourseId);
                 if (newCourse != null) {
@@ -173,9 +164,6 @@ public class CoursesService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // GET ALL COURSES
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getAllCourses() {
         JSONObject resp = new JSONObject();
         JSONArray arr = new JSONArray();
@@ -217,9 +205,6 @@ public class CoursesService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // GET COURSE BY ID (with instructor details)
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject getCourseById(int id) {
         JSONObject resp = new JSONObject();
         try {
@@ -241,7 +226,6 @@ public class CoursesService {
             data.put("end_date", extractEndDateIso(course));
             data.put("header_image", course.getHeaderImage() != null ? course.getHeaderImage() : JSONObject.NULL);
             
-            // Fetch instructor details
             if (course.getInstructorId() != null) {
                 try {
                     Users instructor = em.find(Users.class, course.getInstructorId());
@@ -262,8 +246,8 @@ public class CoursesService {
             
             resp.put("status", "Success");
             resp.put("statusCode", 200);
-            resp.put("data", data);  // Változtatva "course"-ról "data"-ra
-            resp.put("course", data);  // Megtartjuk a régi kulcsot is a kompatibilitás miatt
+            resp.put("data", data);
+            resp.put("course", data);
         } catch (Exception e) {
             e.printStackTrace();
             resp.put("statusCode", 500);
@@ -272,9 +256,6 @@ public class CoursesService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // UPDATE COURSE
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject updateCourse(int id, String title, String description, Integer price, 
                                    String startDate, String endDate, Integer userId) {
         JSONObject resp = new JSONObject();
@@ -312,9 +293,6 @@ public class CoursesService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // ✅ DELETE COURSE - EXPLICIT TRANSACTION ANNOTATION
-    // ════════════════════════════════════════════════════════════════════════
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public JSONObject deleteCourse(int courseId, Integer userId) {
         JSONObject resp = new JSONObject();
@@ -324,7 +302,6 @@ public class CoursesService {
         System.out.println("   User ID: " + userId);
         
         try {
-            // 1. Jogosultság ellenőrzés
             System.out.println("   → Tanfolyam lekérése...");
             Courses course = em.find(Courses.class, courseId);
             if (course == null) {
@@ -354,13 +331,11 @@ public class CoursesService {
             
             System.out.println("   ✓ Jogosultság OK");
             
-            // 2. TÖRLÉS
             System.out.println("   → Külső kulcs ellenőrzés kikapcsolása...");
             em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
-            em.flush(); // FONTOS: flush a SET parancs után
+            em.flush();
             
             try {
-                // Quiz ID-k lekérése
                 System.out.println("   → Quizek lekérdezése...");
                 @SuppressWarnings("unchecked")
                 List<Integer> quizIds = em.createNativeQuery(
@@ -370,7 +345,6 @@ public class CoursesService {
                 
                 System.out.println("   ✓ " + quizIds.size() + " quiz találva");
                 
-                // Quiz eredmények és kérdések törlése
                 for (Integer quizId : quizIds) {
                     em.createNativeQuery("DELETE FROM quiz_results WHERE quiz_id = :quizId")
                         .setParameter("quizId", quizId)
@@ -383,50 +357,39 @@ public class CoursesService {
                     System.out.println("   ✓ Quiz #" + quizId + " törölve");
                 }
                 
-                // Quizek törlése
                 int deleted = em.createNativeQuery("DELETE FROM quizzes WHERE course_id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Quizek törölve: " + deleted);
                 
-                // ❌ MESSAGES TÖRLÉS KIHAGYVA
-                // A messages táblában NINCS course_id oszlop!
-                // Ez egy chat üzenet tábla (sender_id, receiver_id)
-                
-                // Beiratkozások
                 deleted = em.createNativeQuery("DELETE FROM enrollments WHERE course_id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Beiratkozások törölve: " + deleted);
                 
-                // Értékelések
                 deleted = em.createNativeQuery("DELETE FROM course_reviews WHERE course_id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Értékelések törölve: " + deleted);
                 
-                // Anyagok
                 deleted = em.createNativeQuery("DELETE FROM course_materials WHERE course_id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Anyagok törölve: " + deleted);
                 
-                // Órák
                 deleted = em.createNativeQuery("DELETE FROM course_sessions WHERE course_id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Órák törölve: " + deleted);
                 
-                // Tanfolyam
                 deleted = em.createNativeQuery("DELETE FROM courses WHERE id = :courseId")
                     .setParameter("courseId", courseId)
                     .executeUpdate();
                 System.out.println("   ✓ Tanfolyam törölve: " + deleted);
                 
-                em.flush(); // FONTOS: flush a DELETE parancsok után
+                em.flush();
                 
             } finally {
-                // MINDIG visszakapcsoljuk a külső kulcs ellenőrzést
                 System.out.println("   → Külső kulcs ellenőrzés visszakapcsolása...");
                 em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
                 em.flush();
@@ -442,7 +405,6 @@ public class CoursesService {
             System.err.println("   ❌ HIBA:");
             e.printStackTrace();
             
-            // Biztonság: külső kulcs ellenőrzés visszakapcsolása
             try {
                 em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
                 em.flush();
@@ -455,9 +417,6 @@ public class CoursesService {
         return resp;
     }
     
-    // ════════════════════════════════════════════════════════════════════════
-    // UPLOAD MATERIAL
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject uploadMaterial(int courseId, int uploadedBy, String title, 
                                      java.io.InputStream fileStream, String originalFileName) {
         JSONObject resp = new JSONObject();
@@ -517,14 +476,10 @@ public class CoursesService {
         return resp;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // FEJLÉC KÉP FELTÖLTÉSE - uploads mappába (mint a profilképek)
-    // ════════════════════════════════════════════════════════════════════════
     public JSONObject uploadHeaderImage(int courseId, int userId, java.io.InputStream fileStream, String fileName) {
         JSONObject resp = new JSONObject();
 
         try {
-            // Ellenőrizzük, hogy a tanfolyam létezik és a felhasználó az oktató
             Courses course = em.find(Courses.class, courseId);
             if (course == null) {
                 resp.put("statusCode", 404);
@@ -538,32 +493,25 @@ public class CoursesService {
                 return resp;
             }
 
-            // Fájl kiterjesztés
             String ext = "";
             if (fileName != null && fileName.contains(".")) {
                 ext = fileName.substring(fileName.lastIndexOf("."));
             }
 
-            // Egyedi fájlnév generálása
             String uniqueFileName = "course_header_" + courseId + "_" + System.currentTimeMillis() + ext;
 
-            // Fájl mentési útvonal - uploads/course_headers könyvtárba (mint a profilképek)
             String uploadsDir = "C:/Users/Bagoly Donát/Desktop/SkillBook/server/wildfly-preview-26.1.1.Final/standalone/data/uploads/course_headers/";
             java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadsDir);
 
-            // Könyvtár létrehozása, ha nem létezik
             if (!java.nio.file.Files.exists(uploadPath)) {
                 java.nio.file.Files.createDirectories(uploadPath);
             }
 
-            // Fájl mentése
             java.nio.file.Path filePath = uploadPath.resolve(uniqueFileName);
             java.nio.file.Files.copy(fileStream, filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-            // URL generálása - UploadsController-en keresztül
             String fileUrl = "/SkillBook/api/Uploads/course_headers/" + uniqueFileName;
 
-            // Tanfolyam frissítése az új fejléc képpel
             course.setHeaderImage(fileUrl);
             em.merge(course);
 

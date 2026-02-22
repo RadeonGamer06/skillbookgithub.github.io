@@ -589,13 +589,12 @@
     </main>
 
     <footer>
-        2025 | SkillBook
+        2026 | SkillBook
     </footer>
 
     <script>
         const API_BASE_URL = '/SkillBook/api';
 
-        // Hamburger menü toggle
         const menuToggle = document.getElementById('menuToggle');
         const mainNav = document.getElementById('mainNav');
         
@@ -613,7 +612,6 @@
             };
         }
 
-        // Theme selection
         let selectedTheme = localStorage.getItem('theme') || 'light';
 
         function applyTheme(theme) {
@@ -635,11 +633,9 @@
             }
         }
 
-        // Initialize theme
         applyTheme(selectedTheme);
         updateThemeSelection();
 
-        // Theme option click handlers
         document.querySelectorAll('.theme-option').forEach(option => {
             option.addEventListener('click', () => {
                 selectedTheme = option.getAttribute('data-theme-option');
@@ -648,7 +644,6 @@
             });
         });
 
-        // Save button
         document.getElementById('saveButton').addEventListener('click', () => {
             localStorage.setItem('theme', selectedTheme);
             
@@ -660,7 +655,6 @@
             }, 3000);
         });
 
-        // Ellenőrzi, hogy van-e legalább egy saját kurzusa az oktatónak
         async function checkMyCoursesNav() {
             const link = document.getElementById('myCoursesNav');
             if (!link) return;
@@ -768,7 +762,6 @@
             if (chatLink) chatLink.style.display = 'none';
         }
 
-        // User dropdown toggle
         const userTrigger = document.getElementById('userMenuTrigger');
         const userDropdown = document.getElementById('userDropdown');
 
@@ -789,7 +782,6 @@
             });
         }
 
-        // Kijelentkezés
         document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
             e.preventDefault();
             localStorage.removeItem('token');
@@ -801,7 +793,6 @@
             window.location.href = 'pro.html';
         });
 
-        // Inicializálás
         document.addEventListener('DOMContentLoaded', async function(){
             await checkAuth();
             await checkMyCoursesNav();

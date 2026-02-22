@@ -16,10 +16,6 @@ public class ReviewsController {
     @Inject
     private ReviewsService reviewsService;
 
-    /**
-     * Értékelés létrehozása
-     * POST /api/Reviews/create
-     */
     @POST
     @Path("create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -61,10 +57,6 @@ public class ReviewsController {
                 .build();
     }
 
-    /**
-     * Tanfolyam értékeléseinek lekérése
-     * GET /api/Reviews/getByCourse/{courseId}
-     */
     @GET
     @Path("getByCourse/{courseId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -77,10 +69,6 @@ public class ReviewsController {
                 .build();
     }
 
-    /**
-     * Felhasználó értékeléseinek lekérése
-     * GET /api/Reviews/getByUser
-     */
     @GET
     @Path("getByUser")
     @Produces(MediaType.APPLICATION_JSON)
@@ -101,10 +89,6 @@ public class ReviewsController {
                 .build();
     }
 
-    /**
-     * Értékelés törlése
-     * DELETE /api/Reviews/delete/{reviewId}
-     */
     @DELETE
     @Path("delete/{reviewId}")
     @Produces(MediaType.APPLICATION_JSON)

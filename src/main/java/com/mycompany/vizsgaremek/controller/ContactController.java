@@ -22,13 +22,11 @@ public class ContactController {
         try {
             JSONObject obj = new JSONObject(body);
 
-            // Adatok kinyerése
             String name = obj.optString("name", "").trim();
             String email = obj.optString("email", "").trim();
             String subject = obj.optString("subject", "").trim();
             String message = obj.optString("message", "").trim();
 
-            // Validáció
             if (name.isEmpty() || email.isEmpty() || subject.isEmpty() || message.isEmpty()) {
                 resp.put("statusCode", 400);
                 resp.put("message", "Minden mező kitöltése kötelező!");
@@ -38,7 +36,6 @@ public class ContactController {
                         .build();
             }
 
-            // Email validáció (egyszerű regex)
             if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
                 resp.put("statusCode", 400);
                 resp.put("message", "Érvénytelen email cím!");
@@ -48,7 +45,6 @@ public class ContactController {
                         .build();
             }
 
-            // Email küldése
             boolean emailSent = emailService.sendContactEmail(name, email, subject, message);
 
             if (emailSent) {

@@ -8,27 +8,16 @@ import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.nio.file.Files;
 
-/**
- * ✅ ÚJ CONTROLLER - Képek kiszolgálására
- * Ez szolgálja ki a feltöltött profilképeket statikus fájlokként
- */
 @Path("Uploads")
 public class UploadsController {
 
-    /**
-     * Profilkép lekérése fájlnév alapján
-     * GET /api/Uploads/profile_pictures/{filename}
-     * 
-     * Példa: http://127.0.0.1:8080/SkillBook/api/Uploads/profile_pictures/profile_80_abc123.jpg
-     */
     @GET
     @Path("profile_pictures/{filename}")
-    @Produces("image/*")  // Bármilyen képtípus
+    @Produces("image/*")
     public Response getProfilePicture(@PathParam("filename") String filename) {
         try {
             System.out.println("📷 PROFILKÉP LEKÉRÉS: " + filename);
 
-            // Biztonság: ne engedjük a "../" karaktereket (path traversal attack védelem)
             if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 System.err.println("❌ BIZTONSÁGI HIBA: Érvénytelen fájlnév");
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -37,7 +26,6 @@ public class UploadsController {
                         .build();
             }
 
-            // Fájl lekérése a lemezről
             File imageFile = UsersService.getProfilePictureFile(filename);
 
             if (!imageFile.exists()) {
@@ -48,7 +36,6 @@ public class UploadsController {
                         .build();
             }
 
-            // MIME type meghatározása fájlkiterjesztés alapján
             String contentType = "image/jpeg";  // alapértelmezett
             String lowerFilename = filename.toLowerCase();
             
@@ -62,7 +49,6 @@ public class UploadsController {
                 contentType = "image/jpeg";
             }
 
-            // Fájl beolvasása és visszaküldése
             byte[] imageData = Files.readAllBytes(imageFile.toPath());
 
             System.out.println("✅ Kép kiszolgálva: " + filename + " (" + imageData.length + " byte)");
@@ -83,20 +69,13 @@ public class UploadsController {
         }
     }
 
-    /**
-     * Tanfolyam fejléc kép lekérése fájlnév alapján
-     * GET /api/Uploads/course_headers/{filename}
-     * 
-     * Példa: http://127.0.0.1:8080/SkillBook/api/Uploads/course_headers/course_header_55_1771283127614.jpg
-     */
     @GET
     @Path("course_headers/{filename}")
-    @Produces("image/*")  // Bármilyen képtípus
+    @Produces("image/*")
     public Response getCourseHeader(@PathParam("filename") String filename) {
         try {
             System.out.println("🎨 TANFOLYAM FEJLÉC KÉP LEKÉRÉS: " + filename);
 
-            // Biztonság: ne engedjük a "../" karaktereket (path traversal attack védelem)
             if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 System.err.println("❌ BIZTONSÁGI HIBA: Érvénytelen fájlnév");
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -105,7 +84,6 @@ public class UploadsController {
                         .build();
             }
 
-            // Fájl lekérése a lemezről - course_headers mappából
             String uploadsDir = "C:/Users/Bagoly Donát/Desktop/SkillBook/server/wildfly-preview-26.1.1.Final/standalone/data/uploads/course_headers/";
             File imageFile = new File(uploadsDir + filename);
 
@@ -117,7 +95,6 @@ public class UploadsController {
                         .build();
             }
 
-            // MIME type meghatározása fájlkiterjesztés alapján
             String contentType = "image/jpeg";  // alapértelmezett
             String lowerFilename = filename.toLowerCase();
             
@@ -131,7 +108,6 @@ public class UploadsController {
                 contentType = "image/jpeg";
             }
 
-            // Fájl beolvasása és visszaküldése
             byte[] imageData = Files.readAllBytes(imageFile.toPath());
 
             System.out.println("✅ Tanfolyam fejléc kép kiszolgálva: " + filename + " (" + imageData.length + " byte)");
