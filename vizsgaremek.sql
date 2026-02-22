@@ -485,6 +485,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `uploadCourseMaterial` (IN `p_course
         p_uploaded_by,
         CURRENT_TIMESTAMP
     );
+
 END$$
 
 DELIMITER ;
