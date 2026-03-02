@@ -821,27 +821,42 @@
 </div>
 
 <div id="uploadMaterialModal" class="modal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:700px;">
     <div class="modal-header">
-      <h2><i class='bx bx-upload'></i> Anyag feltöltése</h2>
+      <h2><i class='bx bx-book-content'></i> Tananyagok kezelése</h2>
       <button class="modal-close" onclick="closeUploadModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <form id="uploadMaterialForm" onsubmit="handleUploadMaterial(event)">
-        <input type="hidden" id="uploadCourseId">
-        <div class="form-group">
-          <label for="materialTitle">Anyag címe *</label>
-          <input type="text" id="materialTitle" placeholder="pl. 1. lecke - Bevezetés" required>
+
+      <div class="form-section">
+        <p class="form-section-title"><i class='bx bx-list-ul'></i> Feltöltött tananyagok</p>
+        <div id="existingMaterialsList">
+          <div style="text-align:center;padding:16px;color:var(--muted);">
+            <div class="loading-spinner" style="width:28px;height:28px;border-width:3px;margin:0 auto;"></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="materialFile">Fájl kiválasztása *</label>
-          <input type="file" id="materialFile" required>
-        </div>
-        <div class="modal-footer" style="padding:0; border:none; background:none; margin-top:8px;">
-          <button type="button" class="btn-secondary" onclick="closeUploadModal()">Mégse</button>
-          <button type="submit" class="btn-primary"><i class='bx bx-upload'></i> Feltöltés</button>
-        </div>
-      </form>
+      </div>
+
+      <div class="form-section">
+        <p class="form-section-title"><i class='bx bx-upload'></i> Új tananyag feltöltése</p>
+        <form id="uploadMaterialForm" onsubmit="handleUploadMaterial(event)">
+          <input type="hidden" id="uploadCourseId">
+          <div class="form-group">
+            <label for="materialTitle">Anyag címe *</label>
+            <input type="text" id="materialTitle" placeholder="pl. 1. lecke – Bevezetés" required>
+          </div>
+          <div class="form-group">
+            <label for="materialFile">Fájl kiválasztása *</label>
+            <input type="file" id="materialFile" required>
+            <small>Elfogadott formátumok: PDF, Word, PowerPoint, képek, videók stb.</small>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+            <button type="button" class="btn-secondary" onclick="closeUploadModal()">Bezárás</button>
+            <button type="submit" class="btn-primary" id="uploadSubmitBtn"><i class='bx bx-upload'></i> Feltöltés</button>
+          </div>
+        </form>
+      </div>
+
     </div>
   </div>
 </div>
@@ -915,6 +930,13 @@ async function checkAuth() {
             const result = await res.json();
             if (result.statusCode !== 200 || !result.data) throw new Error(result.message || 'Hibás válasz');
             const user = result.data;
+
+            // Jogosultság ellenőrzés a SZERVER válasza alapján
+            if (user.role !== 'instructor' && user.role !== 'admin') {
+                window.location.href = 'courses.html';
+                return;
+            }
+
             userName.textContent = user.name || user.email || 'Felhasználó';
             if (user.profilePicture && user.profilePicture.trim() !== '') {
                 const imageUrl = user.profilePicture.startsWith('http')
@@ -935,6 +957,12 @@ async function checkAuth() {
             if (chatLink && (user.role === 'student' || user.role === 'instructor' || user.role === 'admin')) {
                 chatLink.style.display = 'inline-flex';
             }
+            // Instructor UI elemek megjelenítése
+            const myCoursesNav = document.getElementById('myCoursesNav');
+            const addBtn = document.getElementById('addCourseBtn');
+            if (myCoursesNav) myCoursesNav.style.display = 'inline-flex';
+            if (addBtn) addBtn.style.display = 'inline-flex';
+
             localStorage.setItem('user', JSON.stringify(user));
             sessionStorage.setItem('user', JSON.stringify(user));
         } catch (err) {
@@ -949,16 +977,7 @@ async function checkAuth() {
 }
 
 function checkIfInstructor() {
-    try {
-        const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-        if (user.role !== 'instructor') { window.location.href = 'courses.html'; return; }
-        const myCoursesNav = document.getElementById('myCoursesNav');
-        const addBtn = document.getElementById('addCourseBtn');
-        if (myCoursesNav) myCoursesNav.style.display = 'inline-flex';
-        if (addBtn) addBtn.style.display = 'inline-flex';
-    } catch {
-        window.location.href = 'courses.html';
-    }
+    // Üres — a logika átkerült a checkAuth()-ba (szerver alapú ellenőrzés)
 }
 
 let categoriesCache = [];
@@ -1275,18 +1294,114 @@ async function confirmDelete(courseId) {
 
 function openUploadModal(courseId) {
     document.getElementById('uploadCourseId').value = courseId;
+    document.getElementById('uploadMaterialForm').reset();
     document.getElementById('uploadMaterialModal').style.display = 'flex';
+    loadExistingMaterials(courseId);
 }
 function closeUploadModal() {
     document.getElementById('uploadMaterialModal').style.display = 'none';
     document.getElementById('uploadMaterialForm').reset();
 }
+
+async function loadExistingMaterials(courseId) {
+    const container = document.getElementById('existingMaterialsList');
+    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);">
+        <div class="loading-spinner" style="width:28px;height:28px;border-width:3px;margin:0 auto;"></div>
+    </div>`;
+    try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const res = await fetch(API_BASE_URL + '/Materials/getByCourse/' + courseId, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error('fetch failed');
+        const result = await res.json();
+        const materials = Array.isArray(result.data) ? result.data : [];
+
+        if (materials.length === 0) {
+            container.innerHTML = `<div style="text-align:center;padding:18px;color:var(--muted);font-size:0.88rem;">
+                <i class='bx bx-folder-open' style="font-size:2rem;display:block;margin-bottom:6px;opacity:0.4;"></i>
+                Még nincs feltöltött tananyag.
+            </div>`;
+            return;
+        }
+
+        const extIconMap = {
+            pdf:'bx-file-pdf', doc:'bx-file', docx:'bx-file',
+            ppt:'bx-slideshow', pptx:'bx-slideshow',
+            xls:'bx-spreadsheet', xlsx:'bx-spreadsheet',
+            mp4:'bx-video', mov:'bx-video', avi:'bx-video',
+            jpg:'bx-image', jpeg:'bx-image', png:'bx-image',
+            zip:'bx-archive', rar:'bx-archive',
+        };
+
+        container.innerHTML = '';
+        materials.forEach(mat => {
+            const fileUrl   = mat.file_url || '';
+            const title     = mat.title || 'Névtelen anyag';
+            const uploadedAt = mat.uploaded_at || '';
+            const ext  = fileUrl.split('.').pop().toLowerCase();
+            const icon = extIconMap[ext] || 'bx-file-blank';
+            const fullUrl = fileUrl.startsWith('http') ? fileUrl : window.location.origin + fileUrl;
+            let dateStr = '';
+            if (uploadedAt) {
+                try { dateStr = new Date(uploadedAt).toLocaleDateString('hu-HU', {year:'numeric',month:'short',day:'numeric'}); } catch(e) {}
+            }
+            const item = document.createElement('div');
+            item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card-2);margin-bottom:8px;';
+            item.innerHTML = `
+                <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;flex-shrink:0;">
+                    <i class='bx ${icon}'></i>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div>
+                    ${dateStr ? `<div style="font-size:0.76rem;color:var(--muted);margin-top:2px;">${dateStr}</div>` : ''}
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0;">
+                    <a href="${fullUrl}" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--card-2);color:var(--text);text-decoration:none;font-size:1rem;transition:all 0.18s;" title="Letöltés">
+                        <i class='bx bx-download'></i>
+                    </a>
+                    <button onclick="deleteMaterial(${mat.id}, ${courseId})" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--card-2);color:var(--text);cursor:pointer;font-size:1rem;transition:all 0.18s;" title="Törlés">
+                        <i class='bx bx-trash'></i>
+                    </button>
+                </div>`;
+            container.appendChild(item);
+        });
+    } catch(e) {
+        console.error('Anyagok betöltési hiba:', e);
+        container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-size:0.88rem;">Nem sikerült betölteni az anyagokat.</div>`;
+    }
+}
+
+async function deleteMaterial(materialId, courseId) {
+    if (!confirm('Biztosan törölni szeretnéd ezt az anyagot?')) return;
+    try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const res = await fetch(API_BASE_URL + '/Materials/deleteMaterial/' + materialId, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+            showMessage('Anyag törölve.', 'success');
+            loadExistingMaterials(courseId);
+        } else {
+            const r = await res.json();
+            showMessage(r.message || 'Hiba a törlés során.', 'error');
+        }
+    } catch(e) {
+        showMessage('Hiba a törlés során.', 'error');
+    }
+}
+
 async function handleUploadMaterial(event) {
     event.preventDefault();
     const courseId = document.getElementById('uploadCourseId').value;
-    const title = document.getElementById('materialTitle').value;
-    const file = document.getElementById('materialFile').files[0];
+    const title    = document.getElementById('materialTitle').value;
+    const file     = document.getElementById('materialFile').files[0];
     if (!file) { showMessage('Válassz ki egy fájlt!', 'error'); return; }
+
+    const submitBtn = document.getElementById('uploadSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Feltöltés...`;
 
     const formData = new FormData();
     formData.append('title', title);
@@ -1302,13 +1417,21 @@ async function handleUploadMaterial(event) {
         const result = await res.json();
         if (res.ok && result.statusCode === 201) {
             showMessage('Anyag sikeresen feltöltve!', 'success');
-            closeUploadModal();
+            document.getElementById('uploadMaterialForm').reset();
+            loadExistingMaterials(courseId);
         } else {
             showMessage(result.message || 'Hiba a feltöltés során.', 'error');
         }
     } catch(e) {
         showMessage('Hiba a feltöltés során.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class='bx bx-upload'></i> Feltöltés`;
     }
+}
+
+function escapeHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 window.onclick = function(e) {

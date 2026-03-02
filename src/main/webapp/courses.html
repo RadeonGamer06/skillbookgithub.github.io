@@ -375,9 +375,10 @@
       color: white;
       position: relative;
       overflow: hidden;
-      height: 150px;
-      background-size: cover;
-      background-position: center;
+      height: 180px;
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
       flex-shrink: 0;
     }
 
@@ -1393,27 +1394,8 @@
     }
 
     async function checkMyCoursesNav() {
-        const link = document.getElementById('myCoursesNav');
-        if (!link) return;
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-        if (!token || !userStr) { link.style.display = 'none'; return; }
-        let user;
-        try { user = JSON.parse(userStr); } catch(e) { link.style.display = 'none'; return; }
-        if (!user || user.role !== 'instructor') { link.style.display = 'none'; return; }
-        try {
-            const meRes = await fetch(API_BASE_URL + '/Users/me', { headers: authHeaders() });
-            if (!meRes.ok) { link.style.display = 'none'; return; }
-            const meJson = await meRes.json();
-            const myId = meJson?.data?.id;
-            if (!myId) { link.style.display = 'none'; return; }
-            const cRes = await fetch(API_BASE_URL + '/Courses/getAllCourses');
-            if (!cRes.ok) { link.style.display = 'none'; return; }
-            const cJson = await cRes.json();
-            const courses = Array.isArray(cJson?.data) ? cJson.data : [];
-            const myCourses = courses.filter(c => String(c.instructor_id) === String(myId));
-            link.style.display = myCourses.length > 0 ? 'inline-flex' : 'none';
-        } catch (e) { link.style.display = 'none'; }
+        // Ez a funkció már a checkAuth()-ból fut, itt nem kell külön hívni.
+        // Megtartjuk visszafelé kompatibilitásért, de a logika a checkAuth-ban van.
     }
 
     async function checkAuth() {
@@ -1450,6 +1432,25 @@
                 authLinks.classList.add('hidden');
                 if (chatLink && (user.role === 'student' || user.role === 'instructor' || user.role === 'admin')) {
                     chatLink.style.display = 'inline-flex';
+                }
+                // Instructor funkciók megjelenítése a SZERVER által visszaadott role alapján
+                if (user.role === 'instructor' || user.role === 'admin') {
+                    const createBtn = document.getElementById('createCourseBtn');
+                    if (createBtn) createBtn.style.display = 'inline-flex';
+
+                    // "Tanfolyamaim" link: megmutatjuk ha van saját tanfolyam
+                    const myCoursesLink = document.getElementById('myCoursesNav');
+                    if (myCoursesLink) {
+                        try {
+                            const cRes = await fetch(API_BASE_URL + '/Courses/getAllCourses');
+                            if (cRes.ok) {
+                                const cJson = await cRes.json();
+                                const allC = Array.isArray(cJson?.data) ? cJson.data : [];
+                                const mine = allC.filter(c => String(c.instructor_id) === String(user.id));
+                                myCoursesLink.style.display = mine.length > 0 ? 'inline-flex' : 'none';
+                            }
+                        } catch(e) { /* csendesen kezeljük */ }
+                    }
                 }
                 localStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.setItem('user', JSON.stringify(user));
@@ -1765,7 +1766,7 @@
             }
 
             const headerStyle = hasHeaderImage
-                ? `style="background-image: url('${headerBgUrl}')"` 
+                ? `style="background-image: url('${headerBgUrl}'); background-size: cover; background-position: center center; background-repeat: no-repeat;"`
                 : '';
 
             let dateBadgeHTML = '';
@@ -1816,12 +1817,10 @@
     }
 
     document.addEventListener('DOMContentLoaded', async function(){
-        await checkAuth();
-        await checkMyCoursesNav();
-        await loadEnrolledCourses();   // ← Saját beiratkozott tanfolyamok
+        await checkAuth();          // Ez már kezeli: createCourseBtn + myCoursesNav + chatLink
+        await loadEnrolledCourses();
         await loadCourses();
         await loadCategories();
-        checkInstructorRole();
     });
 
     async function loadEnrolledCourses() {
@@ -1940,23 +1939,6 @@
             .replace(/"/g,'&quot;');
     }
     
-    function checkInstructorRole() {
-        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-        if (!userStr) return;
-        
-        try {
-            const user = JSON.parse(userStr);
-            if (user.role === 'instructor') {
-                const createBtn = document.getElementById('createCourseBtn');
-                if (createBtn) {
-                    createBtn.style.display = 'inline-flex';
-                }
-            }
-        } catch (e) {
-            console.error('Error checking instructor role:', e);
-        }
-    }
-
     function openCreateCourseModal() {
         const modal = document.getElementById('createCourseModal');
         if (modal) {

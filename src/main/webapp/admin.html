@@ -1048,26 +1048,27 @@
             case 'messages':        loadMessages(); break;
             case 'course_materials':loadMaterials(); break;
             case 'course_sessions': loadSessions(); break;
-            case 'quizzes':         loadQuizzes(); break;
-            case 'quiz_questions':  loadQuestions(); break;
-            case 'quiz_results':    loadQuizResults(); break;
         }
     }
 
+    // Stub-ok hiányzó quiz funkcióhoz (nem implementált)
+    function loadQuizzes() {}
+    function loadQuestions() {}
+    function loadQuizResults() {}
+
     async function loadDashboard() {
         try {
-            const [uR, cR, catR, eR, revR, mR, qR, matR] = await Promise.all([
+            const [uR, cR, catR, eR, revR, mR, matR] = await Promise.all([
                 fetch(`${API}/Admin/Users/getAllUsers`,       { headers: authHdr() }),
                 fetch(`${API}/Courses/getAllCourses`),
                 fetch(`${API}/Categories/getAllCategories`),
                 fetch(`${API}/Enrollments/getAllEnrollments`, { headers: authHdr() }),
                 fetch(`${API}/Reviews/getAllReviews`,         { headers: authHdr() }),
                 fetch(`${API}/Messages/getAllMessages`,       { headers: authHdr() }),
-                fetch(`${API}/Quizzes/getAllQuizzes`,         { headers: authHdr() }),
                 fetch(`${API}/Materials/getAllMaterials`,     { headers: authHdr() })
             ]);
-            const [u, c, cat, e, rev, m, q, mat] = await Promise.all([
-                uR.json(), cR.json(), catR.json(), eR.json(), revR.json(), mR.json(), qR.json(), matR.json()
+            const [u, c, cat, e, rev, m, mat] = await Promise.all([
+                uR.json(), cR.json(), catR.json(), eR.json(), revR.json(), mR.json(), matR.json()
             ]);
 
             const users = Array.isArray(u?.data) ? u.data : [];
@@ -1076,7 +1077,6 @@
             const enrollments = Array.isArray(e?.data) ? e.data : [];
             const reviews = Array.isArray(rev?.data) ? rev.data : (Array.isArray(rev?.reviews) ? rev.reviews : []);
             const messages = Array.isArray(m?.data) ? m.data : [];
-            const quizzes = Array.isArray(q?.data) ? q.data : [];
             const materials = Array.isArray(mat?.data) ? mat.data : [];
 
             document.getElementById('st-users').textContent = users.length;
@@ -1085,7 +1085,7 @@
             document.getElementById('st-enrollments').textContent = enrollments.length;
             document.getElementById('st-reviews').textContent = reviews.length;
             document.getElementById('st-messages').textContent = messages.length;
-            document.getElementById('st-quizzes').textContent = quizzes.length;
+            document.getElementById('st-quizzes').textContent = '–';
             document.getElementById('st-materials').textContent = materials.length;
 
             const recent = users.slice(0, 10);

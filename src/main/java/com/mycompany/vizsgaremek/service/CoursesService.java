@@ -272,7 +272,8 @@ public class CoursesService {
                 resp.put("message", "Nincs jogosultságod");
                 return resp;
             }
-            if (!"admin".equals(user.getRole()) && !course.getInstructorId().equals(userId)) {
+            if (!"admin".equals(user.getRole()) &&
+                    (course.getInstructorId() == null || !course.getInstructorId().equals(userId))) {
                 resp.put("statusCode", 403);
                 resp.put("message", "Csak a saját tanfolyamodat frissítheted");
                 return resp;
@@ -296,124 +297,70 @@ public class CoursesService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public JSONObject deleteCourse(int courseId, Integer userId) {
         JSONObject resp = new JSONObject();
-        
-        System.out.println("=== TANFOLYAM TÖRLÉS ===");
-        System.out.println("   Course ID: " + courseId);
-        System.out.println("   User ID: " + userId);
-        
         try {
-            System.out.println("   → Tanfolyam lekérése...");
             Courses course = em.find(Courses.class, courseId);
             if (course == null) {
                 resp.put("statusCode", 404);
                 resp.put("message", "Tanfolyam nem található");
                 return resp;
             }
-            
+
             Users user = em.find(Users.class, userId);
             if (user == null) {
                 resp.put("statusCode", 403);
                 resp.put("message", "Nincs jogosultságod");
                 return resp;
             }
-            
+
             if (!"instructor".equals(user.getRole()) && !"admin".equals(user.getRole())) {
                 resp.put("statusCode", 403);
                 resp.put("message", "Nincs jogosultságod (csak oktató vagy admin)");
                 return resp;
             }
-            
-            if (!"admin".equals(user.getRole()) && !course.getInstructorId().equals(userId)) {
+
+            if (!"admin".equals(user.getRole()) &&
+                    (course.getInstructorId() == null || !course.getInstructorId().equals(userId))) {
                 resp.put("statusCode", 403);
                 resp.put("message", "Csak a saját tanfolyamadat törölheted");
                 return resp;
             }
-            
-            System.out.println("   ✓ Jogosultság OK");
-            
-            System.out.println("   → Külső kulcs ellenőrzés kikapcsolása...");
-            em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
-            em.flush();
-            
-            try {
-                System.out.println("   → Quizek lekérdezése...");
-                @SuppressWarnings("unchecked")
-                List<Integer> quizIds = em.createNativeQuery(
-                    "SELECT id FROM quizzes WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .getResultList();
-                
-                System.out.println("   ✓ " + quizIds.size() + " quiz találva");
-                
-                for (Integer quizId : quizIds) {
-                    em.createNativeQuery("DELETE FROM quiz_results WHERE quiz_id = :quizId")
-                        .setParameter("quizId", quizId)
-                        .executeUpdate();
-                    
-                    em.createNativeQuery("DELETE FROM quiz_questions WHERE quiz_id = :quizId")
-                        .setParameter("quizId", quizId)
-                        .executeUpdate();
-                    
-                    System.out.println("   ✓ Quiz #" + quizId + " törölve");
-                }
-                
-                int deleted = em.createNativeQuery("DELETE FROM quizzes WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Quizek törölve: " + deleted);
-                
-                deleted = em.createNativeQuery("DELETE FROM enrollments WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Beiratkozások törölve: " + deleted);
-                
-                deleted = em.createNativeQuery("DELETE FROM course_reviews WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Értékelések törölve: " + deleted);
-                
-                deleted = em.createNativeQuery("DELETE FROM course_materials WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Anyagok törölve: " + deleted);
-                
-                deleted = em.createNativeQuery("DELETE FROM course_sessions WHERE course_id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Órák törölve: " + deleted);
-                
-                deleted = em.createNativeQuery("DELETE FROM courses WHERE id = :courseId")
-                    .setParameter("courseId", courseId)
-                    .executeUpdate();
-                System.out.println("   ✓ Tanfolyam törölve: " + deleted);
-                
-                em.flush();
-                
-            } finally {
-                System.out.println("   → Külső kulcs ellenőrzés visszakapcsolása...");
-                em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
-                em.flush();
-            }
-            
-            System.out.println("   ✅ SIKERES TÖRLÉS!");
-            
+
+            // Helyes törlési sorrend FK szerint — egyszerű natív query-k
+            em.createNativeQuery(
+                "DELETE FROM quiz_results WHERE quiz_id IN (SELECT id FROM quizzes WHERE course_id = :cid)")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery(
+                "DELETE FROM quiz_questions WHERE quiz_id IN (SELECT id FROM quizzes WHERE course_id = :cid)")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM quizzes WHERE course_id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM enrollments WHERE course_id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM course_reviews WHERE course_id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM course_materials WHERE course_id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM course_sessions WHERE course_id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
+            em.createNativeQuery("DELETE FROM courses WHERE id = :cid")
+                .setParameter("cid", courseId).executeUpdate();
+
             resp.put("status", "CourseDeleted");
             resp.put("statusCode", 200);
             resp.put("message", "Tanfolyam törölve");
-            
+
         } catch (Exception e) {
-            System.err.println("   ❌ HIBA:");
             e.printStackTrace();
-            
-            try {
-                em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
-                em.flush();
-            } catch (Exception ignored) {}
-            
             resp.put("statusCode", 500);
             resp.put("message", "Hiba: " + e.getMessage());
         }
-        
         return resp;
     }
     
@@ -435,18 +382,16 @@ public class CoursesService {
                 return resp;
             }
 
-            String uploadDir = "uploads/courses/" + courseId + "/";
-            String basePath = System.getProperty("jboss.server.base.dir") + "/standalone/deployments/SkillBook.war/";
-            String dirFull = basePath + uploadDir;
-            Files.createDirectories(Paths.get(dirFull));
+            String uploadsDir = "C:/Users/Bagoly Donát/Desktop/SkillBook/server/wildfly-preview-26.1.1.Final/standalone/data/uploads/courses/" + courseId + "/";
+            java.nio.file.Path uploadPath = Paths.get(uploadsDir);
+            Files.createDirectories(uploadPath);
 
             String safeName = originalFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
             String uniqueName = UUID.randomUUID().toString().substring(0, 8) + "_" + safeName;
-            String fullFilePath = dirFull + uniqueName;
 
-            Files.copy(fileStream, Paths.get(fullFilePath), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(fileStream, uploadPath.resolve(uniqueName), StandardCopyOption.REPLACE_EXISTING);
 
-            String fileUrl = "/uploads/courses/" + courseId + "/" + uniqueName;
+            String fileUrl = "/SkillBook/api/Uploads/courses/" + courseId + "/" + uniqueName;
 
             em.createNativeQuery(
                 "INSERT INTO course_materials (course_id, title, file_url, uploaded_by, uploaded_at) " +
