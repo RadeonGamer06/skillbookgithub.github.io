@@ -738,15 +738,11 @@
     }
 
     @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(100px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(100px); }
+      to   { opacity: 1; transform: translateX(0); }
     }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .hidden { display: none !important; }
 
@@ -822,11 +818,12 @@
 
     .course-hero {
       width: 100%;
-      height: 280px;
+      height: 320px;
       position: relative;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      background-size: cover;
-      background-position: center;
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
       overflow: hidden;
       margin-bottom: -80px;
     }
@@ -886,6 +883,73 @@
     }
     .start-course-btn i { font-size: 1.2rem; }
 
+    /* ── Tananyagok szekció ── */
+    .materials-section {
+      background: var(--card);
+      padding: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      animation: slideIn 0.55s ease-out;
+    }
+    .materials-section h3 {
+      margin: 0 0 6px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .materials-section h3 i { font-size: 1.5rem; }
+    .materials-subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 22px; }
+    .material-grid { display: flex; flex-direction: column; gap: 10px; }
+    .material-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--card-2);
+      transition: border-color 0.2s, transform 0.15s;
+      text-decoration: none; color: var(--text);
+    }
+    .material-row:hover { border-color: var(--accent); transform: translateX(4px); }
+    .material-row-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .material-row-info { flex: 1; min-width: 0; }
+    .material-row-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .material-row-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .material-row-action { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+    .material-row-action i { font-size: 1rem; }
+    .materials-empty { text-align: center; padding: 32px 20px; color: var(--muted); }
+    .materials-empty i { font-size: 2.5rem; display: block; margin-bottom: 10px; opacity: 0.35; }
+    .materials-locked {
+      display: flex; align-items: center; gap: 14px; padding: 20px;
+      border-radius: 12px; border: 1px dashed var(--border);
+      background: var(--card-2); color: var(--muted); font-size: 0.9rem;
+    }
+    .materials-locked i { font-size: 1.8rem; color: var(--accent); opacity: 0.5; flex-shrink: 0; }
+    [data-theme="dark"] .material-row { background: rgba(30,41,59,0.6); }
+
+    .own-course-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 12px 20px;
+      background: rgba(5,150,105,0.1);
+      border: 1px solid rgba(5,150,105,0.3);
+      border-radius: 12px;
+      color: var(--accent-2);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .own-course-badge i { font-size: 1.3rem; flex-shrink: 0; }
 
   </style>
 </head>
@@ -949,6 +1013,8 @@
     <div id="instructorCard" class="instructor-card hidden"></div>
 
     <div id="courseDetails" class="course-details hidden"></div>
+
+    <div id="materialsSection" class="materials-section hidden"></div>
 
     <div id="reviewsSection" class="reviews-section hidden">
       <div class="reviews-header">
@@ -1156,8 +1222,11 @@
           } else {
             await loadInstructor(course.instructor_id || course.instructorId);
           }
-          
-          renderCourseDetails(course);
+
+          // Enrollment ellenőrzés a gomb és a tananyagok megjelenítéséhez
+          const isEnrolled = await checkEnrollmentAndLoadMaterials(courseId);
+
+          renderCourseDetails(course, isEnrolled);
           await loadReviews(courseId);
           
           setTimeout(() => {
@@ -1211,7 +1280,7 @@
       `;
     }
 
-    function renderCourseDetails(course) {
+    function renderCourseDetails(course, isEnrolled) {
       const hero = document.getElementById('courseHero');
       if (hero) {
         const rawHdr = course.headerImage || course.header_image;
@@ -1221,8 +1290,43 @@
             ? rawHdr
             : window.location.origin + rawHdr;
           hero.style.backgroundImage = `url('${hdrUrl}')`;
+          hero.style.backgroundSize = 'cover';
+          hero.style.backgroundPosition = 'center center';
+          hero.style.backgroundRepeat = 'no-repeat';
           hero.classList.add('has-image');
         }
+      }
+
+      const isOwnCourse = currentUser &&
+        (course.instructor_id != null && String(course.instructor_id) === String(currentUser.id));
+      const canAccess = isEnrolled || isOwnCourse;
+
+      // Saját tanfolyamnál: info badge + tananyag gomb, vásárlás gomb nincs
+      // Enrolled: tananyag gomb
+      // Nem enrolled, nem saját: vásárlás gomb
+      let actionBtn;
+      if (isOwnCourse) {
+        actionBtn = `
+          <div class="own-course-badge">
+            <i class='bx bx-shield-check'></i>
+            <span>Ez a te tanfolyamod — vásárlás nem lehetséges</span>
+          </div>
+          <button class="start-course-btn" onclick="scrollToMaterials()" style="margin-top:12px;">
+            <i class='bx bx-book-open'></i>
+            Tananyagok megtekintése
+          </button>`;
+      } else if (isEnrolled) {
+        actionBtn = `
+          <button class="start-course-btn" onclick="scrollToMaterials()">
+            <i class='bx bx-book-open'></i>
+            Tananyagok megtekintése
+          </button>`;
+      } else {
+        actionBtn = `
+          <button class="start-course-btn" onclick="goToPayment()">
+            <i class='bx bx-play-circle'></i>
+            Tanfolyam megvásárlása
+          </button>`;
       }
 
       const container = document.getElementById('courseDetails');
@@ -1255,11 +1359,157 @@
           </div>
         ` : ''}
 
-        <button class="start-course-btn" onclick="goToPayment()">
-          <i class='bx bx-play-circle'></i>
-          Tanfolyam elkezdése
-        </button>
+        ${actionBtn}
       `;
+    }
+
+    function scrollToMaterials() {
+      document.getElementById('materialsSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function checkEnrollmentAndLoadMaterials(courseId) {
+      const materialsSection = document.getElementById('materialsSection');
+
+      // 1. Nincs bejelentkezve
+      if (!currentUser) {
+        if (materialsSection) {
+          renderMaterialsLocked(materialsSection, 'Jelentkezz be a tananyagok megtekintéséhez.');
+          materialsSection.classList.remove('hidden');
+        }
+        return false;
+      }
+
+      // 2. Saját tanfolyam (csak a létrehozó instructor)
+      const isOwnCourse =
+        (course.instructor_id != null && String(course.instructor_id) === String(currentUser.id));
+
+      if (isOwnCourse) {
+        if (materialsSection) {
+          await loadAndRenderMaterials(courseId, materialsSection);
+          materialsSection.classList.remove('hidden');
+        }
+        return true;
+      }
+
+      // 3. Enrollment ellenőrzés — mindenki más esetén
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/Enrollments/getMyEnrollments`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error('enrollment fetch failed');
+        const data = await res.json();
+        const enrollments = Array.isArray(data.data) ? data.data : [];
+        const enrolled = enrollments.find(e =>
+          String(e.course_id) === String(courseId) && e.status !== 'canceled'
+        );
+
+        if (materialsSection) {
+          if (enrolled) {
+            await loadAndRenderMaterials(courseId, materialsSection);
+          } else {
+            renderMaterialsLocked(materialsSection, 'Vásárold meg a tanfolyamot a tananyagok eléréséhez.');
+          }
+          materialsSection.classList.remove('hidden');
+        }
+        return !!enrolled;
+
+      } catch(e) {
+        console.error('Enrollment check error:', e);
+        if (materialsSection) {
+          renderMaterialsLocked(materialsSection, 'Vásárold meg a tanfolyamot a tananyagok eléréséhez.');
+          materialsSection.classList.remove('hidden');
+        }
+        return false;
+      }
+    }
+
+    async function loadAndRenderMaterials(courseId, container) {
+      container.innerHTML = `
+        <h3><i class='bx bx-book-content'></i> Tananyagok</h3>
+        <p class="materials-subtitle">A tanfolyam összes feltöltött anyaga</p>
+        <div class="material-grid">
+          <div style="text-align:center;padding:24px;color:var(--muted);">
+            <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.9s linear infinite;margin:0 auto 10px;"></div>
+            Tananyagok betöltése...
+          </div>
+        </div>
+      `;
+
+      try {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/Materials/getByCourse/${courseId}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) throw new Error('materials fetch failed');
+        const data = await res.json();
+        const materials = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+
+        const grid = container.querySelector('.material-grid');
+
+        if (materials.length === 0) {
+          grid.innerHTML = `
+            <div class="materials-empty">
+              <i class='bx bx-folder-open'></i>
+              <p>Még nincs feltöltött tananyag ehhez a tanfolyamhoz.</p>
+            </div>`;
+          return;
+        }
+
+        const extIconMap = {
+          pdf: 'bx-file-pdf', doc: 'bx-file', docx: 'bx-file',
+          ppt: 'bx-slideshow', pptx: 'bx-slideshow',
+          xls: 'bx-spreadsheet', xlsx: 'bx-spreadsheet',
+          mp4: 'bx-video', mov: 'bx-video', avi: 'bx-video',
+          jpg: 'bx-image', jpeg: 'bx-image', png: 'bx-image', gif: 'bx-image',
+          zip: 'bx-archive', rar: 'bx-archive',
+        };
+
+        grid.innerHTML = materials.map(mat => {
+          const fileUrl = mat.file_url || mat.fileUrl || '';
+          const title = mat.title || mat.name || 'Névtelen anyag';
+          const uploadedAt = mat.uploaded_at || mat.uploadedAt || '';
+          const ext = fileUrl.split('.').pop().toLowerCase();
+          const icon = extIconMap[ext] || 'bx-file-blank';
+          const fullUrl = fileUrl.startsWith('http') ? fileUrl : window.location.origin + fileUrl;
+          let dateStr = '';
+          if (uploadedAt) {
+            try { dateStr = new Date(uploadedAt).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' }); } catch(e) {}
+          }
+          return `
+            <a href="${fullUrl}" target="_blank" rel="noopener" class="material-row">
+              <div class="material-row-icon"><i class='bx ${icon}'></i></div>
+              <div class="material-row-info">
+                <div class="material-row-title">${escapeHtml(title)}</div>
+                ${dateStr ? `<div class="material-row-meta"><i class='bx bx-calendar' style="font-size:11px;vertical-align:middle;"></i> ${dateStr}</div>` : ''}
+              </div>
+              <div class="material-row-action"><i class='bx bx-download'></i> Letöltés</div>
+            </a>`;
+        }).join('');
+
+      } catch(e) {
+        console.error('Materials load error:', e);
+        container.querySelector('.material-grid').innerHTML = `
+          <div class="materials-empty">
+            <i class='bx bx-error-circle'></i>
+            <p>Nem sikerült betölteni a tananyagokat.</p>
+          </div>`;
+      }
+    }
+
+    function renderMaterialsLocked(container, message) {
+      container.innerHTML = `
+        <h3><i class='bx bx-book-content'></i> Tananyagok</h3>
+        <div class="materials-locked">
+          <i class='bx bx-lock'></i>
+          <span>${message}</span>
+        </div>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
     async function loadReviews(courseId) {

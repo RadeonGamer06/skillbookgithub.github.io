@@ -455,6 +455,75 @@
         [data-theme="dark"] .role-tag.role-student    { background: rgba(5,150,105,0.2);   color: #34d399; }
         [data-theme="dark"] .role-tag.role-instructor { background: rgba(139,92,246,0.2);  color: #a78bfa; }
         [data-theme="dark"] .role-tag.role-admin      { background: rgba(239,68,68,0.2);   color: #f87171; }
+
+        /* ── Mobil nézet ── */
+        .back-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+        }
+        .back-btn i { font-size: 1.2rem; }
+
+        @media (max-width: 700px) {
+            body { overflow: hidden; }
+
+            .chat-container {
+                grid-template-columns: 1fr;
+                position: relative;
+            }
+
+            /* Sidebar: alapból teljes képernyő */
+            .sidebar {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                z-index: 2;
+                transition: transform 0.3s ease;
+            }
+
+            /* Chat fő rész: alapból rejtett jobbra */
+            .chat-main {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                z-index: 1;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+
+            /* Aktív chat nézet: sidebar csúszik ki, chat jön be */
+            .chat-container.chat-open .sidebar {
+                transform: translateX(-100%);
+            }
+            .chat-container.chat-open .chat-main {
+                transform: translateX(0);
+                z-index: 2;
+            }
+
+            .back-btn { display: flex; }
+
+            .chat-header {
+                gap: 8px;
+            }
+
+            #messagesContainer {
+                padding: 12px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+
+        [data-theme="dark"] .back-btn { color: #a78bfa; }
     </style>
 </head>
 <body>
@@ -526,6 +595,9 @@
 
     <div class="chat-main">
         <div class="chat-header" id="chatHeader">
+            <button class="back-btn" id="backBtn" aria-label="Vissza">
+                <i class='bx bx-chevron-left'></i>
+            </button>
             <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
             <div class="chat-header-info">
                 <span class="chat-header-name" id="chatPartnerName">Válassz egy partnert a kezdéshez</span>
@@ -574,6 +646,17 @@ function authHdr() {
 document.getElementById('menuToggle')?.addEventListener('click', () =>
     document.getElementById('mainNav')?.classList.toggle('active')
 );
+
+// Mobil: vissza gomb
+document.getElementById('backBtn')?.addEventListener('click', () => {
+    document.querySelector('.chat-container')?.classList.remove('chat-open');
+});
+
+function openChatOnMobile() {
+    if (window.innerWidth <= 700) {
+        document.querySelector('.chat-container')?.classList.add('chat-open');
+    }
+}
 
 const trigger  = document.getElementById('userMenuTrigger');
 const dropdown = document.getElementById('userDropdown');
@@ -733,6 +816,7 @@ function selectPartner(partnerId) {
     document.getElementById('sendBtn').disabled      = false;
     document.getElementById('messageInput').focus();
 
+    openChatOnMobile();
     loadMessages();
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(loadMessages, 3000);
