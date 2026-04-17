@@ -34,7 +34,7 @@
         header {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 30;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -156,25 +156,6 @@
         .logout { color: #ff6b6b !important; }
         .logout:hover { background: rgba(255,107,107,0.15) !important; }
 
-        @media (max-width: 991px) {
-            .menu-toggle { display: flex; }
-            nav {
-                position: absolute; top: 100%; right: 0; left: 0;
-                background: rgba(0,0,0,0.92); backdrop-filter: blur(14px);
-                border-bottom: 1px solid var(--border);
-                flex-direction: column; align-items: stretch;
-                padding: 16px 26px; gap: 8px;
-                max-height: 0; overflow: hidden; opacity: 0; transition: all .3s ease;
-            }
-            nav.active { max-height: 500px; opacity: 1; }
-            nav a, nav button { color: white; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); }
-            nav a:hover, nav button:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); }
-            nav a.active { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
-            .user-menu-trigger { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); }
-            .user-name { color: white; }
-            .dropdown-arrow { color: white; }
-        }
-
         .chat-container {
             display: grid;
             grid-template-columns: 340px 1fr;
@@ -248,6 +229,30 @@
             color: var(--muted);
             margin: 15px 10px 8px;
             letter-spacing: 1px;
+        }
+
+        /* Bejövő üzenetek rész */
+        .incoming-section {
+            background: rgba(239, 68, 68, 0.08);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 0;
+        }
+
+        .incoming-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #ef4444;
+            margin: 8px 16px 6px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .incoming-section .user-item {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .incoming-section .user-item:hover {
+            background: rgba(239, 68, 68, 0.22);
         }
 
         .user-item {
@@ -343,22 +348,52 @@
         .message {
             max-width: 70%;
             padding: 10px 15px;
-            border-radius: 16px;
+            border-radius: 18px;
             font-size: 0.92rem;
             line-height: 1.45;
             word-wrap: break-word;
+            word-break: break-word;
             animation: fadeIn 0.25s ease;
+            flex-shrink: 1;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .sent { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
-        .received { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        .message.sent {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message.received {
+            background: #e9e9eb;
+            color: #1c1c1e;
+            border-bottom-left-radius: 4px;
+        }
 
         .msg-time {
             font-size: 0.68rem; opacity: 0.65; margin-top: 4px;
             display: block; text-align: right;
         }
-        .received .msg-time { text-align: left; }
+        .message.received .msg-time { text-align: left; }
+
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            width: 100%;
+        }
+        .message-row.sent { justify-content: flex-end; }
+        .message-row.received { justify-content: flex-start; }
+
+        .msg-avatar {
+            width: 30px; height: 30px; min-width: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white;
+            overflow: hidden; flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+        .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         .date-sep {
             text-align: center; font-size: 0.72rem; color: var(--muted);
@@ -404,7 +439,24 @@
         .send-btn:hover { opacity: 0.88; }
         .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        [data-theme="dark"] body { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); background-attachment: fixed; color: #f1f5f9; }
+        /* Olvasatlan jelvény */
+        .unread-badge {
+            width: 10px; height: 10px; min-width: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            flex-shrink: 0;
+            animation: pulse-dot 1.8s infinite;
+        }
+        .user-item.active .unread-badge { border-color: var(--accent); }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%       { transform: scale(1.25); opacity: 0.75; }
+        }
+
+        /* ====================== SÖTÉT MÓD ====================== */
+        [data-theme="dark"] body { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f1f5f9; }
         [data-theme="dark"] header { background: rgba(30,41,59,0.9); }
         [data-theme="dark"] nav a, [data-theme="dark"] nav button { background: rgba(51,65,85,0.6); color: #f1f5f9; }
         [data-theme="dark"] nav a:hover, [data-theme="dark"] nav button:hover { background: rgba(51,65,85,0.9); color: #f1f5f9; }
@@ -419,7 +471,8 @@
         [data-theme="dark"] .chat-main { background: rgba(15,23,42,0.6); }
         [data-theme="dark"] .chat-header { background: rgba(30,41,59,0.8); color: #f1f5f9; }
         [data-theme="dark"] .chat-header-role { color: rgba(241,245,249,0.6); }
-        [data-theme="dark"] .message.received { background: rgba(30,41,59,0.9); color: #f1f5f9; border-color: rgba(139,92,246,0.25); }
+        [data-theme="dark"] .message.received { background: #3a3a3c; color: #f1f5f9; border-color: transparent; }
+        [data-theme="dark"] .message.received .msg-time { color: rgba(241,245,249,0.55); }
         [data-theme="dark"] .message-input-area { background: rgba(30,41,59,0.8); }
         [data-theme="dark"] .message-input-area input { background: rgba(15,23,42,0.8); color: #f1f5f9; border-color: rgba(139,92,246,0.4); }
         [data-theme="dark"] .search-container input { background: rgba(15,23,42,0.8); color: #f1f5f9; border-color: rgba(139,92,246,0.4); }
@@ -436,27 +489,120 @@
         [data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: rgba(241,245,249,0.45); }
         [data-theme="dark"] .logo span { color: rgba(241,245,249,0.7); }
         [data-theme="dark"] .user-item-name { color: #f1f5f9; }
-        [data-theme="dark"] .chat-user-avatar {
-            color: #f1f5f9;
-            background: rgba(71,85,105,0.7);
-        }
-
+        [data-theme="dark"] .chat-user-avatar { color: #f1f5f9; background: rgba(71,85,105,0.7); }
         [data-theme="dark"] .chat-header-name { color: #f1f5f9; }
-
-        [data-theme="dark"] .chat-header-avatar {
-            color: #f1f5f9;
-            background: rgba(71,85,105,0.8);
-        }
+        [data-theme="dark"] .chat-header-avatar { color: #f1f5f9; background: rgba(71,85,105,0.8); }
         [data-theme="dark"] .message.received .msg-time { color: rgba(241,245,249,0.5); }
-        [data-theme="dark"] .message.sent    .msg-time { color: rgba(255,255,255,0.6); }
+        [data-theme="dark"] .message.sent .msg-time { color: rgba(255,255,255,0.6); }
         [data-theme="dark"] .date-sep { color: rgba(241,245,249,0.45); }
         [data-theme="dark"] .chat-placeholder { color: rgba(241,245,249,0.45); }
-        [data-theme="dark"] .chat-placeholder p { color: rgba(241,245,249,0.45); }
-        [data-theme="dark"] .role-tag.role-student    { background: rgba(5,150,105,0.2);   color: #34d399; }
-        [data-theme="dark"] .role-tag.role-instructor { background: rgba(139,92,246,0.2);  color: #a78bfa; }
-        [data-theme="dark"] .role-tag.role-admin      { background: rgba(239,68,68,0.2);   color: #f87171; }
+        [data-theme="dark"] .msg-avatar { background: rgba(71,85,105,0.9); color: #f1f5f9; }
+        [data-theme="dark"] .incoming-title { color: #f87171; }
+        [data-theme="dark"] .incoming-section { background: rgba(185, 28, 28, 0.25); }
+        [data-theme="dark"] .incoming-section .user-item { background: rgba(185, 28, 28, 0.3); }
+        [data-theme="dark"] .unread-badge { border-color: #1e293b; }
 
-        /* ── Mobil nézet ── */
+        /* ====================== MOBIL NAVIGÁCIÓ ====================== */
+        @media (max-width: 991px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            nav {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: 0;
+                background: rgba(245, 243, 255, 0.97);
+                backdrop-filter: blur(14px);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px 26px;
+                gap: 8px;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                transition: all .3s ease;
+                z-index: 20;
+            }
+
+            nav.active {
+                max-height: 500px;
+                opacity: 1;
+            }
+
+            nav a, nav button {
+                color: var(--text);
+                border-color: var(--border);
+                background: rgba(255,255,255,0.7);
+            }
+
+            nav a:hover, nav button:hover {
+                background: rgba(255,255,255,0.95);
+                border-color: var(--accent);
+                transform: none;
+            }
+
+            nav a.active {
+                background: linear-gradient(135deg, var(--accent), var(--accent-2));
+                color: white;
+                border-color: transparent;
+            }
+
+            .auth-links {
+                flex-direction: column;
+            }
+
+            .user-menu-container {
+                width: 100%;
+            }
+
+            .user-menu-trigger {
+                background: rgba(255,255,255,0.7);
+                border: 1px solid var(--border);
+                padding: 10px 14px;
+                width: 100%;
+                justify-content: center;
+                color: var(--text);
+            }
+
+            .user-name {
+                color: var(--text);
+            }
+
+            .dropdown-arrow {
+                color: var(--text);
+            }
+
+            .user-dropdown {
+                position: static;
+                transform: none;
+                opacity: 1;
+                pointer-events: auto;
+                box-shadow: none;
+                border-radius: 4px;
+                margin-top: 4px;
+            }
+        }
+
+        /* Sötét módban a mobil nav fekete marad, mint a pro.html-en */
+        [data-theme="dark"] nav {
+            background: rgba(30,41,59,0.97);
+        }
+
+        [data-theme="dark"] nav a, [data-theme="dark"] nav button {
+            color: #f1f5f9;
+            border-color: rgba(139,92,246,0.3);
+            background: rgba(51,65,85,0.6);
+        }
+
+        [data-theme="dark"] nav a:hover, [data-theme="dark"] nav button:hover {
+            background: rgba(51,65,85,0.9);
+            color: #f1f5f9;
+        }
+
+        /* Mobil nézet */
         .back-btn {
             display: none;
             align-items: center;
@@ -474,56 +620,31 @@
 
         @media (max-width: 700px) {
             body { overflow: hidden; }
-
-            .chat-container {
-                grid-template-columns: 1fr;
-                position: relative;
-            }
-
-            /* Sidebar: alapból teljes képernyő */
-            .sidebar {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                z-index: 2;
-                transition: transform 0.3s ease;
-            }
-
-            /* Chat fő rész: alapból rejtett jobbra */
-            .chat-main {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                z-index: 1;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-            }
-
-            /* Aktív chat nézet: sidebar csúszik ki, chat jön be */
-            .chat-container.chat-open .sidebar {
-                transform: translateX(-100%);
-            }
-            .chat-container.chat-open .chat-main {
-                transform: translateX(0);
-                z-index: 2;
-            }
-
+            .chat-container { grid-template-columns: 1fr; position: relative; }
+            .sidebar { position: absolute; inset: 0; z-index: 2; transition: transform 0.3s ease; }
+            .chat-main { position: absolute; inset: 0; z-index: 1; transform: translateX(100%); transition: transform 0.3s ease; }
+            .chat-container.chat-open .sidebar { transform: translateX(-100%); }
+            .chat-container.chat-open .chat-main { transform: translateX(0); z-index: 2; }
             .back-btn { display: flex; }
-
-            .chat-header {
-                gap: 8px;
-            }
-
-            #messagesContainer {
-                padding: 12px;
-            }
-
-            .message {
-                max-width: 85%;
-            }
         }
 
-        [data-theme="dark"] .back-btn { color: #a78bfa; }
+        /* Sötét mód: nav és user-trigger felülírás mobil nézeten */
+        @media (max-width: 991px) {
+            [data-theme="dark"] nav {
+                background: rgba(15,23,42,0.97);
+            }
+            [data-theme="dark"] .user-menu-trigger {
+                background: rgba(51,65,85,0.6);
+                border-color: rgba(139,92,246,0.3);
+                color: #f1f5f9;
+            }
+            [data-theme="dark"] .user-name {
+                color: #f1f5f9;
+            }
+            [data-theme="dark"] .dropdown-arrow {
+                color: #f1f5f9;
+            }
+        }
     </style>
 </head>
 <body>
@@ -579,6 +700,12 @@
         </div>
 
         <div class="user-lists" id="userLists">
+            <!-- Bejövő üzenetek -->
+            <div id="incomingSection" style="display: none;">
+                <div class="incoming-title">Bejövő üzenetek</div>
+                <div id="incomingChats"></div>
+            </div>
+
             <div id="recentSection" style="display:none;">
                 <div class="list-section-title">Korábbi beszélgetések</div>
                 <div id="recentChats"></div>
@@ -624,12 +751,16 @@
 <script>
 const API = '/SkillBook/api';
 
-let myId           = null;   // bejelentkezett user ID-ja
-let allUsers       = [];     // /api/chat/users válasza (mind)
-let activeFilter   = 'all';  // 'all' 'student' 'instructor'
-let selectedId     = null;   // kiválasztott partner ID
-let selectedUser   = null;   // kiválasztott partner adatai
-let pollTimer      = null;   // üzenet polling időzítő
+let myId              = null;
+let allUsers          = [];
+let activeFilter      = 'all';
+let selectedId        = null;
+let selectedUser      = null;
+let pollTimer         = null;
+let sidebarPollTimer  = null;
+let renderedMsgIds    = new Set();
+let sidebarLastSeen   = {};
+let unreadUsers       = new Set();
 
 (function(){
     if (localStorage.getItem('theme') === 'dark')
@@ -647,7 +778,6 @@ document.getElementById('menuToggle')?.addEventListener('click', () =>
     document.getElementById('mainNav')?.classList.toggle('active')
 );
 
-// Mobil: vissza gomb
 document.getElementById('backBtn')?.addEventListener('click', () => {
     document.querySelector('.chat-container')?.classList.remove('chat-open');
 });
@@ -712,8 +842,7 @@ async function checkMyCoursesNav(instructorId) {
         const j = await r.json();
         const courses = Array.isArray(j?.data) ? j.data : [];
         const link = document.getElementById('myCoursesNav');
-        if (link) link.style.display =
-            courses.some(c => String(c.instructor_id) === String(instructorId)) ? 'inline-flex' : 'none';
+        if (link) link.style.display = courses.some(c => String(c.instructor_id) === String(instructorId)) ? 'inline-flex' : 'none';
     } catch {}
 }
 
@@ -723,11 +852,45 @@ async function loadUsers() {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || res.status);
         allUsers = Array.isArray(json.data) ? json.data : [];
+
+        allUsers.forEach(u => {
+            sidebarLastSeen[u.id] = u.lastMessageAt || null;
+        });
+
         renderSidebar();
+
+        if (sidebarPollTimer) clearInterval(sidebarPollTimer);
+        sidebarPollTimer = setInterval(pollSidebar, 5000);
+
     } catch (e) {
-        document.getElementById('allUsersList').innerHTML =
-            '<div class="empty-msg">⚠️ Nem sikerült betölteni a felhasználókat.<br>' + e.message + '</div>';
+        document.getElementById('allUsersList').innerHTML = '<div class="empty-msg">⚠️ Nem sikerült betölteni a felhasználókat.<br>' + e.message + '</div>';
     }
+}
+
+async function pollSidebar() {
+    try {
+        const res  = await fetch(API + '/chat/users', { headers: authHdr() });
+        const json = await res.json();
+        if (!res.ok) return;
+        const freshUsers = Array.isArray(json.data) ? json.data : [];
+
+        let changed = false;
+        freshUsers.forEach(u => {
+            const prev = sidebarLastSeen[u.id];
+            if (u.hasConversation && u.lastMessageAt && u.lastMessageAt !== prev) {
+                if (u.id !== selectedId) {
+                    unreadUsers.add(u.id);
+                }
+                sidebarLastSeen[u.id] = u.lastMessageAt;
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            allUsers = freshUsers;
+            renderSidebar();
+        }
+    } catch { }
 }
 
 function renderSidebar() {
@@ -741,12 +904,28 @@ function renderSidebar() {
         return roleOk && searchOk;
     });
 
-    const recent = filtered.filter(u => u.hasConversation)
+    // Bejövő üzenetek
+    const incoming = filtered.filter(u => unreadUsers.has(u.id))
         .sort((a,b) => (b.lastMessageAt || '').localeCompare(a.lastMessageAt || ''));
-    const others = filtered.filter(u => !u.hasConversation);
+
+    const incomingSection = document.getElementById('incomingSection');
+    const incomingDiv     = document.getElementById('incomingChats');
+
+    if (incoming.length > 0) {
+        incomingSection.style.display = 'block';
+        incomingDiv.innerHTML = incoming.map(u => userItemHtml(u, true)).join('');
+    } else {
+        incomingSection.style.display = 'none';
+        incomingDiv.innerHTML = '';
+    }
+
+    // Korábbi beszélgetések
+    const recent = filtered.filter(u => u.hasConversation && !unreadUsers.has(u.id))
+        .sort((a,b) => (b.lastMessageAt || '').localeCompare(a.lastMessageAt || ''));
 
     const recentSection = document.getElementById('recentSection');
     const recentDiv     = document.getElementById('recentChats');
+
     if (recent.length > 0) {
         recentSection.style.display = 'block';
         recentDiv.innerHTML = recent.map(u => userItemHtml(u, true)).join('');
@@ -755,13 +934,16 @@ function renderSidebar() {
         recentDiv.innerHTML = '';
     }
 
+    // Összes többi felhasználó
+    const others = filtered.filter(u => !u.hasConversation);
+
     const allDiv = document.getElementById('allUsersList');
     if (others.length > 0) {
         allDiv.innerHTML = others.map(u => userItemHtml(u, false)).join('');
-    } else if (filtered.length === 0) {
+    } else if (filtered.length === 0 && incoming.length === 0 && recent.length === 0) {
         allDiv.innerHTML = '<div class="empty-msg">Nincs találat.</div>';
     } else {
-        allDiv.innerHTML = ''; // mindenki a recent-ben van
+        allDiv.innerHTML = '';
     }
 }
 
@@ -771,12 +953,18 @@ function userItemHtml(u, showPreview) {
     const avatarInner = u.profilePicture
         ? `<img src="${esc(buildImgUrl(u.profilePicture))}" onerror="this.style.display='none'">`
         : initial;
+
     const roleMap  = { student: 'Diák', instructor: 'Tanár', admin: 'Admin' };
     const roleText = roleMap[u.role] || u.role || '';
     const roleCls  = 'role-' + (u.role || 'student');
+
     const sub = showPreview && u.lastMessagePreview
-        ? esc(u.lastMessagePreview)
+        ? `<strong>${esc(u.lastMessagePreview)}</strong>`
         : `${esc(u.email || '')} <span class="role-tag ${roleCls}">${esc(roleText)}</span>`;
+
+    const unreadDot = unreadUsers.has(u.id)
+        ? '<div class="unread-badge" title="Új üzenet"></div>'
+        : '';
 
     return `
         <div class="user-item${isActive ? ' active' : ''}"
@@ -786,6 +974,7 @@ function userItemHtml(u, showPreview) {
                 <div class="user-item-name">${esc(u.name || u.email || 'Ismeretlen')}</div>
                 <div class="user-item-sub">${sub}</div>
             </div>
+            ${unreadDot}
         </div>`;
 }
 
@@ -793,9 +982,17 @@ function selectPartner(partnerId) {
     selectedId   = partnerId;
     selectedUser = allUsers.find(u => u.id === partnerId) || { id: partnerId, name: 'Felhasználó' };
 
-    document.querySelectorAll('.user-item').forEach(el => {
-        el.classList.toggle('active', Number(el.dataset.uid) === partnerId);
-    });
+    if (unreadUsers.has(partnerId)) {
+        unreadUsers.delete(partnerId);
+        renderSidebar();
+    } else {
+        document.querySelectorAll('.user-item').forEach(el => {
+            el.classList.toggle('active', Number(el.dataset.uid) === partnerId);
+        });
+    }
+
+    renderedMsgIds.clear();
+    document.getElementById('messagesContainer').innerHTML = '';
 
     const nameEl   = document.getElementById('chatPartnerName');
     const roleEl   = document.getElementById('chatPartnerRole');
@@ -806,8 +1003,7 @@ function selectPartner(partnerId) {
     roleEl.textContent = roleMap[selectedUser.role] || selectedUser.role || '';
     avatarEl.classList.add('show');
     if (selectedUser.profilePicture) {
-        avatarEl.innerHTML = `<img src="${esc(buildImgUrl(selectedUser.profilePicture))}"
-            onerror="this.style.display='none'">`;
+        avatarEl.innerHTML = `<img src="${esc(buildImgUrl(selectedUser.profilePicture))}" onerror="this.style.display='none'">`;
     } else {
         avatarEl.textContent = (selectedUser.name || '?')[0].toUpperCase();
     }
@@ -836,34 +1032,70 @@ async function loadMessages() {
 
 function renderMessages(messages) {
     const container = document.getElementById('messagesContainer');
-    const atBottom  = container.scrollHeight - container.clientHeight - container.scrollTop < 80;
 
     if (!messages.length) {
-        container.innerHTML = `
-            <div class="chat-placeholder">
-                <i class='bx bx-message-add'></i>
-                <p>Kezdj el csevegni ${esc(selectedUser?.name || 'ezzel a felhasználóval')}!</p>
-            </div>`;
+        if (!container.querySelector('.chat-placeholder')) {
+            container.innerHTML = `
+                <div class="chat-placeholder">
+                    <i class='bx bx-message-add'></i>
+                    <p>Kezdj el csevegni ${esc(selectedUser?.name || 'ezzel a felhasználóval')}!</p>
+                </div>`;
+            renderedMsgIds.clear();
+        }
         return;
     }
 
-    let html = '';
-    let lastDay = '';
-    messages.forEach(m => {
+    const placeholder = container.querySelector('.chat-placeholder');
+    if (placeholder) container.innerHTML = '';
+
+    const newMessages = messages.filter(m => !renderedMsgIds.has(m.id));
+    if (newMessages.length === 0) return;
+
+    const atBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 80;
+
+    const seps = container.querySelectorAll('.date-sep');
+    let lastDay = seps.length > 0 ? seps[seps.length - 1].textContent : '';
+
+    newMessages.forEach(m => {
         const day = dayLabel(m.sentAt);
         if (day !== lastDay) {
-            html += `<div class="date-sep">${esc(day)}</div>`;
+            const sep = document.createElement('div');
+            sep.className = 'date-sep';
+            sep.textContent = day;
+            container.appendChild(sep);
             lastDay = day;
         }
+
         const isMine = m.isMe || m.senderId === myId;
-        html += `
-            <div class="message ${isMine ? 'sent' : 'received'}">
-                ${esc(m.content)}
-                <span class="msg-time">${timeStr(m.sentAt)}</span>
-            </div>`;
+
+        const row = document.createElement('div');
+        row.className = `message-row ${isMine ? 'sent' : 'received'}`;
+
+        if (!isMine) {
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'msg-avatar';
+            if (selectedUser && selectedUser.profilePicture) {
+                const img = document.createElement('img');
+                img.src = buildImgUrl(selectedUser.profilePicture);
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    avatarDiv.textContent = (selectedUser.name || '?')[0].toUpperCase();
+                };
+                avatarDiv.appendChild(img);
+            } else {
+                avatarDiv.textContent = (selectedUser?.name || '?')[0].toUpperCase();
+            }
+            row.appendChild(avatarDiv);
+        }
+
+        const div = document.createElement('div');
+        div.className = `message ${isMine ? 'sent' : 'received'}`;
+        div.innerHTML = `${esc(m.content)}<span class="msg-time">${timeStr(m.sentAt)}</span>`;
+        row.appendChild(div);
+        container.appendChild(row);
+        renderedMsgIds.add(m.id);
     });
 
-    container.innerHTML = html;
     if (atBottom) container.scrollTop = container.scrollHeight;
 }
 
@@ -896,7 +1128,7 @@ async function sendMessage() {
 
     } catch (e) {
         console.error('Küldési hiba:', e);
-        input.value = content; // visszaírjuk
+        input.value = content;
         alert('Nem sikerült elküldeni az üzenetet: ' + e.message);
     } finally {
         document.getElementById('sendBtn').disabled = false;
@@ -905,7 +1137,6 @@ async function sendMessage() {
 }
 
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-
 document.getElementById('messageInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
@@ -938,7 +1169,6 @@ function buildImgUrl(path) {
 
 function timeStr(raw) {
     if (!raw) return '';
-    // Java LocalDateTime.toString() – replace T with space
     const d = new Date(String(raw).replace('T',' '));
     if (isNaN(d)) return '';
     return d.toLocaleTimeString('hu-HU', { hour:'2-digit', minute:'2-digit' });
@@ -962,6 +1192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 window.addEventListener('beforeunload', () => {
     if (pollTimer) clearInterval(pollTimer);
+    if (sidebarPollTimer) clearInterval(sidebarPollTimer);
 });
 </script>
 </body>
