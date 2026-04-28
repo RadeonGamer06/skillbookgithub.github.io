@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Gép: localhost:3306
--- Létrehozás ideje: 2026. Már 02. 10:18
--- Kiszolgáló verziója: 5.7.24
--- PHP verzió: 8.3.1
+-- Gép: localhost:8889
+-- Létrehozás ideje: 2026. Ápr 28. 08:03
+-- Kiszolgáló verziója: 8.0.44
+-- PHP verzió: 8.3.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -500,10 +500,10 @@ DELIMITER ;
 --
 
 CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `categories`
@@ -554,18 +554,18 @@ INSERT INTO `categories` (`id`, `name`, `slug`) VALUES
 --
 
 CREATE TABLE `courses` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `title` varchar(255) DEFAULT NULL,
   `description` text,
-  `price` int(11) DEFAULT NULL,
-  `instructor_id` int(11) DEFAULT NULL,
-  `category_id` int(11) DEFAULT NULL,
-  `max_participants` int(11) DEFAULT '20',
+  `price` int DEFAULT NULL,
+  `instructor_id` int DEFAULT NULL,
+  `category_id` int DEFAULT NULL,
+  `max_participants` int DEFAULT '20',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `header_image` varchar(500) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `courses`
@@ -591,13 +591,13 @@ INSERT INTO `courses` (`id`, `title`, `description`, `price`, `instructor_id`, `
 --
 
 CREATE TABLE `course_materials` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
   `file_url` varchar(255) DEFAULT NULL,
-  `uploaded_by` int(11) DEFAULT NULL,
+  `uploaded_by` int DEFAULT NULL,
   `uploaded_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `course_materials`
@@ -615,13 +615,13 @@ INSERT INTO `course_materials` (`id`, `course_id`, `title`, `file_url`, `uploade
 --
 
 CREATE TABLE `course_reviews` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `rating` tinyint(4) NOT NULL,
+  `id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `rating` tinyint NOT NULL,
   `comment` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -630,11 +630,11 @@ CREATE TABLE `course_reviews` (
 --
 
 CREATE TABLE `course_sessions` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
   `start_at` datetime DEFAULT NULL,
   `end_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -643,13 +643,13 @@ CREATE TABLE `course_sessions` (
 --
 
 CREATE TABLE `enrollments` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `course_id` int(11) DEFAULT NULL,
-  `session_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `course_id` int DEFAULT NULL,
+  `session_id` int DEFAULT NULL,
   `status` enum('registered','canceled') DEFAULT 'registered',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `enrollments`
@@ -667,12 +667,12 @@ INSERT INTO `enrollments` (`id`, `user_id`, `course_id`, `session_id`, `status`,
 --
 
 CREATE TABLE `messages` (
-  `id` int(11) NOT NULL,
-  `sender_id` int(11) NOT NULL,
-  `receiver_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `sender_id` int NOT NULL,
+  `receiver_id` int NOT NULL,
   `content` text NOT NULL,
   `sentAt` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `messages`
@@ -698,10 +698,10 @@ INSERT INTO `messages` (`id`, `sender_id`, `receiver_id`, `content`, `sentAt`) V
 --
 
 CREATE TABLE `quizzes` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -710,11 +710,11 @@ CREATE TABLE `quizzes` (
 --
 
 CREATE TABLE `quiz_questions` (
-  `id` int(11) NOT NULL,
-  `quiz_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL,
+  `quiz_id` int DEFAULT NULL,
   `question` text,
   `correct_answer` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -723,12 +723,12 @@ CREATE TABLE `quiz_questions` (
 --
 
 CREATE TABLE `quiz_results` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `quiz_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `quiz_id` int NOT NULL,
   `score` decimal(5,2) DEFAULT NULL,
   `completed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -737,7 +737,7 @@ CREATE TABLE `quiz_results` (
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
@@ -745,7 +745,7 @@ CREATE TABLE `users` (
   `profile_picture` varchar(500) DEFAULT NULL COMMENT 'Profilkép relatív URL-je',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- A tábla adatainak kiíratása `users`
@@ -755,7 +755,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `profile_picture
 (75, 'Pettermann Shaun', 'pettermann.shaun.pharell@szechenyi.hu', '$2a$12$kjZaGmzHY/Arbjns8oe.huyczpT6/yGrCjIz03sLPuUHs91f3h5I2', 'admin', NULL, '2026-02-09 09:05:37', '2026-02-17 13:11:24'),
 (77, 'Bagoly Doni', 'bagoly.donat@szechenyi.hu', '$2a$12$v3neymlSSwJpnc1QLAaZNu4n.cIzz5wUfLx693DH4jivPQzqqqOlW', 'instructor', '/SkillBook/api/Uploads/profile_pictures/profile_77_53a47b6c-5c84-4f11-828e-8bece9bb39be.jpg', '2026-02-09 20:09:18', '2026-02-26 11:28:51'),
 (79, 'Buzasi Regina', 'rbuzasi6@gmail.com', '$2a$12$z.5TN59YX6Tm811OXUMZieMFLaKrS2aqHB8t6hl53bP7D2sIk25fC', 'admin', '/SkillBook/api/Uploads/profile_pictures/profile_79_5d571845-ed03-4d24-8d76-13bec86c1a07.png', '2026-02-10 09:27:39', '2026-02-17 13:11:21'),
-(80, 'Test Profile', 'ikr3erpeti@gmail.com', '$2a$12$3lU8c098AZMhVZnLaEAqFe9cAeGaxc9H896zZV2eywJM2aOdCAEVe', 'admin', '/SkillBook/api/Uploads/profile_pictures/profile_80_23c9183a-50e1-49db-a09d-889c81a20920.webp', '2026-02-14 09:07:59', '2026-03-02 10:45:37'),
+(80, 'Test Profile', 'ikr3erpeti@gmail.com', '$2a$12$3lU8c098AZMhVZnLaEAqFe9cAeGaxc9H896zZV2eywJM2aOdCAEVe', 'admin', '/SkillBook/api/Uploads/profile_pictures/profile_80_e3bb354b-1fc0-4622-a921-53ef7cd36dd7.jpg', '2026-02-14 09:07:59', '2026-04-26 18:53:48'),
 (86, 'Bagoly Patrik', 'ikr4erpeti@gmail.com', '$2a$12$ubO..4imUjZGhKFTIV2abOwB86.XdjFlBji/a3X8LS/T5eU6VlK6C', 'instructor', '/SkillBook/api/Uploads/profile_pictures/profile_86_a2ff65ae-85cf-4fcf-b958-7fa94e0d4055.jpg', '2026-02-16 08:47:38', '2026-02-26 11:02:27');
 
 --
@@ -854,67 +854,67 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT a táblához `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT a táblához `course_materials`
 --
 ALTER TABLE `course_materials`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT a táblához `course_reviews`
 --
 ALTER TABLE `course_reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT a táblához `course_sessions`
 --
 ALTER TABLE `course_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT a táblához `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT a táblához `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `quiz_results`
 --
 ALTER TABLE `quiz_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- Megkötések a kiírt táblákhoz
